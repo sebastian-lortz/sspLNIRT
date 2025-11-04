@@ -20,8 +20,8 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "name_of_module1", with_test = TRUE) # Name of the module
-golem::add_module(name = "name_of_module2", with_test = TRUE) # Name of the module
+golem::add_module(name = "ssp_lnirt", with_test = TRUE) # Name of the module
+#golem::add_module(name = "about", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
@@ -63,7 +63,7 @@ covrpage::covrpage()
 ##
 ## (You'll need GitHub there)
 usethis::use_github()
-
+devtools::build_readme()
 # GitHub Actions
 usethis::use_github_action()
 # Chose one of the three
