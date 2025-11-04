@@ -18,11 +18,14 @@
 #' @export
 #'
 
-geweke.LNIRT <- function (object, z.cut = 1.96)  {
+geweke.LNIRT <- function (object,
+                          z.cut = 1.96)  {
+
+  # get sample length and burn-in
   XG = object$XG
   burn  = ceiling(object$burnin/100 * XG)
-  print(burn)
-  print(XG)
+
+  # create blocks by dimensions
   D1 <-  c(
     "Mu.Person.Ability",
     "Mu.Person.Speed",
@@ -33,50 +36,50 @@ geweke.LNIRT <- function (object, z.cut = 1.96)  {
     "Mu.Item.Difficulty",
     "Mu.Time.Discrimination",
     "Mu.Time.Intensity")
-  mcmc.D1 <- lapply(object$MCMC.Samples[D1], coda::as.mcmc)
-  geweke.D1 <- sapply(mcmc.D1, FUN = function(x) {
-    geweke <- unlist(coda::geweke.diag(x[burn:XG]))
-    z.vars <- geweke[grep("z", names(geweke))]
-    ifelse(z.vars > z.cut | z.vars < -z.cut, 0, 1)
-  })
-
   D2.item <- c(
     "Item.Discrimination",
     "Item.Difficulty",
     "Time.Discrimination",
     "Time.Intensity",
     "Sigma2")
+  D2.person <- c(
+    "Person.Ability",
+    "Person.Speed")
+  D3 <- c(
+    "CovMat.Item"
+  )
+
+  # create mcmc objects
+  mcmc.D1 <- lapply(object$MCMC.Samples[D1], coda::as.mcmc)
   mcmc.D2.item <- lapply(object$MCMC.Samples[D2.item], coda::as.mcmc)
+  mcmc.D2.person <- lapply(object$MCMC.Samples[D2.person], coda::as.mcmc)
+  mcmc.D3 <- apply(object$MCMC.Samples[[D3]], c(2,3), coda::as.mcmc)
+
+  # assess convergence with geweke's diagnostic
+  geweke.D1 <- sapply(mcmc.D1, FUN = function(x) {
+    geweke <- unlist(coda::geweke.diag(x[burn:XG]))
+    z.vars <- geweke[grep("z", names(geweke))]
+    ifelse(z.vars > z.cut | z.vars < -z.cut, 0, 1)
+  })
   geweke.D2.item <- unlist(lapply(mcmc.D2.item, FUN = function(x) {
     geweke <- unlist(coda::geweke.diag(x[burn:XG,]))
     z.vars <- geweke[grep("z", names(geweke))]
     ifelse(z.vars > z.cut | z.vars < -z.cut, 0, 1)
   }))
-
-  D2.person <- c(
-    "Person.Ability",
-    "Person.Speed")
-  mcmc.D2.person <- lapply(object$MCMC.Samples[D2.person], coda::as.mcmc)
   geweke.D2.person <- unlist(lapply(mcmc.D2.person, FUN = function(x) {
     geweke <- unlist(coda::geweke.diag(x[burn:XG,]))
     z.vars <- geweke[grep("z", names(geweke))]
     ifelse(z.vars > z.cut | z.vars < -z.cut, 0, 1)
   }))
-
-  D3 <- c(
-    "CovMat.Item"
-  )
-  mcmc.D3 <- apply(object$MCMC.Samples[[D3]], c(2,3), coda::as.mcmc)
   geweke.D3 <- c()
   for (i in 1:4) {
     geweke <- unlist(apply(mcmc.D3[burn:XG, , i], 2, coda::geweke.diag))
     z.vars <- geweke[grep("z", names(geweke))]
     geweke.D3 <- append(geweke.D3,
-                        ifelse(z.vars > z.cut | z.vars < -z.cut, 0, 1)
-    )
+                        ifelse(z.vars > z.cut | z.vars < -z.cut, 0, 1))
   }
 
-  # calculate diagnostic
+  # assemble convergence rates
   return(
     list(D1 = mean(geweke.D1),
          D2.item = mean(geweke.D2.item),

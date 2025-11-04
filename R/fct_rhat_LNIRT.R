@@ -17,13 +17,19 @@
 #' @export
 #'
 
-rhat_LNIRT <- function(object.list, chains = 4, cutoff = 1.01) {
+rhat_LNIRT <- function(object.list,
+                       chains = 4,
+                       cutoff = 1.01) {
+
+  # input checks
   stopifnot(length(object.list) >= 2)
-  # sanity: same blocks everywhere
   blocks <- Reduce(intersect, lapply(object.list, function(f) names(f$MCMC.Samples)))
+
+  # get sampler length and burn-in
   XG = object.list[[1]]$XG
   burn = ceiling(object.list[[1]]$burnin/100 * XG)
 
+  # create blocks by dimensions
   D1 <-  c(
     "Mu.Person.Ability",
     "Mu.Person.Speed",
@@ -48,51 +54,35 @@ rhat_LNIRT <- function(object.list, chains = 4, cutoff = 1.01) {
     "CovMat.Item"
   )
 
+  # get all mcmc samples
   mcmc.samples <- lapply(object.list, FUN = function(x) {
     x$MCMC.Samples })
 
+  # get mcmc chains of the blocks
   D1.chains <- transpose(lapply(mcmc.samples, FUN = function(x) {
     x[D1]
   }))
-
-  D1.mcmc <- lapply(D1.chains, function(x) {
-    m <- do.call(cbind, x)
-    m[burn:XG,]
-  })
-  D1.r.hat <- lapply(D1.mcmc, posterior::rhat)
-
   D2.item.chains <- transpose(lapply(mcmc.samples, FUN = function(x) {
     x[D2.item]
   }))
-
-  D2.item.mcmc <- lapply(D2.item.chains, function(x) {
-    do.call(rbind, x)
-  })
-
-  D2.item.r.hat <- lapply(D2.item.mcmc, FUN = function(x) {
-    apply(x, 2, FUN = function(y) {
-      posterior::rhat(matrix(y, ncol = chains)[burn:XG, ])
-    }, simplify = FALSE)
-  })
-
   D2.person.chains <- transpose(lapply(mcmc.samples, FUN = function(x) {
     x[D2.person]
   }))
-
-  D2.person.mcmc <- lapply(D2.person.chains, function(x) {
-    do.call(rbind, x)
-  })
-
-  D2.person.r.hat <- lapply(D2.person.mcmc, FUN = function(x) {
-    apply(x, 2, FUN = function(y) {
-      posterior::rhat(matrix(y, ncol = chains)[burn:XG, ])
-    }, simplify = FALSE)
-  })
-
   D3.chains <- lapply(mcmc.samples, FUN = function(x) {
     x[D3]$CovMat.Item
   })
 
+  # create list of matrices, colums = mcmc chains
+  D1.mcmc <- lapply(D1.chains, function(x) {
+    m <- do.call(cbind, x)
+    m[burn:XG,]
+  })
+  D2.item.mcmc <- lapply(D2.item.chains, function(x) {
+    do.call(rbind, x)
+  })
+  D2.person.mcmc <- lapply(D2.person.chains, function(x) {
+    do.call(rbind, x)
+  })
   D3.mcmc <- lapply(D3.chains, FUN = function(x) {
     temp <- x[,,1]
     for (i in 2:4) {
@@ -101,6 +91,18 @@ rhat_LNIRT <- function(object.list, chains = 4, cutoff = 1.01) {
     temp
   })
 
+  # compute Rhat values
+  D1.r.hat <- lapply(D1.mcmc, posterior::rhat)
+  D2.item.r.hat <- lapply(D2.item.mcmc, FUN = function(x) {
+    apply(x, 2, FUN = function(y) {
+      posterior::rhat(matrix(y, ncol = chains)[burn:XG, ])
+    }, simplify = FALSE)
+  })
+  D2.person.r.hat <- lapply(D2.person.mcmc, FUN = function(x) {
+    apply(x, 2, FUN = function(y) {
+      posterior::rhat(matrix(y, ncol = chains)[burn:XG, ])
+    }, simplify = FALSE)
+  })
   D3.r.hat <- lapply(
     apply(do.call(rbind, D3.mcmc), 2, FUN = function(y) {
       matrix(y, ncol = chains)[burn:XG, ]
@@ -108,6 +110,8 @@ rhat_LNIRT <- function(object.list, chains = 4, cutoff = 1.01) {
       posterior::rhat(x)
     }
   )
+
+  # count convergence
   D1.count <- ifelse(D1.r.hat < cutoff, 1, 0)
   D2.item.count <- ifelse(unlist(D2.item.r.hat) < cutoff, 1, 0)
   D2.person.count <- ifelse(unlist(D2.person.r.hat) < cutoff, 1, 0)
