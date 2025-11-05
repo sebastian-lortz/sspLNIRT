@@ -18,7 +18,7 @@
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
 #' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param seed Integer. (optional) Seed for simulating the whole list of data sets.
+#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #' @param n.cores Integer. (optional) The number of cores for parallel computation.
@@ -35,6 +35,26 @@
 #'   by parameter blocks (columns).}
 #' }
 #'
+#' @examples
+#'  \dontrun{
+#' comp_mse(
+#'           iter = 5,
+#'           N = 100,
+#'           I = 20,
+#'           mu.person = c(0,0),
+#'           mu.item = c(2,1,4,-1),
+#'           meanlog.sigma2 = log(.3),
+#'           cov.m.person = matrix(c(1,.5,
+#'                                   .5,1), ncol = 2, byrow = TRUE),
+#'                                   cov.m.item = matrix(c(.2, 0, 0, 0,
+#'                                                         0, .5, -.35, -.15,
+#'                                                         0, -.35, .5, .15,
+#'                                                         0, -.15, .15, .2), ncol =  4, byrow = TRUE),
+#'           sdlog.sigma2 = 0.2,
+#'           person.seed = 123,
+#'           item.seed = 456,
+#'           n.cores = 5)
+#' }
 #' @export
 #'
 
@@ -56,7 +76,7 @@ comp_mse <- function(N,
                      random.item = TRUE,
                      item.pars.m = NULL,
                      item.seed = NULL,
-                     seed = NULL,
+                     person.seed = NULL,
                      cor2cov.item = FALSE,
                      sd.item = NULL,
                      n.cores = NULL) {
@@ -75,7 +95,7 @@ comp_mse <- function(N,
                        random.item = random.item,
                        item.pars.m = item.pars.m,
                        item.seed = item.seed,
-                       seed = seed,
+                       person.seed = person.seed,
                        cor2cov.item = cor2cov.item,
                        sd.item = sd.item)
   #print(data$person.par[[1]])
@@ -113,7 +133,7 @@ comp_mse <- function(N,
           )}
 
         # compute r.hat of item parameter samples
-        r.hat.out <- rhat_LNIRT(fit.list, chains = 4, cutoff = 1.05)
+        r.hat.out <- sspLNIRT::rhat_LNIRT(fit.list, chains = 4, cutoff = 1.01)
         r.hat.rates <- unlist(r.hat.out$rate)
 
         # compute posterior means
@@ -152,7 +172,8 @@ comp_mse <- function(N,
         res
       },
       future.seed = TRUE, # ensure random workers
-      future.stdout = FALSE
+      future.stdout = FALSE,
+      future.packages = c("LNIRT", "sspLNIRT")
     )
   },
   handlers = handler)

@@ -15,7 +15,6 @@
 #' }
 #'
 #' @export
-#'
 
 rhat_LNIRT <- function(object.list,
                        chains = 4,
@@ -59,13 +58,13 @@ rhat_LNIRT <- function(object.list,
     x$MCMC.Samples })
 
   # get mcmc chains of the blocks
-  D1.chains <- transpose(lapply(mcmc.samples, FUN = function(x) {
+  D1.chains <- purrr::transpose(lapply(mcmc.samples, FUN = function(x) {
     x[D1]
   }))
-  D2.item.chains <- transpose(lapply(mcmc.samples, FUN = function(x) {
+  D2.item.chains <- purrr::transpose(lapply(mcmc.samples, FUN = function(x) {
     x[D2.item]
   }))
-  D2.person.chains <- transpose(lapply(mcmc.samples, FUN = function(x) {
+  D2.person.chains <- purrr::transpose(lapply(mcmc.samples, FUN = function(x) {
     x[D2.person]
   }))
   D3.chains <- lapply(mcmc.samples, FUN = function(x) {

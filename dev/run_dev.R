@@ -11,5 +11,8 @@ golem::detach_all_attached()
 # Document and reload your package
 golem::document_and_reload()
 
+# install for testing
+devtools::install()
+
 # Run the application
-run_app()
+#run_app()

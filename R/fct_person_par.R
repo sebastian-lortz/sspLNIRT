@@ -12,22 +12,39 @@
 #'   \column{theta}{Numeric vector. The values of theta.}
 #'   \column{zeta}{Numeric vector. The values of zeta,}
 #' }
+#'
+#' @examples
+#'  \dontrun{
+#' test.data <- person.par(N = 50,
+#'                           mu.person = c(0,0),
+#'                          cov.m.person = matrix(c(1,.5,
+#'                                                  .5,1), ncol = 2, byrow = TRUE),
+#'                          person.seed = 123)
+#'}
+#'
 #' @export
 #'
 
 person.par <- function(N,
                        mu.person = c(0,0),
                        cov.m.person = matrix(c(1,.5,
-                                               .5,1), ncol = 2, byrow = TRUE)
+                                               .5,1), ncol = 2, byrow = TRUE),
+                       person.seed = NULL
 ) {
+
+  # seed
+  set.seed(person.seed)
 
   # sample person parameters from MVN
   hyper.par = as.data.frame(
-    mvrnorm(N,
+    MASS::mvrnorm(N,
             mu = mu.person,
             Sigma = cov.m.person
     )
   )
+
+  # remove seed
+  set.seed = NULL
 
   # first col: theta, second col: zeta
   colnames(hyper.par) <- c("theta", "zeta")

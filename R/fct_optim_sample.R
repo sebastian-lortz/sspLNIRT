@@ -24,7 +24,7 @@
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
 #' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param seed Integer. (optional) Seed for simulating the whole list of data sets.
+#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #' @param n.cores Integer. (optional) The number of cores for parallel computation.
@@ -42,15 +42,6 @@
 #'
 #' @export
 #'
-
-
-# return output
-return(list(N.best,
-            res.best,
-            reps,
-            track.res,
-            track.N,
-            track.conv))
 
 optim.sample <- function(FUN = comp_mse,
                          thresh,
@@ -75,7 +66,7 @@ optim.sample <- function(FUN = comp_mse,
                          random.item = TRUE,
                          item.pars.m = NULL,
                          item.seed = 12345,
-                         seed = NULL,
+                         person.seed = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL,
                          n.cores = NULL
@@ -97,7 +88,7 @@ optim.sample <- function(FUN = comp_mse,
       scale = scale,
       random.item = random.item,
       item.pars.m = item.pars.m,
-      seed = seed,
+      person.seed = person.seed,
       cor2cov.item = cor2cov.item,
       sd.item = sd.item,
       n.cores = n.cores

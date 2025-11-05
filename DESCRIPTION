@@ -8,7 +8,14 @@ License: MIT + file LICENSE
 Imports: 
     config,
     golem,
-    shiny
+    shiny,
+    MASS,
+    lavaan,
+    tmvtnorm,
+    LNIRT,
+    future,
+    progressr,
+    purrr
 Suggests: 
     knitr,
     rmarkdown,

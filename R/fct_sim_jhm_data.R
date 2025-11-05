@@ -17,7 +17,7 @@
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
 #' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param seed Integer. (optional) Seed for simulating the whole list of data sets.
+#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #'
@@ -29,6 +29,26 @@
 #'   \item{person.par}{Data Frame. The person parameters.}
 #'   \item{item.par}{Data Frame. The item parameters.}
 #' }
+#'
+#' @examples
+#'  \dontrun{
+#' test.data <- sim.jhm.data(iter = 2,
+#'                          N = 50,
+#'                          I = 10,
+#'                          mu.person = c(0,0),
+#'                          mu.item = c(1,0,4,0),
+#'                          meanlog.sigma2 = log(.3),
+#'                          cov.m.person = matrix(c(1,.5,
+#'                                                  .5,1), ncol = 2, byrow = TRUE),
+#'                          cov.m.item = matrix(c(.2, 0, 0, 0,
+#'                                                0, .5, -.35, -.15,
+#'                                                0, -.35, .5, .15,
+#'                                                0, -.15, .15, .2), ncol =  4, byrow = TRUE),
+#'                          sdlog.sigma2 = 0.2,
+#'                          item.seed = 456,
+#'                          person.seed = NULL
+#'                          )$person.par
+#'}
 #'
 #' @export
 #'
@@ -50,13 +70,10 @@ sim.jhm.data <- function(iter,
                          random.item = TRUE,
                          item.pars.m = NULL,
                          item.seed = NULL,
-                         seed = NULL,
+                         person.seed = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL
 ) {
-
-  # set seed
-  set.seed(seed)
 
   # open lists
   sim.time <- sim.response <- person.par <- item.par <- sim.data <- list()
@@ -67,7 +84,8 @@ sim.jhm.data <- function(iter,
     # person parameters
     person <- person.par(N = N,
                          cov.m.person = cov.m.person,
-                         mu.person = mu.person)
+                         mu.person = mu.person,
+                         person.seed = person.seed)
 
     # item parameters
     if (random.item) {
