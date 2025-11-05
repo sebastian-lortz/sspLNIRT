@@ -1,5 +1,5 @@
 ## code to generate `sspLNIRT.data` dataset
-# This script was excecuted on the Habrok high performance computing cluster
+# This script can be executed on the Habrok high performance computing cluster
 
 # set root path
 root.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/"
