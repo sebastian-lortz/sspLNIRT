@@ -27,3 +27,5 @@ Language: en-US
 LazyData: true
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
+Depends: 
+    R (>= 3.5)

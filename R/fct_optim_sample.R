@@ -14,12 +14,12 @@
 #' @param N NULL. Place holder for the sample size in the optimizer.
 #' @param iter Integer. The number of iteration or the number of data sets.
 #' @param I Integer. The test length.
-#' @param mu.person Numeric vector. Means of theta and zeta
-#' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda
+#' @param mu.person Numeric vector. Means of theta and zeta.
+#' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda.
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
-#' @param cov.m.person Matrix. The covariance matrix of theat and zeta
-#' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
-#' @param sdlog.sigma2 Numeric. The sdlog of sigma2
+#' @param cov.m.person Matrix. The covariance matrix of theat and zeta.
+#' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda.
+#' @param sdlog.sigma2 Numeric. The sdlog of sigma2.
 #' @param scale Logical. Weather the item and person parameters are scaled.
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
@@ -88,6 +88,7 @@ optim.sample <- function(FUN = comp_mse,
       scale = scale,
       random.item = random.item,
       item.pars.m = item.pars.m,
+      item.seed   = item.seed,
       person.seed = person.seed,
       cor2cov.item = cor2cov.item,
       sd.item = sd.item,
@@ -108,13 +109,13 @@ optim.sample <- function(FUN = comp_mse,
   # check lower bound result
   if (res.lb$res < thresh) {
     cat("stop due to res.lb < thresh with", lb, "\n")
-    stop(list(N.best = NA,
+    return(list(N.best = NA,
               res.best = "res.lb < thresh",
               reps = 1,
               track.res = data.frame(res.lb = "res.lb < thresh",
                                      res.ub = NULL,
                                      res.temp = c("res.lb < thresh")),
-              data.frame(N.lb = rep(lb),
+              track.N = data.frame(N.lb = rep(lb),
                          N.ub = rep(ub),
                          N.temp = NA)))}
 
@@ -125,13 +126,13 @@ optim.sample <- function(FUN = comp_mse,
   # check upper bound result
   if (res.ub$res > thresh) {
     cat("stop due to res.ub > thresh with", ub, "\n")
-    stop(list(N.best = NA,
+    return(list(N.best = NA,
               res.best = "res.ub > thresh",
               reps = 2,
               track.res = data.frame(res.lb = res.lb$res,
                                      res.ub = "res.ub > thresh",
                                      res.temp = c(res.lb$res, "res.ub > thresh")),
-              data.frame(N.lb = rep(lb, 2),
+              track.N = data.frame(N.lb = rep(lb, 2),
                          N.ub = rep(ub, 2),
                          N.temp = c(lb, ub))))}
 
