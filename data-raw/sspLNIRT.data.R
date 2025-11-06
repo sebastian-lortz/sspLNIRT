@@ -68,7 +68,7 @@ for (b in seq_along(batches)) {
                 random.item = TRUE,
                 item.seed = 12345,
                 person.seed = NULL,
-                n.cores = NULL)
+                n.cores = 6)
 
         # estimate sample size
         res <- do.call(optim.sample, fct.args)
@@ -88,6 +88,7 @@ for (b in seq_along(batches)) {
 
     # progress
     cat("Batch", b, "of", length(batches), "batches complete. \n")
+
     # empty memory
       rm(res.out)
       invisible(
