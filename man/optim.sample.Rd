@@ -50,17 +50,17 @@ optim.sample(
 
 \item{I}{Integer. The test length.}
 
-\item{mu.person}{Numeric vector. Means of theta and zeta}
+\item{mu.person}{Numeric vector. Means of theta and zeta.}
 
-\item{mu.item}{Numeric vector. Means of alpha, beta, phi, and lambda}
+\item{mu.item}{Numeric vector. Means of alpha, beta, phi, and lambda.}
 
 \item{meanlog.sigma2}{Numeric. The meanlog of sigma2.}
 
-\item{cov.m.person}{Matrix. The covariance matrix of theat and zeta}
+\item{cov.m.person}{Matrix. The covariance matrix of theat and zeta.}
 
-\item{cov.m.item}{Matrix. The covariance matrix of of alpha, beta, phi, and lambda}
+\item{cov.m.item}{Matrix. The covariance matrix of of alpha, beta, phi, and lambda.}
 
-\item{sdlog.sigma2}{Numeric. The sdlog of sigma2}
+\item{sdlog.sigma2}{Numeric. The sdlog of sigma2.}
 
 \item{scale}{Logical. Weather the item and person parameters are scaled.}
 

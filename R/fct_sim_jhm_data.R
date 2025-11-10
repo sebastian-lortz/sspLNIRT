@@ -32,22 +32,22 @@
 #'
 #' @examples
 #'  \dontrun{
-#' test.data <- sim.jhm.data(iter = 2,
-#'                          N = 50,
+#' test.data <- sim.jhm.data(iter = 10,
+#'                          N = 1000,
 #'                          I = 10,
 #'                          mu.person = c(0,0),
-#'                          mu.item = c(1,0,4,0),
+#'                          mu.item = c(1,0,1,0),
 #'                          meanlog.sigma2 = log(.3),
-#'                          cov.m.person = matrix(c(1,.5,
-#'                                                  .5,1), ncol = 2, byrow = TRUE),
+#'                          cov.m.person = matrix(c(1,0.5,
+#'                                                  0.5,1), ncol = 2, byrow = TRUE),
 #'                          cov.m.item = matrix(c(.2, 0, 0, 0,
-#'                                                0, .5, -.35, -.15,
-#'                                                0, -.35, .5, .15,
-#'                                                0, -.15, .15, .2), ncol =  4, byrow = TRUE),
+#'                                                0, .5, 0, 0,
+#'                                                0, 0, .5, 0,
+#'                                                0, 0, 0, .2), ncol =  4, byrow = TRUE),
 #'                          sdlog.sigma2 = 0.2,
-#'                          item.seed = 456,
+#'                          item.seed = NULL,
 #'                          person.seed = NULL
-#'                          )$person.par
+#'                          )
 #'}
 #'
 #' @export
@@ -76,7 +76,7 @@ sim.jhm.data <- function(iter,
 ) {
 
   # open lists
-  sim.time <- sim.response <- person.par <- item.par <- sim.data <- list()
+  sim.time <- sim.response <- person.par <- item.par <- sim.data <- scale.factor <- list()
 
   # iterate
   for (k in 1:iter) {
@@ -117,15 +117,14 @@ sim.jhm.data <- function(iter,
 
     # generate RA using 2par normal ogive model
     for (i in 1:I) {
-      delta.b <- person$theta - item$beta[i]
-      prob <- pnorm(item$alpha[i] * delta.b)
-      response[,i] <- rbinom(N, 1, prob = prob)
+      response[,i] <- rbinom(N,
+                             1,
+                             prob = pnorm(item$alpha[i] * (person$theta - item$beta[i])))
     }
 
     # generate RT using 3par lognormal model
     for (r in 1:I) {
-      t <- item$lambda[r] - item$phi[r] * person$zeta
-      time[,r] <- t + rnorm(N, 0, sqrt(item$log.sigma2[r]))
+      time[,r] <- item$lambda[r] - item$phi[r] * person$zeta + rnorm(N, 0, sqrt(item$log.sigma2[r]))
     }
 
     # assemble data in long format
@@ -143,6 +142,8 @@ sim.jhm.data <- function(iter,
     sim.response[[k]] <- response
     person.par[[k]] <- person
     item.par[[k]] <- item
+    scale.factor[[k]] <- data.frame(c.alpha = scaled.pars$c.alpha,
+                          c.phi = scaled.pars$c.phi)
 
   }
 
@@ -155,6 +156,7 @@ sim.jhm.data <- function(iter,
     time.data = sim.time,
     response.data = sim.response,
     person.par = person.par,
-    item.par = item.par
+    item.par = item.par,
+    scale.factor = scale.factor
   ))
 }

@@ -38,22 +38,24 @@
 #' @examples
 #'  \dontrun{
 #' comp_mse(
-#'           iter = 5,
-#'           N = 100,
-#'           I = 20,
+#'           iter = 6,
+#'           N = 500,
+#'           I = 10,
 #'           mu.person = c(0,0),
-#'           mu.item = c(2,1,4,-1),
-#'           meanlog.sigma2 = log(.3),
-#'           cov.m.person = matrix(c(1,.5,
-#'                                   .5,1), ncol = 2, byrow = TRUE),
-#'                                   cov.m.item = matrix(c(.2, 0, 0, 0,
-#'                                                         0, .5, -.35, -.15,
-#'                                                         0, -.35, .5, .15,
-#'                                                         0, -.15, .15, .2), ncol =  4, byrow = TRUE),
+#'           mu.item = c(1,0,1,0),
+#'           meanlog.sigma2 = log(.6),
+#'           cov.m.person = matrix(c(1,0,
+#'                                   0,1), ncol = 2, byrow = TRUE),
+#'           cov.m.item = matrix(c(1, 0, 0, 0,
+#'                                 0, 1, 0, 0,
+#'                                 0, 0, 1, 0,
+#'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
+#'           sd.item         = c(.2, 1, .2, .5),
+#'           cor2cov.item    = TRUE,
 #'           sdlog.sigma2 = 0.2,
 #'           person.seed = 123,
 #'           item.seed = 456,
-#'           n.cores = 5)
+#'           n.cores = 6)
 #' }
 #' @export
 #'
@@ -120,13 +122,14 @@ comp_mse <- function(N,
       X = seq_len(iter),
       FUN = function(i) {
 
+        # i=1
         # fit LNIRT with 4 chains
         fit.list <- list()
         for (f in 1:4) {
           fit.list[[f]] <- LNIRT::LNIRT(
             RT = data$time.data[[i]],
             Y = data$response.data[[i]],
-            XG = 3000,
+            XG = 5000,
             burnin = 33.33,
             residual = FALSE,
             par1 = TRUE
@@ -137,9 +140,15 @@ comp_mse <- function(N,
         r.hat.rates <- unlist(r.hat.out$rate)
 
         # compute posterior means
+        XGburnin <- ceiling(fit.list[[1]]$XG * fit.list[[1]]$burnin / 100)
         post.theta = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          (x$Post.Means$Person.Ability)
+          colMeans(x$MCMC.Samples$Person.Ability[XGburnin:x$XG,])
         })))
+
+        post.zeta = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
+          colMeans(x$MCMC.Samples$Person.Speed[XGburnin:x$XG,])
+        })))
+
         post.alpha = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
           (x$Post.Means$Item.Discrimination)
         })))
@@ -156,14 +165,29 @@ comp_mse <- function(N,
           (x$Post.Means$Sigma2)
         })))
 
-        # calculate (mean) squared errors
+        # re-scale to input scale
+        post.item.pars <- cbind(post.alpha, post.beta, post.phi, post.lambda, post.sigma2)
+        post.person.pars <- cbind(post.theta, post.zeta)
+        re.scaled.post <- scale_M(item.pars = post.item.pars,
+                                  person.pars = post.person.pars,
+                                  re.scale = TRUE,
+                                  c.alpha = data$scale.factor[[i]]$c.alpha,
+                                  c.phi = data$scale.factor[[i]]$c.phi)
+        re.scaled.data <- scale_M(item.pars = data$item.par[[i]],
+                                  person.pars = data$person.par[[i]],
+                                  re.scale = TRUE,
+                                  c.alpha = data$scale.factor[[i]]$c.alpha,
+                                  c.phi = data$scale.factor[[i]]$c.phi)
+
+        # calculate (mean) squared errors on input scale
         res <- list(
-          mse.theta = mean((post.theta - data$person.par[[i]]$theta)^2),
-          se.alpha = (post.alpha - data$item.par[[i]]$alpha)^2,
-          se.beta = (post.beta - data$item.par[[i]]$beta)^2,
-          se.phi = (post.phi - data$item.par[[i]]$phi)^2,
-          se.lambda = (post.lambda - data$item.par[[i]]$lambda)^2,
-          se.sigma2 = (post.sigma2 - data$item.par[[i]]$log.sigma2)^2,
+          mse.theta = mean((re.scaled.post$person.pars.scaled$post.theta - re.scaled.data$person.pars.scaled$theta)^2),
+          mse.zeta = mean((re.scaled.post$person.pars.scaled$post.zeta - re.scaled.data$person.pars.scaled$zeta)^2),
+          se.alpha = (re.scaled.post$items.pars.scaled$post.alpha - re.scaled.data$items.pars.scaled$alpha)^2,
+          se.beta = (re.scaled.post$items.pars.scaled$post.beta - re.scaled.data$items.pars.scaled$beta)^2,
+          se.phi = (re.scaled.post$items.pars.scaled$post.phi - re.scaled.data$items.pars.scaled$phi)^2,
+          se.lambda = (re.scaled.post$items.pars.scaled$post.lambda - re.scaled.data$items.pars.scaled$lambda)^2,
+          se.sigma2 = (re.scaled.post$items.pars.scaled$post.sigma2 - re.scaled.data$items.pars.scaled$log.sigma2)^2,
           conv.rate = r.hat.rates
         )
 
@@ -179,9 +203,14 @@ comp_mse <- function(N,
   handlers = handler)
 
   # take median across iterations
-  mse.theta = list(mse.theta = median(unlist(lapply(out, FUN = function(x) {
+    mse.theta = list(mse.theta = median(unlist(lapply(out, FUN = function(x) {
     x$mse.theta
   }))))
+  mse.zeta= list(mse.zeta = median(unlist(lapply(out, FUN = function(x) {
+    x$mse.zeta
+  }))))
+  mse.person = append(mse.theta, mse.zeta)
+
   mse.items =
     colMeans(apply(
       simplify2array(
@@ -201,6 +230,6 @@ comp_mse <- function(N,
   # return output
   return(
     MSE = append(
-      append(mse.theta, as.list(mse.items)), list(conv.rate = conv.rate))
+      append(mse.person, as.list(mse.items)), list(conv.rate = conv.rate))
   )
 }

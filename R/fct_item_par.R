@@ -57,7 +57,7 @@ item.par <- function(I,
   item.pars <- tmvtnorm::rtmvnorm(n = I,
                                   mean = mu.item,
                                   sigma = cov.m.item,
-                                  lower = c(0, -Inf, -Inf, -Inf),
+                                  lower = c(0, -Inf, 0, -Inf),
                                   upper = c(Inf, Inf, Inf, Inf))
   colnames(item.pars) <- c("alpha", "beta", "phi", "lambda")
   set.seed(NULL)

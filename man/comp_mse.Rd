@@ -83,10 +83,10 @@ time.
  \dontrun{
 comp_mse(
           iter = 5,
-          N = 100,
-          I = 20,
+          N = 5000,
+          I = 10,
           mu.person = c(0,0),
-          mu.item = c(2,1,4,-1),
+          mu.item = c(2,0,4,0),
           meanlog.sigma2 = log(.3),
           cov.m.person = matrix(c(1,.5,
                                   .5,1), ncol = 2, byrow = TRUE),
@@ -95,8 +95,8 @@ comp_mse(
                                                         0, -.35, .5, .15,
                                                         0, -.15, .15, .2), ncol =  4, byrow = TRUE),
           sdlog.sigma2 = 0.2,
-          person.seed = 123,
-          item.seed = 456,
+          person.seed = NULL,
+          item.seed = 3456,
           n.cores = 5)
 }
 }

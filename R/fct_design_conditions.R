@@ -57,11 +57,10 @@ for (i in 1:nrow(par.grid)) {
     cov.m.person = matrix(c(1, rho,
                             rho ,1), ncol = 2, byrow = TRUE),
     mu.item = c(mu.alpha, 0, mu.alpha*4, 0),
-    cov.m.item = matrix(c(.2, 0, 0, 0,
-                          0, .5, 0, cov.beta.lambda,
-                          0, 0, .5, 0,
-                          0, cov.beta.lambda, 0, .2), ncol =  4, byrow = TRUE)
-
+    cov.m.item = matrix(c(1, 0, 0, 0,
+                          0, 1, 0, cov.beta.lambda,
+                          0, 0, 1, 0,
+                          0, cov.beta.lambda, 0, 1), ncol =  4, byrow = TRUE)
    )
 }
 
