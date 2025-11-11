@@ -38,12 +38,12 @@
 #' @examples
 #'  \dontrun{
 #' comp_mse(
-#'           iter = 6,
+#'           iter = 12,
 #'           N = 500,
 #'           I = 10,
 #'           mu.person = c(0,0),
 #'           mu.item = c(1,0,1,0),
-#'           meanlog.sigma2 = log(.6),
+#'           meanlog.sigma2 = log(.9),
 #'           cov.m.person = matrix(c(1,0,
 #'                                   0,1), ncol = 2, byrow = TRUE),
 #'           cov.m.item = matrix(c(1, 0, 0, 0,
