@@ -23,17 +23,28 @@
 #' @export
 #'
 
-design_conditions <- function() {
+design_conditions <- function(exclude = NULL) {
 
 # parameter combinations
-par.grid <- expand.grid(
-  out.par = c("mse.alpha", "mse.beta", "mse.phi", "mse.lambda"),
-  thresh = c(.05, .02, .01, .005),
-  I = c(10, 25, 50, 100),
-  rho = c(.2, .4, .6, .8),
-  mu.alpha = c(.8, 1.0, 1.2, 1.4),
-  cov.beta.lambda = c(0, .2, .4, .6)
-)
+  par_vals <- list(
+    out.par         = c("mse.alpha", "mse.beta", "mse.phi", "mse.lambda"),
+    thresh          = c(.05, .02, .01, .005),
+    I               = c(10, 25, 50, 100),
+    rho             = c(.2, .4, .6, .8),
+    mu.alpha        = c(.8, 1.0, 1.2, 1.4),
+    cov.beta.lambda = c(0, .2, .4, .6)
+  )
+
+  # exclude
+  if (!is.null(exclude)) {
+    par_vals <- par_vals[setdiff(names(par_vals), exclude)]
+  }
+
+  # create grid
+  par.grid <- do.call(
+    expand.grid,
+    c(par_vals, list(KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE))
+  )
 
 # storage
 design <- list()
@@ -56,7 +67,7 @@ for (i in 1:nrow(par.grid)) {
     I = I,
     cov.m.person = matrix(c(1, rho,
                             rho ,1), ncol = 2, byrow = TRUE),
-    mu.item = c(mu.alpha, 0, mu.alpha*4, 0),
+    mu.item = c(mu.alpha, 0, 1, 0),
     cov.m.item = matrix(c(1, 0, 0, 0,
                           0, 1, 0, cov.beta.lambda,
                           0, 0, 1, 0,

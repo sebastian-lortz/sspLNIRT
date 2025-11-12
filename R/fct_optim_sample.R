@@ -40,10 +40,32 @@
 #'   \item{track.conv}{List. The Rhat convergence rate per repetition.}
 #' }
 #'
+#' @examples
+#'  \dontrun{
+#' optim_sample(
+#'           iter = 100,
+#'           N = 100,
+#'           I = 10,
+#'           mu.person = c(0,0),
+#'           mu.item = c(1,0,1,0),
+#'           meanlog.sigma2 = log(.3),
+#'           cov.m.person = matrix(c(1,0,
+#'                                   0,1), ncol = 2, byrow = TRUE),
+#'           cov.m.item = matrix(c(1, 0, 0, 0,
+#'                                 0, 1, 0, 0,
+#'                                 0, 0, 1, 0,
+#'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
+#'           sd.item         = c(.2, .5, .2, .5),
+#'           cor2cov.item    = TRUE,
+#'           sdlog.sigma2 = 0.2,
+#'           person.seed = 123,
+#'           item.seed = 456,
+#'           n.cores = 6)
+#' }
 #' @export
 #'
 
-optim.sample <- function(FUN = comp_mse,
+optim_sample <- function(FUN = comp_mse,
                          thresh,
                          lb,
                          ub,

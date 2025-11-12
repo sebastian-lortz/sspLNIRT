@@ -38,19 +38,19 @@
 #' @examples
 #'  \dontrun{
 #' comp_mse(
-#'           iter = 12,
-#'           N = 500,
+#'           iter = 100,
+#'           N = 100,
 #'           I = 10,
 #'           mu.person = c(0,0),
 #'           mu.item = c(1,0,1,0),
-#'           meanlog.sigma2 = log(.9),
+#'           meanlog.sigma2 = log(.3),
 #'           cov.m.person = matrix(c(1,0,
 #'                                   0,1), ncol = 2, byrow = TRUE),
 #'           cov.m.item = matrix(c(1, 0, 0, 0,
 #'                                 0, 1, 0, 0,
 #'                                 0, 0, 1, 0,
 #'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
-#'           sd.item         = c(.2, 1, .2, .5),
+#'           sd.item         = c(.2, .5, .2, .5),
 #'           cor2cov.item    = TRUE,
 #'           sdlog.sigma2 = 0.2,
 #'           person.seed = 123,
@@ -129,7 +129,7 @@ comp_mse <- function(N,
           fit.list[[f]] <- LNIRT::LNIRT(
             RT = data$time.data[[i]],
             Y = data$response.data[[i]],
-            XG = 5000,
+            XG = 6000,
             burnin = 33.33,
             residual = FALSE,
             par1 = TRUE

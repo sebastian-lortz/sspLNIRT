@@ -38,6 +38,6 @@ invisible (
 design <- design_conditions()
 
 # compute MSE for low N and check convergence
-
+design
 
 # compute MSE for large N to set upper bound

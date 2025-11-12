@@ -79,7 +79,7 @@ for (b in seq_along(batches)) {
                 n.cores = 6)
 
         # estimate sample size
-        res <- do.call(optim.sample, fct.args)
+        res <- do.call(optim_sample, fct.args)
 
         # assemble output
         res.out[[i]] <- append(
