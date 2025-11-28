@@ -21,7 +21,6 @@
 #' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
-#' @param n.cores Integer. (optional) The number of cores for parallel computation.
 #'
 #' @return A list of containing:
 #' \describe{
@@ -38,12 +37,12 @@
 #' @examples
 #'  \dontrun{
 #' comp_mse(
-#'           iter = 100,
-#'           N = 100,
-#'           I = 10,
+#'           iter = 6,
+#'           N = 500,
+#'           I = 100,
 #'           mu.person = c(0,0),
-#'           mu.item = c(1,0,1,0),
-#'           meanlog.sigma2 = log(.3),
+#'           mu.item = c(1,0,1,4),
+#'           meanlog.sigma2 = log(1),
 #'           cov.m.person = matrix(c(1,0,
 #'                                   0,1), ncol = 2, byrow = TRUE),
 #'           cov.m.item = matrix(c(1, 0, 0, 0,
@@ -54,8 +53,7 @@
 #'           cor2cov.item    = TRUE,
 #'           sdlog.sigma2 = 0.2,
 #'           person.seed = 123,
-#'           item.seed = 456,
-#'           n.cores = 6)
+#'           item.seed = NULL,
 #' }
 #' @export
 #'
@@ -65,7 +63,7 @@ comp_mse <- function(N,
                      iter,
                      I,
                      mu.person = c(0,0),
-                     mu.item = c(1,0,4,0),
+                     mu.item = c(1,0,1,0),
                      meanlog.sigma2 = log(.3),
                      cov.m.person = matrix(c(1,.5,
                                              .5,1), ncol = 2, byrow = TRUE),
@@ -81,35 +79,9 @@ comp_mse <- function(N,
                      person.seed = NULL,
                      cor2cov.item = FALSE,
                      sd.item = NULL,
-                     n.cores = NULL) {
-
-  # simulate data
-  data <- sim.jhm.data(iter = iter,
-                       N = N,
-                       I = I,
-                       mu.person = mu.person,
-                       mu.item = mu.item,
-                       meanlog.sigma2 = meanlog.sigma2,
-                       cov.m.person = cov.m.person,
-                       cov.m.item = cov.m.item,
-                       sdlog.sigma2 = sdlog.sigma2,
-                       scale = scale,
-                       random.item = random.item,
-                       item.pars.m = item.pars.m,
-                       item.seed = item.seed,
-                       person.seed = person.seed,
-                       cor2cov.item = cor2cov.item,
-                       sd.item = sd.item)
-  #print(data$person.par[[1]])
-  # open parallel backend
-  if (is.null(n.cores)) {
-    n.cores = future::availableCores() - 1
-  }
-  if (n.cores > 1L) {
-    future::plan(future::multisession, workers = n.cores)
-  } else {
-    future::plan(future::sequential)
-  }
+                     XG = 3000,
+                     burnin = 20,
+                     par1 = TRUE) {
 
   # set progressr
   handler <-list(progressr::handler_txtprogressbar())
@@ -122,21 +94,39 @@ comp_mse <- function(N,
       X = seq_len(iter),
       FUN = function(i) {
 
+        # simulate data
+        data <- sim.jhm.data(iter = 1,
+                             N = N,
+                             I = I,
+                             mu.person = mu.person,
+                             mu.item = mu.item,
+                             meanlog.sigma2 = meanlog.sigma2,
+                             cov.m.person = cov.m.person,
+                             cov.m.item = cov.m.item,
+                             sdlog.sigma2 = sdlog.sigma2,
+                             scale = scale,
+                             random.item = random.item,
+                             item.pars.m = item.pars.m,
+                             item.seed = item.seed,
+                             person.seed = person.seed,
+                             cor2cov.item = cor2cov.item,
+                             sd.item = sd.item)
+
         # i=1
         # fit LNIRT with 4 chains
         fit.list <- list()
         for (f in 1:4) {
           fit.list[[f]] <- LNIRT::LNIRT(
-            RT = data$time.data[[i]],
-            Y = data$response.data[[i]],
-            XG = 6000,
-            burnin = 33.33,
+            RT = data$time.data[[1]],
+            Y = data$response.data[[1]],
+            XG = XG,
+            burnin = burnin,
             residual = FALSE,
-            par1 = TRUE
+            par1 = par1
           )}
 
         # compute r.hat of item parameter samples
-        r.hat.out <- sspLNIRT::rhat_LNIRT(fit.list, chains = 4, cutoff = 1.01)
+        r.hat.out <- rhat_LNIRT(fit.list, chains = 4, cutoff = 1.05)
         r.hat.rates <- unlist(r.hat.out$rate)
 
         # compute posterior means
@@ -171,13 +161,13 @@ comp_mse <- function(N,
         re.scaled.post <- scale_M(item.pars = post.item.pars,
                                   person.pars = post.person.pars,
                                   re.scale = TRUE,
-                                  c.alpha = data$scale.factor[[i]]$c.alpha,
-                                  c.phi = data$scale.factor[[i]]$c.phi)
-        re.scaled.data <- scale_M(item.pars = data$item.par[[i]],
-                                  person.pars = data$person.par[[i]],
+                                  c.alpha = data$scale.factor[[1]]$c.alpha,
+                                  c.phi = data$scale.factor[[1]]$c.phi)
+        re.scaled.data <- scale_M(item.pars = data$item.par[[1]],
+                                  person.pars = data$person.par[[1]],
                                   re.scale = TRUE,
-                                  c.alpha = data$scale.factor[[i]]$c.alpha,
-                                  c.phi = data$scale.factor[[i]]$c.phi)
+                                  c.alpha = data$scale.factor[[1]]$c.alpha,
+                                  c.phi = data$scale.factor[[1]]$c.phi)
 
         # calculate (mean) squared errors on input scale
         res <- list(
@@ -191,22 +181,45 @@ comp_mse <- function(N,
           conv.rate = r.hat.rates
         )
 
+        # empty memory
+        rm(fit.list,
+           post.theta, post.zeta,
+           post.alpha, post.beta, post.phi, post.lambda, post.sigma2,
+           post.item.pars, post.person.pars,
+           re.scaled.post, re.scaled.data)
+        gc()
+
         # track and return
         p()
-        res
+        if (r.hat.rates[2] == 1) {
+          return(res)
+        } else {
+          return(NA)
+        }
       },
-      future.seed = TRUE, # ensure random workers
+      future.seed = TRUE, # random workers
       future.stdout = FALSE,
-      future.packages = c("LNIRT", "sspLNIRT")
+      future.packages = c("LNIRT"),
+      future.globals = structure(
+        TRUE,  # <- do automatic detection
+        add = c(
+          # but ALWAYS also ship these helpers:
+          "sim.jhm.data",
+          "person.par",
+          "item.par",
+          "scale_M",
+          "rhat_LNIRT"
+        )
+      )
     )
   },
   handlers = handler)
 
-  # take median across iterations
-    mse.theta = list(mse.theta = median(unlist(lapply(out, FUN = function(x) {
+  # take mean across iterations
+  mse.theta = list(mse.theta = mean(unlist(lapply(out[!is.na(out)], FUN = function(x) {
     x$mse.theta
   }))))
-  mse.zeta= list(mse.zeta = median(unlist(lapply(out, FUN = function(x) {
+  mse.zeta= list(mse.zeta = mean(unlist(lapply(out[!is.na(out)], FUN = function(x) {
     x$mse.zeta
   }))))
   mse.person = append(mse.theta, mse.zeta)
@@ -214,22 +227,31 @@ comp_mse <- function(N,
   mse.items =
     colMeans(apply(
       simplify2array(
-        lapply(out, FUN = function(x) {
+        lapply(out[!is.na(out)], FUN = function(x) {
           cbind(mse.alpha = x$se.alpha,
                 mse.beta = x$se.beta,
                 mse.phi = x$se.phi,
                 mse.lambda = x$se.lambda,
                 mse.sigma2 = x$se.sigma2)
-        })), MARGIN = c(1,2), median))
+        })), MARGIN = c(1,2), FUN = function(x) {
+          mean(x, na.rm = TRUE)
+        }))
 
   # store convergence rates
-  conv.rate = as.data.frame(t(sapply(out, FUN = function(x) {
+  conv.rate = as.data.frame(t(sapply(out[!is.na(out)], FUN = function(x) {
     x$conv.rate
   })))
+
+  # empty memory
+  rm(out)
+  gc()
 
   # return output
   return(
     MSE = append(
       append(mse.person, as.list(mse.items)), list(conv.rate = conv.rate))
   )
+
 }
+
+

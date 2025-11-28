@@ -33,7 +33,7 @@ scale_M <- function(item.pars,
   if (re.scale) {
 
     # scaling vectors
-    c.items <- matrix(rep(c(c.alpha, 1/c.alpha, c.phi, 1/c.phi, 1), I), ncol = 5, byrow = TRUE)
+    c.items <- matrix(rep(c(c.alpha, 1/c.alpha, c.phi, 1, 1), I), ncol = 5, byrow = TRUE)
     c.persons <- matrix(rep(c(1/c.alpha, 1/c.phi), N), ncol = 2, byrow = TRUE)
 
     # parameter scaling
@@ -44,7 +44,7 @@ scale_M <- function(item.pars,
   c.phi <- prod(item.pars$phi)^(1/I)
 
   # scaling vectors
-  c.items <- matrix(rep(c(1/c.alpha, c.alpha, 1/c.phi, c.phi, 1), I), ncol = 5, byrow = TRUE)
+  c.items <- matrix(rep(c(1/c.alpha, c.alpha, 1/c.phi, 1, 1), I), ncol = 5, byrow = TRUE)
   c.persons <- matrix(rep(c(c.alpha, c.phi), N), ncol = 2, byrow = TRUE)
   }
 

@@ -27,7 +27,6 @@
 #' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
-#' @param n.cores Integer. (optional) The number of cores for parallel computation.
 #'
 #' @return A list of containing:
 #' \describe{
@@ -91,8 +90,11 @@ optim_sample <- function(FUN = comp_mse,
                          person.seed = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL,
-                         n.cores = NULL
+                         XG = 6000
 ) {
+
+  # start time
+  start.time = Sys.time()
 
   # helper: compute FUN value given new N
   compute_obj <- function(newN) {
@@ -114,7 +116,7 @@ optim_sample <- function(FUN = comp_mse,
       person.seed = person.seed,
       cor2cov.item = cor2cov.item,
       sd.item = sd.item,
-      n.cores = n.cores
+      XG = XG
     )
 
     return(
@@ -132,14 +134,14 @@ optim_sample <- function(FUN = comp_mse,
   if (res.lb$res < thresh) {
     cat("stop due to res.lb < thresh with", lb, "\n")
     return(list(N.best = NA,
-              res.best = "res.lb < thresh",
-              reps = 1,
-              track.res = data.frame(res.lb = "res.lb < thresh",
-                                     res.ub = NA,
-                                     res.temp = c("res.lb < thresh")),
-              track.N = data.frame(N.lb = rep(lb),
-                         N.ub = rep(ub),
-                         N.temp = NA)))}
+                res.best = "res.lb < thresh",
+                reps = 1,
+                track.res = data.frame(res.lb = "res.lb < thresh",
+                                       res.ub = NA,
+                                       res.temp = c("res.lb < thresh")),
+                track.N = data.frame(N.lb = rep(lb),
+                                     N.ub = rep(ub),
+                                     N.temp = NA)))}
 
   # compute N for upper bound
   res.ub <- compute_obj(newN = ub)
@@ -149,14 +151,14 @@ optim_sample <- function(FUN = comp_mse,
   if (res.ub$res > thresh) {
     cat("stop due to res.ub > thresh with", ub, "\n")
     return(list(N.best = NA,
-              res.best = "res.ub > thresh",
-              reps = 2,
-              track.res = data.frame(res.lb = res.lb$res,
-                                     res.ub = "res.ub > thresh",
-                                     res.temp = c(res.lb$res, "res.ub > thresh")),
-              track.N = data.frame(N.lb = rep(lb, 2),
-                         N.ub = rep(ub, 2),
-                         N.temp = c(lb, ub))))}
+                res.best = "res.ub > thresh",
+                reps = 2,
+                track.res = data.frame(res.lb = res.lb$res,
+                                       res.ub = "res.ub > thresh",
+                                       res.temp = c(res.lb$res, "res.ub > thresh")),
+                track.N = data.frame(N.lb = rep(lb, 2),
+                                     N.ub = rep(ub, 2),
+                                     N.temp = c(lb, ub))))}
 
   # track N and resulting output parameter
   track.N <- data.frame(N.lb = rep(lb, 2),
@@ -243,11 +245,16 @@ optim_sample <- function(FUN = comp_mse,
   cat("Best result is", res.best," for threshold", thresh, "\n")
   cat("Minimum N is", N.best, "\n")
 
+  # track time
+  end.time = Sys.time()
+  time.taken = end.time - start.time
+
   # return output
   return(list(N.best,
               res.best,
               reps,
               track.res,
               track.N,
-              track.conv))
+              track.conv,
+              time.taken))
 }

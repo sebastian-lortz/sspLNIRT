@@ -1,4 +1,6 @@
-# script to determine the lower and upper bound of N for the sspLNIRT.data script
+# script to determine the variance in MSE given the number of
+# iterations for calculating the mse and the number of posterior samples.
+
 
 # Setup Config ------------------------------------------------------------
 
@@ -69,59 +71,58 @@ if (HPC ) {
 
 
 
-
 # Run the Job -------------------------------------------------------------
 
 
 # generate the design conditions for low and high N
 design <- expand.grid(
-  I = c(15,45),
-  N = c(100, 2000),
-  mu.alpha = c(.7, 1.3),
-  meanlog.sigma2 = c(log(.3), log(1)),
-  rho = c(0, .6),
-  cor.item = c(0, 0.6),
-  sd.factor = c(1,2)
-  )
+  XG = c(1000, 3000, 6000, 9000),
+  iter = c(100, 500)
+)
 
 # storage
-bounds.res <- list()
+result.list <- list()
 
 # compute MSE
+start.time = Sys.time()
 for (i in seq_len(nrow(design))) {
 
-# get pars
-N = design$N[i]
-I = design$I[i]
-meanlog.sigma2 = design$meanlog.sigma2[i]
-rho = design$rho[i]
-cor.item = design$cor.item[i]
-sd.factor = design$sd.factor[i]
-mu.alpha = design$mu.alpha[i]
-# comp MSE
-res <- comp_mse(
-          iter = 1000,
-          N = N,
-          I = I,
-          mu.person = c(0,0),
-          mu.item = c(mu.alpha,0,1,4),
-          meanlog.sigma2 = meanlog.sigma2,
-          cov.m.person = matrix(c(1,rho,
-                                  rho,1), ncol = 2, byrow = TRUE),
-          cov.m.item = matrix(c(1, 0, 0, 0,
-                                 0, 1, 0, cor.item,
-                                 0, 0, 1, 0,
-                                 0, cor.item, 0, 1), ncol =  4, byrow = TRUE),
-          sd.item         = sd.factor*c(.2, .5, .2, .5),
-          cor2cov.item    = TRUE,
-          sdlog.sigma2 = 0.2,
-          person.seed = NULL,
-          item.seed = NULL,
-          XG = 3000)
-bounds.res[[i]] <- res
-cat("design row", i, "of", nrow(design), "done!! \n\n")
-rm(res)
-gc()
-}
+  result <- list()
+  iter <- design$iter[i]
+  XG <- design$XG[i]
 
-saveRDS(bounds.res, paste0(save.dir, "design.bounds"))
+  for (k in 1:100) {
+    res <- comp_mse(
+      N = 250,
+      iter = iter,
+      I = 15,
+      mu.person = c(0,0),
+      mu.item = c(1,0,1,4),
+      meanlog.sigma2 = log(.3),
+      cov.m.person = matrix(c(1,0.5,
+                              0.5,1), ncol = 2, byrow = TRUE),
+      cov.m.item = matrix(c(1, 0, 0, 0,
+                            0, 1, 0, 0.3,
+                            0, 0, 1, 0,
+                            0, 0.3, 0, 1), ncol =  4, byrow = TRUE),
+      sd.item         = c(.2, .5, .2, .5),
+      cor2cov.item    = TRUE,
+      sdlog.sigma2 = 0.2,
+      person.seed = NULL,
+      item.seed = NULL,
+      XG = XG)
+    result[[k]] <- res
+    cat("iteration", k, "of", 100, "done!!!! \n\n")
+    rm(res)
+  }
+  saveRDS(result, paste0(save.dir, "mse.variance.no.seed.", i))
+
+  result.list[[i]] <- result
+  cat("Design row", i, "done!!!! \n\n")
+  gc()
+}
+saveRDS(result.list, paste0(save.dir, "mse.variance.no.seed.list"))
+
+end.time = Sys.time()
+time.taken = end.time-start.time
+print(time.taken)

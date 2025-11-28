@@ -28,11 +28,12 @@ design_conditions <- function(exclude = NULL) {
 # parameter combinations
   par_vals <- list(
     out.par         = c("mse.alpha", "mse.beta", "mse.phi", "mse.lambda"),
-    thresh          = c(.05, .02, .01, .005),
-    I               = c(10, 25, 50, 100),
-    rho             = c(.2, .4, .6, .8),
-    mu.alpha        = c(.8, 1.0, 1.2, 1.4),
-    cov.beta.lambda = c(0, .2, .4, .6)
+    thresh          = c(.01, .005, .001),
+    I               = c(15, 30, 45),
+    rho             = c(.2, .4, .6),
+    mu.alpha        = c(.6, 1.0, 1.4),
+    cov.beta.lambda = c(.2, .4, .6),
+    meanlog.sigma2  = c(log(.2), log(.6), log(1))
   )
 
   # exclude
@@ -59,6 +60,7 @@ for (i in 1:nrow(par.grid)) {
   mu.alpha = par.grid$mu.alpha[i]
   rho = par.grid$rho[i]
   cov.beta.lambda = par.grid$cov.beta.lambda[i]
+  meanlog.sigma2 = par.grid$meanlog.sigma2[i]
 
   # create design
   design[[i]] <- list(
@@ -71,7 +73,8 @@ for (i in 1:nrow(par.grid)) {
     cov.m.item = matrix(c(1, 0, 0, 0,
                           0, 1, 0, cov.beta.lambda,
                           0, 0, 1, 0,
-                          0, cov.beta.lambda, 0, 1), ncol =  4, byrow = TRUE)
+                          0, cov.beta.lambda, 0, 1), ncol =  4, byrow = TRUE),
+    meanlog.sigma2 = meanlog.sigma2
    )
 }
 

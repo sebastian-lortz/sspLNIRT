@@ -18,7 +18,7 @@
 
 rhat_LNIRT <- function(object.list,
                        chains = 4,
-                       cutoff = 1.01) {
+                       cutoff = 1.05) {
 
   # input checks
   stopifnot(length(object.list) >= 2)
