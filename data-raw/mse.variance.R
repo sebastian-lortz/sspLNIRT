@@ -32,7 +32,7 @@ if (HPC) {
   root.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/"
 
   # set save path
-  #save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
+  save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
   #dir.create(save.dir, recursive = TRUE, showWarnings = FALSE)
 
 
@@ -61,9 +61,9 @@ invisible (
 # cores
 if (HPC ) {
   # set cores
-  n.cores <- future::availableCores() - 1
+  n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
-  future::plan(future::multisession, workers = n.cores)
+  future::plan(future::multicore, workers = n.cores)
 } else {
   n.cores <- 6
   future::plan(future::multisession, workers = n.cores)
@@ -85,7 +85,7 @@ result.list <- list()
 
 # compute MSE
 start.time = Sys.time()
-for (i in seq_len(nrow(design))) {
+for (i in 3:nrow(design)) {
 
   result <- list()
   iter <- design$iter[i]
@@ -126,3 +126,84 @@ saveRDS(result.list, paste0(save.dir, "mse.variance.no.seed.list"))
 end.time = Sys.time()
 time.taken = end.time-start.time
 print(time.taken)
+
+
+# Results -----------------------------------------------------------------
+
+library(dplyr)
+library(ggplot2)
+
+# load results
+mse.variance.no.seed.1 <- readRDS(paste0(save.dir, "mse.variance.no.seed.1"))
+mse.variance.no.seed.2 <- readRDS(paste0(save.dir, "mse.variance.no.seed.2"))
+
+res.names <- list(
+  mse.variance.no.seed.1, mse.variance.no.seed.2
+)
+
+# check convergence
+conv.data = as.data.frame(sapply(res.names, FUN = function(x) {
+  sapply(x, FUN = function(y) {
+    nrow(y$conv.rate)
+  })
+}))
+summary(conv.data)
+
+# get mse data
+list.mse <- lapply(res.names, FUN = function(x) {
+  as.data.frame(t(sapply(x, FUN = function(y) {
+    cbind(y$mse.alpha,
+      y$mse.beta,
+      y$mse.phi,
+      y$mse.lambda,
+      y$mse.sigma2)
+  })))
+})
+
+mse.data <- data.frame(
+  condition = factor(rep(rep(1:2, each = 100), 5)),
+  parameter = factor(rep(c("alpha", "beta", "phi", "lambda", "sigma2"), each = 200)),
+  mse = unlist(dplyr::bind_rows(list.mse)), row.names = NULL)
+
+
+sum.stats <- mse.data %>%
+  summarise(
+    mu  = mean(mse),
+    sd  = sd(mse),
+    min = min(mse),
+    max = max(mse),
+    .by = c(condition, parameter)
+  ) %>%
+  mutate(
+    across(c(mu, sd, min, max), ~ round(.x, 5)),
+    y = rep(c(6000, 5000, 4000, 3000, 2000), 2)
+  )
+
+saveRDS(sum.stats, paste0(save.dir, "mse.variance.sum.stats"))
+
+# plot mse variance
+cond_labels <- apply(design, 1, function(x) {
+  paste(sprintf("%s = %s", names(x), x), collapse = " & ")
+})
+
+# density plot
+ggplot(mse.data, aes(x = mse, fill = parameter)) +
+  geom_density(alpha = .5) +
+  geom_text(
+    data = sum.stats,
+    aes(x = min, y = y, label = sd, color = parameter),
+    hjust = 0,
+    size = 4.5,
+    inherit.aes = FALSE
+  ) +
+  facet_wrap(
+    ~ condition,
+    ncol = 1,
+    labeller = labeller(condition = cond_labels[1:2])
+  )
+
+# violin plot
+ggplot(data  = mse.data, mapping = aes(x = parameter, y = mse, fill = condition)) +
+  geom_violin()
+
+

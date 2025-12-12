@@ -32,7 +32,7 @@ if (HPC) {
   root.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/"
 
   # set save path
-  #save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
+  save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
   #dir.create(save.dir, recursive = TRUE, showWarnings = FALSE)
 
 
@@ -61,9 +61,9 @@ invisible (
 # cores
 if (HPC ) {
   # set cores
-  n.cores <- future::availableCores() - 1
+  n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
-  future::plan(future::multisession, workers = n.cores)
+  future::plan(future::multicore, workers = n.cores)
 } else {
   n.cores <- 6
   future::plan(future::multisession, workers = n.cores)
@@ -85,7 +85,7 @@ result.list <- list()
 
 # compute MSE
 start.time = Sys.time()
-for (i in seq_len(nrow(design))) {
+for (i in 2:nrow(design)) {
 
   result <- list()
   iter <- design$iter[i]
@@ -131,3 +131,110 @@ saveRDS(result.list, paste0(save.dir, "ssp.variance.no.seed.list"))
 end.time = Sys.time()
 time.taken = end.time-start.time
 print(time.taken)
+
+
+# Results -----------------------------------------------------------------
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# load results
+ssp.variance.no.seed.1 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.1"))
+#ssp.variance.no.seed.2 <- readRDS(paste0(save.dir, "mse.variance.no.seed.2"))
+
+res.names <- list(
+  ssp.variance.no.seed.1 #, ssp.variance.no.seed.2
+)
+ssp.variance.no.seed.1[[1]][[6]]
+
+## check convergence
+# optim_sample didnt return conv rates for [[64]]
+lengths(ssp.variance.no.seed.1)
+which(lengths(ssp.variance.no.seed.1) < 6)
+subset.list <- ssp.variance.no.seed.1[-64]
+
+summary(
+  unlist(sapply(subset.list, FUN = function(x) {
+  #x[[6]]
+  sapply(x[[6]], FUN = function(y) {
+    colMeans(y)
+  })
+  })))
+# conv rates min = 99.85%
+
+# get ssp data
+ssp.res <- lapply(res.names, FUN = function(x) {
+t(sapply(x, FUN = function(y) {
+    (y[c(1,2,3,7)])
+  }))
+})
+
+# drop the ub violation iteration
+ssp.res[[1]] <- ssp.res[[1]][-64,]
+
+ssp.data <- lapply(ssp.res, FUN = function(x) {
+  as.data.frame(cbind(
+    N.best = as.numeric(x[,1]),
+    res.best = as.numeric(x[,2]),
+    reps = as.numeric(x[,3]),
+    time.taken = as.numeric(x[,4])))
+})
+
+
+sum.stats <- ssp.data[[1]] %>%
+  slice(-64) %>%  # drop row 64
+  summarise(
+    across(
+      1:4,
+      list(
+        mean = ~ mean(.x, na.rm = TRUE),
+        sd   = ~ sd(.x,   na.rm = TRUE),
+        min  = ~ min(.x,  na.rm = TRUE),
+        max  = ~ max(.x,  na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    )
+  ) %>%
+  pivot_longer(
+    everything(),
+    names_to  = c("variable", ".value"),
+    names_sep = "_"
+  ) %>%
+  data.frame()
+
+
+
+
+# plot ssp variance
+cond_labels <- apply(design, 1, function(x) {
+  paste(sprintf("%s = %s", names(x), x), collapse = " & ")
+})
+
+# density plot
+N.mu = sum.stats$mean[1]
+N.sd = sum.stats$sd[1]
+
+ggplot(ssp.data[[1]], aes(x = N.best)) +
+  geom_density(alpha = .5) +
+  geom_vline(xintercept = c(N.mu-N.sd, N.mu, N.mu + N.sd), color = "red") +
+  geom_vline(xintercept = sum.stats$mean[1]-sum.stats$sd1, linetype = "dotted")
+
+# histogram
+ggplot(ssp.data[[1]], aes(x = N.best)) +
+  geom_histogram() +
+  geom_vline(xintercept = c(N.mu-N.sd, N.mu, N.mu + N.sd), color = "red") +
+  geom_vline(xintercept = sum.stats$mean[1]-sum.stats$sd1, linetype = "dotted")
+
+
+  facet_wrap(
+    ~ condition,
+    ncol = 1,
+    labeller = labeller(condition = cond_labels[1:2])
+  )
+
+# violin plot
+ggplot(data  = mse.data, mapping = aes(x = parameter, y = mse, fill = condition)) +
+  geom_violin()
+
+

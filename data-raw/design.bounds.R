@@ -59,9 +59,9 @@ invisible (
 # cores
 if (HPC ) {
   # set cores
-  n.cores <- future::availableCores() - 1
+  n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
-  future::plan(future::multisession, workers = n.cores)
+  future::plan(future::multicore, workers = n.cores)
 } else {
   n.cores <- 6
   future::plan(future::multisession, workers = n.cores)

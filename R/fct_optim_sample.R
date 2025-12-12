@@ -5,7 +5,7 @@
 #' under the the Joint Hierarchical Model using a 2-pl normal ogive model for
 #' response accuracy and a 3-pl log-normal model for response time.
 #'
-#' @param FUN Function. The function to calcuate the target parameter.
+#' @param FUN Function. The function to calculate the target parameter.
 #' @param thresh Numeric. The desired threshold of the target parameter to be achieved.
 #' @param lb Integer. The lower bound of the sample size.
 #' @param ub Integer. The upper bound of the sample size.
@@ -141,7 +141,8 @@ optim_sample <- function(FUN = comp_mse,
                                        res.temp = c("res.lb < thresh")),
                 track.N = data.frame(N.lb = rep(lb),
                                      N.ub = rep(ub),
-                                     N.temp = NA)))}
+                                     N.temp = NA),
+                track.conv = list(res.lb$conv.rate)))}
 
   # compute N for upper bound
   res.ub <- compute_obj(newN = ub)
@@ -158,7 +159,9 @@ optim_sample <- function(FUN = comp_mse,
                                        res.temp = c(res.lb$res, "res.ub > thresh")),
                 track.N = data.frame(N.lb = rep(lb, 2),
                                      N.ub = rep(ub, 2),
-                                     N.temp = c(lb, ub))))}
+                                     N.temp = c(lb, ub)),
+                track.conv = list(res.lb$conv.rate,
+                                  res.ub$conv.rate)))}
 
   # track N and resulting output parameter
   track.N <- data.frame(N.lb = rep(lb, 2),

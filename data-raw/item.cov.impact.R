@@ -15,7 +15,7 @@ Sys.setenv(
 options(repos=c(CRAN="https://ftp.belnet.be/mirror/CRAN/"))
 
 # setup for HPC or local
-HPC = TRUE
+HPC = FALSE
 
 if (HPC) {
   # set root path
@@ -57,7 +57,7 @@ invisible (
 # cores
 if (HPC ) {
   # set cores
-  n.cores <- future::availableCores() - 1
+  n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
   future::plan(future::multisession, workers = n.cores)
 } else {
@@ -265,30 +265,74 @@ res.cor6 <- comp_mse(
   burnin = 20)
 saveRDS(res.cor6, paste0(save.dir, "res.cor.alpha.beta.lambda.I45"))
 
+
+
+# Results -----------------------------------------------------------------
+
 # load results
 res.no.cor <- readRDS(paste0(save.dir, "res.no.cor"))
 res.cor.alpha.beta <- readRDS(paste0(save.dir, "res.cor.alpha.beta"))
 res.cor.beta.lambda <- readRDS(paste0(save.dir, "res.cor.beta.lambda"))
-res.cor.alpha.beta.I45 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.I45"))
 res.cor.alpha.beta.lambda <- readRDS(paste0(save.dir, "res.cor.alpha.beta.lambda"))
+res.no.cor.I45 <- readRDS(paste0(save.dir, "res.no.cor.I45"))
+res.cor.alpha.beta.I45 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.I45"))
+res.cor.beta.lambda.I45 <- readRDS(paste0(save.dir, "res.cor.beta.lambda.I45"))
 res.cor.alpha.beta.lambda.I45 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.lambda.I45"))
-
+res.names <- list(
+  res.no.cor, res.cor.alpha.beta, res.cor.beta.lambda, res.cor.alpha.beta.lambda,
+  res.no.cor.I45, res.cor.alpha.beta.I45, res.cor.beta.lambda.I45, res.cor.alpha.beta.lambda.I45
+)
 
 # check convergence
-nrow(res.no.cor$conv.rate)
-nrow(res.cor.alpha.beta$conv.rate)
-nrow(res.cor.beta.lambda$conv.rate)
-nrow(res.cor.alpha.beta.I45$conv.rate)
-nrow(res.cor.alpha.beta.lambda$conv.rate)
-nrow(res.cor.alpha.beta.lambda.I45$conv.rate)
-# similar convergence 99.7% - 100%
+lapply(res.names, FUN = function(x) {
+  nrow(x$conv.rate)
+})
+# similar convergence 99.8% - 100%
 
 # compare results
-as.data.frame(res.no.cor[c(1:7)])
-as.data.frame(res.cor.alpha.beta[c(1:7)])
-as.data.frame(res.cor.beta.lambda[c(1:7)])
-as.data.frame(res.cor.alpha.beta.I45[c(1:7)])
-as.data.frame(res.cor.alpha.beta.lambda[c(1:7)])
-as.data.frame(res.cor.alpha.beta.lambda.I45[c(1:7)])
+person.par <- t(sapply(res.names, FUN = function(x) {
+  as.data.frame(x[c(1:2)])
+}))
+item.par <- t(sapply(res.names, FUN = function(x) {
+  x[c(3:7)]
+}))
+rownames(person.par) <- rownames(item.par) <- c("no.cor", "cor.alpha.beta", "cor.beta.lambda", "cor.alpha.beta.lambda",
+                        "no.cor.I45", "cor.alpha.beta.I45", "cor.beta.lambda.I45", "cor.alpha.beta.lambda.I45")
 
+# prep ggplot format
+library(ggplot2)
+ggdat <- data.frame(
+  condition = rep(rownames(item.par), 5),
+  parameter = rep(colnames(item.par), each = 8),
+  mse = unlist(c(item.par))
+)
+ggdat$condition <- factor(ggdat$condition, levels = unique(ggdat$condition))
+
+# split data
+ggdat.I45 <- ggdat[grepl("I45", ggdat[,1]),]
+ggdat.I15 <- ggdat[!grepl("I45", ggdat[,1]),]
+
+# sd from mse.variance.R
+# test length 15
+mse.variance.sum.stats <- readRDS(paste0(save.dir, "mse.variance.sum.stats"))
+ggdat.I15.sd <- cbind(ggdat.I15,
+      sd = rep(mse.variance.sum.stats %>%
+                 filter(condition == 1) %>%
+                 pull(sd),
+               each = 4))
+
+ggplot(data = ggdat.I15.sd, aes(x = condition, y = mse, group = parameter)) +
+  geom_line(aes(color = parameter)) +
+  geom_point(position=position_dodge(0.1))  +
+  geom_errorbar(aes(ymin=mse-2*sd, ymax=mse+2*sd, color = parameter), position=position_dodge(0.1))
+
+# test length 45
+ggplot(data = ggdat.I45, aes(x = condition, y = mse, group = parameter)) +
+  geom_line(aes(color = parameter)) +
+  geom_point()
+
+# compare test lengths
+ggplot(data = ggdat, aes(x = condition, y = mse, group = parameter)) +
+  geom_line(aes(color = parameter)) +
+  geom_point()
 # approximately similar for I = 15
