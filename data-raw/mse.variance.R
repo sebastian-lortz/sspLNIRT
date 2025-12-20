@@ -17,7 +17,7 @@ Sys.setenv(
 options(repos=c(CRAN="https://ftp.belnet.be/mirror/CRAN/"))
 
 # setup for HPC or local
-HPC = TRUE
+HPC = FALSE
 
 if (HPC) {
   # set root path
@@ -63,21 +63,21 @@ if (HPC ) {
   # set cores
   n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
-  future::plan(future::multicore, workers = n.cores)
+  future::plan(future::multisession, workers = n.cores)
 } else {
   n.cores <- 6
   future::plan(future::multisession, workers = n.cores)
 }
 
-
+parallelly::supportsMulticore()
 
 # Run the Job -------------------------------------------------------------
 
 
 # generate the design conditions for low and high N
 design <- expand.grid(
-  XG = c(1000, 3000, 6000, 9000),
-  iter = c(100, 500)
+  XG = c(1000, 3000, 6000),
+  iter = c(100, 250, 500)
 )
 
 # storage
@@ -85,7 +85,7 @@ result.list <- list()
 
 # compute MSE
 start.time = Sys.time()
-for (i in 3:nrow(design)) {
+for (i in 1:nrow(design)) {
 
   result <- list()
   iter <- design$iter[i]
@@ -95,22 +95,21 @@ for (i in 3:nrow(design)) {
     res <- comp_mse(
       N = 250,
       iter = iter,
-      I = 15,
+      I = 30,
       mu.person = c(0,0),
-      mu.item = c(1,0,1,4),
-      meanlog.sigma2 = log(.3),
-      cov.m.person = matrix(c(1,0.5,
-                              0.5,1), ncol = 2, byrow = TRUE),
+      mu.item = c(1,0,1,1),
+      meanlog.sigma2 = log(.6),
+      cov.m.person = matrix(c(1,0.4,
+                              0.4,1), ncol = 2, byrow = TRUE),
       cov.m.item = matrix(c(1, 0, 0, 0,
-                            0, 1, 0, 0.3,
+                            0, 1, 0, 0.4,
                             0, 0, 1, 0,
-                            0, 0.3, 0, 1), ncol =  4, byrow = TRUE),
-      sd.item         = c(.2, .5, .2, .5),
+                            0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
+      sd.item         = c(.2, 1, .2, 1),
       cor2cov.item    = TRUE,
       sdlog.sigma2 = 0.2,
-      person.seed = NULL,
-      item.seed = NULL,
-      XG = XG)
+      XG = XG,
+      mse.seed = NULL)
     result[[k]] <- res
     cat("iteration", k, "of", 100, "done!!!! \n\n")
     rm(res)
@@ -133,12 +132,23 @@ print(time.taken)
 library(dplyr)
 library(ggplot2)
 
+L = nrow(design)
+
 # load results
 mse.variance.no.seed.1 <- readRDS(paste0(save.dir, "mse.variance.no.seed.1"))
 mse.variance.no.seed.2 <- readRDS(paste0(save.dir, "mse.variance.no.seed.2"))
+mse.variance.no.seed.3 <- readRDS(paste0(save.dir, "mse.variance.no.seed.3"))
+mse.variance.no.seed.4 <- readRDS(paste0(save.dir, "mse.variance.no.seed.4"))
+mse.variance.no.seed.5 <- readRDS(paste0(save.dir, "mse.variance.no.seed.5"))
+mse.variance.no.seed.6 <- readRDS(paste0(save.dir, "mse.variance.no.seed.6"))
+mse.variance.no.seed.7 <- readRDS(paste0(save.dir, "mse.variance.no.seed.7"))
+mse.variance.no.seed.8 <- readRDS(paste0(save.dir, "mse.variance.no.seed.8"))
+mse.variance.no.seed.9 <- readRDS(paste0(save.dir, "mse.variance.no.seed.9"))
 
 res.names <- list(
-  mse.variance.no.seed.1, mse.variance.no.seed.2
+  mse.variance.no.seed.1, mse.variance.no.seed.2, mse.variance.no.seed.3,
+  mse.variance.no.seed.4, mse.variance.no.seed.5, mse.variance.no.seed.6,
+  mse.variance.no.seed.7, mse.variance.no.seed.8, mse.variance.no.seed.9
 )
 
 # check convergence
@@ -147,7 +157,17 @@ conv.data = as.data.frame(sapply(res.names, FUN = function(x) {
     nrow(y$conv.rate)
   })
 }))
-summary(conv.data)
+
+sum_conv <- cbind(design, data.frame(
+  min  = apply(conv.data, 2, min),
+  median = apply(conv.data, 2, median),
+  mean = apply(conv.data, 2, mean),
+  max  = apply(conv.data, 2, max),
+  sd   = apply(conv.data, 2, sd),
+  row.names = NULL
+)) %>%
+  mutate(prop = mean / iter)
+
 
 # get mse data
 list.mse <- lapply(res.names, FUN = function(x) {
@@ -161,8 +181,8 @@ list.mse <- lapply(res.names, FUN = function(x) {
 })
 
 mse.data <- data.frame(
-  condition = factor(rep(rep(1:2, each = 100), 5)),
-  parameter = factor(rep(c("alpha", "beta", "phi", "lambda", "sigma2"), each = 200)),
+  condition = factor(rep(rep(1:L, each = 100), 5)),
+  parameter = factor(rep(c("alpha", "beta", "phi", "lambda", "sigma2"), each = L*100)),
   mse = unlist(dplyr::bind_rows(list.mse)), row.names = NULL)
 
 
@@ -172,38 +192,169 @@ sum.stats <- mse.data %>%
     sd  = sd(mse),
     min = min(mse),
     max = max(mse),
+    rel.sd = sd(mse)/mean(mse),
     .by = c(condition, parameter)
-  ) %>%
-  mutate(
-    across(c(mu, sd, min, max), ~ round(.x, 5)),
-    y = rep(c(6000, 5000, 4000, 3000, 2000), 2)
   )
 
+#round(res$mc.se.items,5)
 saveRDS(sum.stats, paste0(save.dir, "mse.variance.sum.stats"))
 
 # plot mse variance
 cond_labels <- apply(design, 1, function(x) {
   paste(sprintf("%s = %s", names(x), x), collapse = " & ")
 })
+cond_labs <- setNames(cond_labels, levels(mse.data$condition))
 
 # density plot
-ggplot(mse.data, aes(x = mse, fill = parameter)) +
+mse.data <- mse.data %>%
+  filter(condition == 1 |
+         condition == 2 |
+         condition == 3)
+
+ggplot(mse.data , aes(x = mse, fill = condition)) +
   geom_density(alpha = .5) +
-  geom_text(
-    data = sum.stats,
-    aes(x = min, y = y, label = sd, color = parameter),
-    hjust = 0,
-    size = 4.5,
-    inherit.aes = FALSE
-  ) +
   facet_wrap(
-    ~ condition,
-    ncol = 1,
-    labeller = labeller(condition = cond_labels[1:2])
-  )
+    ~ parameter,
+    scales = "free",
+    ncol = 1  )
+design
 
 # violin plot
-ggplot(data  = mse.data, mapping = aes(x = parameter, y = mse, fill = condition)) +
-  geom_violin()
+ggplot(data  = mse.data, mapping = aes(x = condition, y = mse, fill = condition)) +
+  geom_violin() +
+  facet_wrap(
+    ~ parameter,
+    scales = "free_y",
+    ncol = 1,
+    labeller = labeller(condition = cond_labels)
+  )
 
 
+# sd plots
+ggplot(data  = sum.stats %>%
+         filter(condition %in% c(1, 2, 3)) %>%
+         mutate(across(c(sd, rel.sd), ~round(.x, 5))),
+       mapping = aes(x = condition, y = sd, group = 1)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(
+    ~ parameter,
+    scales = "free_y",
+    ncol = 1,
+    labeller = labeller(condition = cond_labels[1:5])
+  ) +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  coord_cartesian(ylim = c(0, NA))
+
+# rel.sd plots
+ggplot(data  = sum.stats %>%
+         filter(condition %in% c(3, 6, 9)) %>%
+         mutate(across(c(sd, rel.sd), ~round(.x, 5))),
+       mapping = aes(x = condition, y = rel.sd, group = 1)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(
+    ~ parameter,
+    scales = "free_y",
+    ncol = 1,
+    labeller = labeller(condition = cond_labels[1:5])
+  ) +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  coord_cartesian(ylim = c(0, NA))
+
+
+### Paper Figure and numbers
+
+sum.stats %>%
+  filter(condition == 3,
+         parameter != "sigma2") %>%
+  select(sd, rel.sd) %>%
+  round(., 5) %>%
+  mutate()
+
+gg.stats <- sum.stats %>%
+  filter(condition %in% c(1,2,3),
+         parameter != "sigma2") %>%
+  mutate(condition = dplyr::recode(condition, `1` = 1000, `2` = 3000, `3` = 6000)) %>%
+  mutate(across(c(sd, rel.sd), ~round(.x, 5)))
+
+gg.conv <- conv.data %>%
+            select(V1, V2, V3) %>%
+            pivot_longer(
+              cols      = c(V1, V2, V3),
+              names_to  = "condition",
+              values_to = "conv"
+            ) %>%
+            mutate(condition = factor(recode(condition, `V1` = 1000, `V2` = 3000, `V3` = 6000)),
+                   conv = conv/100)
+
+
+abs.sd.mse.plot <- ggplot(
+  data = gg.stats,
+  aes(x = condition, y = sd, linetype = parameter, shape = parameter, group = parameter)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_x_continuous(breaks = c(1000, 3000, 6000)) +
+  coord_cartesian(ylim = c(0, NA)) +
+  labs(
+    y = "Absolute SD of Estimated MSE",
+    x = "Posterior Samples (XG)",
+    colour = "Parameter",
+    linetype = "Parameter",
+    shape = "Parameter"
+  )
+
+rel.sd.mse.plot <- ggplot(
+    data = gg.stats,
+    aes(x = condition, y = rel.sd, linetype = parameter, shape = parameter, group = parameter)) +
+    geom_line() +
+    geom_point() +
+    scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+    scale_x_continuous(breaks = c(1000, 3000, 6000)) +
+    coord_cartesian(ylim = c(0, NA)) +
+  labs(
+    y = "Relative SD of Estimated MSE",
+    x = "Posterior Samples (XG)",
+    colour = "Parameter",
+    linetype = "Parameter",
+    shape = "Parameter"
+  )
+
+mse.conv.plot <- ggplot(
+  data = gg.conv,
+  aes(x = condition, y = conv)) +
+  geom_violin() +
+  labs(
+    y = "Convergence Rate",
+    x = "Number of Posterior Samples (XG)"
+  )
+
+
+library(patchwork)
+
+sd.mse.plot <- (abs.sd.mse.plot + rel.sd.mse.plot) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    theme = theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  ) &
+  theme(legend.position = "right")
+
+
+ggsave(
+  filename = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/plots/sd.mse.plot.pdf",
+  plot     = sd.mse.plot,
+  width    = 180,
+  height   = 100,
+  units    = "mm",
+  bg       = "white"
+)
+
+ggsave(
+  filename = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/plots/conv.plot.pdf",
+  plot     = mse.conv.plot,
+  width    = 180,
+  height   = 100,
+  units    = "mm",
+  bg       = "white"
+)

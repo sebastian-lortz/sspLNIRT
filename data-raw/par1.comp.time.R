@@ -94,8 +94,6 @@ comp_mse(
   sd.item         = c(.2, .5, .2, .5),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   n.cores = 1,
   par1 = TRUE)
 }

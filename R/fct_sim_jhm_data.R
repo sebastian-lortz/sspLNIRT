@@ -16,8 +16,6 @@
 #' @param scale Logical. Weather the item and person parameters are scaled.
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
-#' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #'
@@ -32,8 +30,8 @@
 #'
 #' @examples
 #'  \dontrun{
-#' test.data <- sim.jhm.data(iter = 10,
-#'                          N = 1000,
+#' test.data <- sim.jhm.data(iter = 2,
+#'                          N = 100,
 #'                          I = 10,
 #'                          mu.person = c(0,0),
 #'                          mu.item = c(1,0,1,0),
@@ -44,9 +42,7 @@
 #'                                                0, .5, 0, 0,
 #'                                                0, 0, .5, 0,
 #'                                                0, 0, 0, .2), ncol =  4, byrow = TRUE),
-#'                          sdlog.sigma2 = 0.2,
-#'                          item.seed = NULL,
-#'                          person.seed = NULL
+#'                          sdlog.sigma2 = 0.2
 #'                          )
 #'}
 #'
@@ -69,8 +65,6 @@ sim.jhm.data <- function(iter,
                          scale = TRUE,
                          random.item = TRUE,
                          item.pars.m = NULL,
-                         item.seed = NULL,
-                         person.seed = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL
 ) {
@@ -84,8 +78,7 @@ sim.jhm.data <- function(iter,
     # person parameters
     person <- person.par(N = N,
                          cov.m.person = cov.m.person,
-                         mu.person = mu.person,
-                         person.seed = person.seed)
+                         mu.person = mu.person)
 
     # item parameters
     if (random.item) {
@@ -95,8 +88,7 @@ sim.jhm.data <- function(iter,
                        meanlog.sigma2 = meanlog.sigma2,
                        sdlog.sigma2 = sdlog.sigma2,
                        cor2cov.item = cor2cov.item,
-                       sd.item = sd.item,
-                       item.seed = item.seed)
+                       sd.item = sd.item)
     } else {
       item <- as.data.frame(
         item.pars.m

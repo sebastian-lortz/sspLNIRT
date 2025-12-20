@@ -71,23 +71,21 @@ if (HPC ) {
 # Run the Job -------------------------------------------------------------
 
 
-
-
 # no cor between alpha and beta
 res.no.cor <- comp_mse(
     iter = 1000,
     N = 250,
-    I = 15,
+    I = 30,
     mu.person = c(0,0),
-    mu.item = c(1,0,1,4),
-    meanlog.sigma2 = log(.3),
+    mu.item = c(1,0,1,0),
+    meanlog.sigma2 = log(.6),
     cov.m.person = matrix(c(1,0,
                             0,1), ncol = 2, byrow = TRUE),
     cov.m.item = matrix(c(1, 0, 0, 0,
                           0, 1, 0, 0,
                           0, 0, 1, 0,
                           0, 0, 0, 1), ncol =  4, byrow = TRUE),
-    sd.item         = c(.2, .5, .2, .5),
+    sd.item         = c(.2, 1, .2, 1),
     cor2cov.item    = TRUE,
     sdlog.sigma2 = 0.2,
     person.seed = NULL,
@@ -101,41 +99,39 @@ saveRDS(res.no.cor, paste0(save.dir, "res.no.cor"))
 res.no.cor2 <- comp_mse(
   iter = 1000,
   N = 250,
-  I = 45,
+  I = 50,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,4),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,0),
+  meanlog.sigma2 = log(.6),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0,
                         0, 1, 0, 0,
                         0, 0, 1, 0,
                         0, 0, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+  sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
-saveRDS(res.no.cor2, paste0(save.dir, "res.no.cor.I45"))
+saveRDS(res.no.cor2, paste0(save.dir, "res.no.cor.I50"))
 
 # cor between alpha and beta
 res.cor <- comp_mse(
     iter = 1000,
     N = 250,
-    I = 15,
+    I = 30,
     mu.person = c(0,0),
-    mu.item = c(1,0,1,4),
-    meanlog.sigma2 = log(.3),
+    mu.item = c(1,0,1,0),
+    meanlog.sigma2 = log(.6),
     cov.m.person = matrix(c(1,0,
                             0,1), ncol = 2, byrow = TRUE),
     cov.m.item = matrix(c(1, -.6, 0, 0,
                           -.6, 1, 0, 0,
                           0, 0, 1, 0,
                           0, 0, 0, 1), ncol =  4, byrow = TRUE),
-    sd.item         = c(.2, .5, .2, .5),
+    sd.item         = c(.2, 1, .2, 1),
     cor2cov.item    = TRUE,
     sdlog.sigma2 = 0.2,
     person.seed = NULL,
@@ -149,17 +145,17 @@ saveRDS(res.cor, paste0(save.dir, "res.cor.alpha.beta"))
 res.cor2 <- comp_mse(
   iter = 1000,
   N = 250,
-  I = 15,
+  I = 30,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,4),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,0),
+  meanlog.sigma2 = log(.6),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0,
                         0, 1, 0, .6,
                         0, 0, 1, 0,
                         0, .6, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+  sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   person.seed = NULL,
@@ -173,17 +169,17 @@ saveRDS(res.cor2, paste0(save.dir, "res.cor.beta.lambda"))
 res.cor3 <- comp_mse(
   iter = 1000,
   N = 250,
-  I = 45,
+  I = 50,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,4),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,0),
+  meanlog.sigma2 = log(.6),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0,
                         0, 1, 0, .6,
                         0, 0, 1, 0,
                         0, .6, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+  sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   person.seed = NULL,
@@ -191,23 +187,23 @@ res.cor3 <- comp_mse(
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
-saveRDS(res.cor3, paste0(save.dir, "res.cor.beta.lambda.I45"))
+saveRDS(res.cor3, paste0(save.dir, "res.cor.beta.lambda.I50"))
 
 # cor between alpha and beta for long tests
 res.cor4 <- comp_mse(
   iter = 1000,
   N = 250,
-  I = 45,
+  I = 50,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,4),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,0),
+  meanlog.sigma2 = log(.6),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, -.6, 0, 0,
                         -.6, 1, 0, 0,
                         0, 0, 1, 0,
                         0, 0, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+  sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   person.seed = NULL,
@@ -215,23 +211,23 @@ res.cor4 <- comp_mse(
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
-saveRDS(res.cor4, paste0(save.dir, "res.cor.alpha.beta.I45"))
+saveRDS(res.cor4, paste0(save.dir, "res.cor.alpha.beta.I50"))
 
 # cor between alpha, beta and lambda
 res.cor5 <- comp_mse(
   iter = 1000,
   N = 250,
-  I = 15,
+  I = 30,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,4),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,0),
+  meanlog.sigma2 = log(.6),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, -.6, 0, 0,
                         -.6, 1, 0, .6,
                         0, 0, 1, 0,
                         0, .6, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+  sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   person.seed = NULL,
@@ -245,17 +241,17 @@ saveRDS(res.cor5, paste0(save.dir, "res.cor.alpha.beta.lambda"))
 res.cor6 <- comp_mse(
   iter = 1000,
   N = 250,
-  I = 45,
+  I = 50,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,4),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,0),
+  meanlog.sigma2 = log(.6),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, -.6, 0, 0,
                         -.6, 1, 0, .6,
                         0, 0, 1, 0,
                         0, .6, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+  sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   person.seed = NULL,
@@ -263,31 +259,34 @@ res.cor6 <- comp_mse(
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
-saveRDS(res.cor6, paste0(save.dir, "res.cor.alpha.beta.lambda.I45"))
+saveRDS(res.cor6, paste0(save.dir, "res.cor.alpha.beta.lambda.I50"))
 
 
 
 # Results -----------------------------------------------------------------
+
+library(dplyr)
+library(ggplot2)
 
 # load results
 res.no.cor <- readRDS(paste0(save.dir, "res.no.cor"))
 res.cor.alpha.beta <- readRDS(paste0(save.dir, "res.cor.alpha.beta"))
 res.cor.beta.lambda <- readRDS(paste0(save.dir, "res.cor.beta.lambda"))
 res.cor.alpha.beta.lambda <- readRDS(paste0(save.dir, "res.cor.alpha.beta.lambda"))
-res.no.cor.I45 <- readRDS(paste0(save.dir, "res.no.cor.I45"))
-res.cor.alpha.beta.I45 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.I45"))
-res.cor.beta.lambda.I45 <- readRDS(paste0(save.dir, "res.cor.beta.lambda.I45"))
-res.cor.alpha.beta.lambda.I45 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.lambda.I45"))
+res.no.cor.I50 <- readRDS(paste0(save.dir, "res.no.cor.I50"))
+res.cor.alpha.beta.I50 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.I50"))
+res.cor.beta.lambda.I50 <- readRDS(paste0(save.dir, "res.cor.beta.lambda.I50"))
+res.cor.alpha.beta.lambda.I50 <- readRDS(paste0(save.dir, "res.cor.alpha.beta.lambda.I50"))
 res.names <- list(
   res.no.cor, res.cor.alpha.beta, res.cor.beta.lambda, res.cor.alpha.beta.lambda,
-  res.no.cor.I45, res.cor.alpha.beta.I45, res.cor.beta.lambda.I45, res.cor.alpha.beta.lambda.I45
+  res.no.cor.I50, res.cor.alpha.beta.I50, res.cor.beta.lambda.I50, res.cor.alpha.beta.lambda.I50
 )
 
 # check convergence
 lapply(res.names, FUN = function(x) {
-  nrow(x$conv.rate)
+  nrow(x$conv.rate)/1000
 })
-# similar convergence 99.8% - 100%
+# similar convergence 77% - 86%
 
 # compare results
 person.par <- t(sapply(res.names, FUN = function(x) {
@@ -297,42 +296,37 @@ item.par <- t(sapply(res.names, FUN = function(x) {
   x[c(3:7)]
 }))
 rownames(person.par) <- rownames(item.par) <- c("no.cor", "cor.alpha.beta", "cor.beta.lambda", "cor.alpha.beta.lambda",
-                        "no.cor.I45", "cor.alpha.beta.I45", "cor.beta.lambda.I45", "cor.alpha.beta.lambda.I45")
+                        "no.cor.I50", "cor.alpha.beta.I50", "cor.beta.lambda.I50", "cor.alpha.beta.lambda.I50")
 
 # prep ggplot format
-library(ggplot2)
 ggdat <- data.frame(
   condition = rep(rownames(item.par), 5),
   parameter = rep(colnames(item.par), each = 8),
-  mse = unlist(c(item.par))
+  mse = unlist(c(item.par)),
+  mc.se = c(do.call(rbind, sapply(res.names, FUN = function(x) {
+    x[8]
+  })))
 )
 ggdat$condition <- factor(ggdat$condition, levels = unique(ggdat$condition))
 
 # split data
-ggdat.I45 <- ggdat[grepl("I45", ggdat[,1]),]
-ggdat.I15 <- ggdat[!grepl("I45", ggdat[,1]),]
+ggdat.I50 <- ggdat[grepl("I50", ggdat[,1]),]
+ggdat.I30 <- ggdat[!grepl("I50", ggdat[,1]),]
 
-# sd from mse.variance.R
-# test length 15
-mse.variance.sum.stats <- readRDS(paste0(save.dir, "mse.variance.sum.stats"))
-ggdat.I15.sd <- cbind(ggdat.I15,
-      sd = rep(mse.variance.sum.stats %>%
-                 filter(condition == 1) %>%
-                 pull(sd),
-               each = 4))
-
-ggplot(data = ggdat.I15.sd, aes(x = condition, y = mse, group = parameter)) +
+# test length 30
+ggplot(data = ggdat.I30, aes(x = condition, y = mse, group = parameter)) +
   geom_line(aes(color = parameter)) +
-  geom_point(position=position_dodge(0.1))  +
-  geom_errorbar(aes(ymin=mse-2*sd, ymax=mse+2*sd, color = parameter), position=position_dodge(0.1))
+  geom_point()  +
+  geom_errorbar(aes(ymin=mse-2*mc.se, ymax=mse+2*mc.se, color = parameter))
 
-# test length 45
-ggplot(data = ggdat.I45, aes(x = condition, y = mse, group = parameter)) +
+# test length 50
+ggplot(data = ggdat.I50, aes(x = condition, y = mse, group = parameter)) +
   geom_line(aes(color = parameter)) +
-  geom_point()
+  geom_point()  +
+  geom_errorbar(aes(ymin=mse-2*mc.se, ymax=mse+2*mc.se, color = parameter), position=position_dodge(0))
 
 # compare test lengths
 ggplot(data = ggdat, aes(x = condition, y = mse, group = parameter)) +
   geom_line(aes(color = parameter)) +
   geom_point()
-# approximately similar for I = 15
+# approximately similar for I = 30

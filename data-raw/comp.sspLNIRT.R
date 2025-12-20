@@ -74,8 +74,6 @@ for (b in seq_along(batches)) {
                 sdlog.sigma2 = 0.2,
                 scale = TRUE,
                 random.item = TRUE,
-                item.seed = 12345,
-                person.seed = NULL,
                 n.cores = 6)
 
         # estimate sample size

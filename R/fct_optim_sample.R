@@ -9,7 +9,6 @@
 #' @param thresh Numeric. The desired threshold of the target parameter to be achieved.
 #' @param lb Integer. The lower bound of the sample size.
 #' @param ub Integer. The upper bound of the sample size.
-#' @param tol Numeric. The tolerance in objective allowed for stopping the optimizer.
 #' @param out.par Character. The name of the target parameter for the threshold.
 #' @param N NULL. Place holder for the sample size in the optimizer.
 #' @param iter Integer. The number of iteration or the number of data sets.
@@ -23,8 +22,6 @@
 #' @param scale Logical. Weather the item and person parameters are scaled.
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
-#' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #'
@@ -37,29 +34,34 @@
 #'   \item{track.N}{Data Frame. The sample size in each repetition.}
 #'   \item{mse.sigma2}{Numeric. The pooled MSE of the sigma2 paramters.}
 #'   \item{track.conv}{List. The Rhat convergence rate per repetition.}
+#'   \item{time.taken}{Numeric. The observed running time of the function.}
 #' }
 #'
 #' @examples
 #'  \dontrun{
 #' optim_sample(
-#'           iter = 100,
-#'           N = 100,
-#'           I = 10,
-#'           mu.person = c(0,0),
-#'           mu.item = c(1,0,1,0),
-#'           meanlog.sigma2 = log(.3),
-#'           cov.m.person = matrix(c(1,0,
-#'                                   0,1), ncol = 2, byrow = TRUE),
-#'           cov.m.item = matrix(c(1, 0, 0, 0,
-#'                                 0, 1, 0, 0,
-#'                                 0, 0, 1, 0,
-#'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
-#'           sd.item         = c(.2, .5, .2, .5),
-#'           cor2cov.item    = TRUE,
-#'           sdlog.sigma2 = 0.2,
-#'           person.seed = 123,
-#'           item.seed = 456,
-#'           n.cores = 6)
+#'     FUN = comp_mse,
+#'     thresh = .01,
+#'     lb = 100,
+#'     ub = 500,
+#'     out.par = 'mse.alpha',
+#'     iter = 5,
+#'     I = 15,
+#'     mu.person = c(0,0),
+#'     mu.item = c(1,0,1,0),
+#'     meanlog.sigma2 = log(.3),
+#'     cov.m.person = matrix(c(1,0.5,
+#'                             0.5,1), ncol = 2, byrow = TRUE),
+#'                             cov.m.item = matrix(c(1, 0, 0, 0,
+#'                                                   0, 1, 0, 0.3,
+#'                                                   0, 0, 1, 0,
+#'                                                   0, 0.3, 0, 1), ncol =  4, byrow = TRUE),
+#'     sd.item         = c(.2, .5, .2, .5),
+#'     cor2cov.item    = TRUE,
+#'     sdlog.sigma2 = 0.2,
+#'     person.seed = NULL,
+#'     item.seed = NULL,
+#'     XG = 1000)
 #' }
 #' @export
 #'
@@ -68,7 +70,6 @@ optim_sample <- function(FUN = comp_mse,
                          thresh,
                          lb,
                          ub,
-                         tol,
                          out.par = 'mse.alpha',
                          N = NULL,
                          iter = 1,
@@ -86,10 +87,9 @@ optim_sample <- function(FUN = comp_mse,
                          scale = TRUE,
                          random.item = TRUE,
                          item.pars.m = NULL,
-                         item.seed = 12345,
-                         person.seed = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL,
+                         ssp.seed = NULL,
                          XG = 6000
 ) {
 
@@ -112,16 +112,16 @@ optim_sample <- function(FUN = comp_mse,
       scale = scale,
       random.item = random.item,
       item.pars.m = item.pars.m,
-      item.seed   = item.seed,
-      person.seed = person.seed,
       cor2cov.item = cor2cov.item,
       sd.item = sd.item,
-      XG = XG
+      XG = XG,
+      mse.seed = ssp.seed
     )
 
     return(
       list(
         res = FUN.out[[out.par]],
+        mc.se = FUN.out$mc.sd.items[[out.par]],
         conv.rate = FUN.out$conv.rate)
     )
   }
@@ -138,7 +138,8 @@ optim_sample <- function(FUN = comp_mse,
                 reps = 1,
                 track.res = data.frame(res.lb = "res.lb < thresh",
                                        res.ub = NA,
-                                       res.temp = c("res.lb < thresh")),
+                                       res.temp = c("res.lb < thresh"),
+                                       mc.se = c(res.lb$mc.se)),
                 track.N = data.frame(N.lb = rep(lb),
                                      N.ub = rep(ub),
                                      N.temp = NA),
@@ -156,7 +157,8 @@ optim_sample <- function(FUN = comp_mse,
                 reps = 2,
                 track.res = data.frame(res.lb = res.lb$res,
                                        res.ub = "res.ub > thresh",
-                                       res.temp = c(res.lb$res, "res.ub > thresh")),
+                                       res.temp = c(res.lb$res, "res.ub > thresh"),
+                                       mc.se = c(res.lb$mc.se, res.ub$mc.se)),
                 track.N = data.frame(N.lb = rep(lb, 2),
                                      N.ub = rep(ub, 2),
                                      N.temp = c(lb, ub)),
@@ -169,7 +171,8 @@ optim_sample <- function(FUN = comp_mse,
                         N.temp = c(lb, ub))
   track.res <- data.frame(res.lb = res.lb$res,
                           res.ub = res.ub$res,
-                          res.temp = c(res.lb$res, res.ub$res))
+                          res.temp = c(res.lb$res, res.ub$res),
+                          mc.se = c(res.lb$mc.se, res.ub$mc.se))
   track.conv <- list(res.lb$conv.rate,
                      res.ub$conv.rate)
 
@@ -230,21 +233,17 @@ optim_sample <- function(FUN = comp_mse,
 
     # track results
     reps <- reps + 1
-    track.res[reps,] <- c(res.lb$res, res.ub$res, res.temp$res)
+    track.res[reps,] <- c(res.lb$res, res.ub$res, res.temp$res, res.temp$mc.se)
     track.N[reps, ] <- c(N.lb, N.ub, N.temp)
     track.conv[[reps]] <- res.temp$conv.rate
     cat("New result is", c(res.lb$res, res.ub$res), "\n")
 
-    # check tolerance
-    if (thresh > res.temp$res & (abs(thresh - res.temp$res) < tol)) {
-      break
-    }
   }
   # end routine
 
   # assemble output
-  res.best <- max(track.res$res.temp[which(track.res$res.temp < thresh)])
-  N.best <- min(track.N[which(track.res$res.temp == res.best), ]$N.temp)
+  N.best  <- N.ub
+  res.best <- res.ub$res
   cat("Best result is", res.best," for threshold", thresh, "\n")
   cat("Minimum N is", N.best, "\n")
 

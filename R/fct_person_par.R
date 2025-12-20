@@ -28,12 +28,8 @@
 person.par <- function(N,
                        mu.person = c(0,0),
                        cov.m.person = matrix(c(1,.5,
-                                               .5,1), ncol = 2, byrow = TRUE),
-                       person.seed = NULL
-) {
-
-  # seed
-  set.seed(person.seed)
+                                               .5,1), ncol = 2, byrow = TRUE)
+                       ) {
 
   # sample person parameters from MVN
   hyper.par = as.data.frame(
@@ -42,9 +38,6 @@ person.par <- function(N,
             Sigma = cov.m.person
     )
   )
-
-  # remove seed
-  set.seed = NULL
 
   # first col: theta, second col: zeta
   colnames(hyper.par) <- c("theta", "zeta")

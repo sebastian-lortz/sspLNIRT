@@ -11,7 +11,6 @@
 #' @param sdlog.sigma2 Numeric. The sdlog of sigma2
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
-#' @param item.seed Integer. (optional) Seed for drawing samples from distributions.
 #'
 #' @return A data frame containing item parameters
 #'\describe{
@@ -38,12 +37,8 @@ item.par <- function(I,
                      meanlog.sigma2 = log(.3),
                      sdlog.sigma2 = 0.2,
                      cor2cov.item = FALSE,
-                     sd.item = NULL,
-                     item.seed = NULL
+                     sd.item = NULL
 ) {
-
-  # set seed
-  set.seed(item.seed)
 
   # sample sigma2 from lognormal distribution
   log.sigma2 <- rlnorm(I, meanlog = meanlog.sigma2, sdlog = sdlog.sigma2)
@@ -60,7 +55,7 @@ item.par <- function(I,
                                   lower = c(0, -Inf, 0, -Inf),
                                   upper = c(Inf, Inf, Inf, Inf))
   colnames(item.pars) <- c("alpha", "beta", "phi", "lambda")
-  set.seed(NULL)
+
 
   # combine item parameters
   pars.out <- as.data.frame(

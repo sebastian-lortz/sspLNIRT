@@ -17,8 +17,6 @@
 #' @param scale Logical. Weather the item and person parameters are scaled.
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
-#' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #'
@@ -51,9 +49,7 @@
 #'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
 #'           sd.item         = c(.2, .5, .2, .5),
 #'           cor2cov.item    = TRUE,
-#'           sdlog.sigma2 = 0.2,
-#'           person.seed = 123,
-#'           item.seed = NULL,
+#'           sdlog.sigma2 = 0.2
 #' }
 #' @export
 #'
@@ -63,8 +59,8 @@ comp_mse <- function(N,
                      iter,
                      I,
                      mu.person = c(0,0),
-                     mu.item = c(1,0,1,0),
-                     meanlog.sigma2 = log(.3),
+                     mu.item = c(1,0,1,1),
+                     meanlog.sigma2 = log(.2),
                      cov.m.person = matrix(c(1,.5,
                                              .5,1), ncol = 2, byrow = TRUE),
                      cov.m.item = matrix(c(.2, 0, 0, 0,
@@ -75,13 +71,17 @@ comp_mse <- function(N,
                      scale = TRUE,
                      random.item = TRUE,
                      item.pars.m = NULL,
-                     item.seed = NULL,
-                     person.seed = NULL,
                      cor2cov.item = FALSE,
                      sd.item = NULL,
                      XG = 3000,
                      burnin = 20,
-                     par1 = TRUE) {
+                     par1 = TRUE,
+                     mse.seed = NULL) {
+
+  if (is.null(mse.seed)) {
+    seed = TRUE } else {
+      seed = mse.seed
+    }
 
   # set progressr
   handler <-list(progressr::handler_txtprogressbar())
@@ -107,8 +107,6 @@ comp_mse <- function(N,
                              scale = scale,
                              random.item = random.item,
                              item.pars.m = item.pars.m,
-                             item.seed = item.seed,
-                             person.seed = person.seed,
                              cor2cov.item = cor2cov.item,
                              sd.item = sd.item)
 
@@ -197,7 +195,7 @@ comp_mse <- function(N,
           return(NA)
         }
       },
-      future.seed = TRUE, # random workers
+      future.seed = seed,
       future.stdout = FALSE,
       future.packages = c("LNIRT"),
       future.globals = structure(
@@ -215,7 +213,7 @@ comp_mse <- function(N,
   },
   handlers = handler)
 
-  # take mean across iterations
+  # take mean across iterations and items/persons
   mse.theta = list(mse.theta = mean(unlist(lapply(out[!is.na(out)], FUN = function(x) {
     x$mse.theta
   }))))
@@ -223,7 +221,6 @@ comp_mse <- function(N,
     x$mse.zeta
   }))))
   mse.person = append(mse.theta, mse.zeta)
-
   mse.items =
     colMeans(apply(
       simplify2array(
@@ -237,6 +234,20 @@ comp_mse <- function(N,
           mean(x, na.rm = TRUE)
         }))
 
+  # sd of MSE over replications
+  mc.sd.items =
+    apply(apply(
+      simplify2array(
+        lapply(out[!is.na(out)], FUN = function(x) {
+          cbind(mse.alpha = x$se.alpha,
+                mse.beta = x$se.beta,
+                mse.phi = x$se.phi,
+                mse.lambda = x$se.lambda,
+                mse.sigma2 = x$se.sigma2)
+        })), MARGIN = c(3,2), FUN = function(x) {
+          mean(x, na.rm = TRUE)
+        }), 2, sd)
+
   # store convergence rates
   conv.rate = as.data.frame(t(sapply(out[!is.na(out)], FUN = function(x) {
     x$conv.rate
@@ -248,8 +259,10 @@ comp_mse <- function(N,
 
   # return output
   return(
-    MSE = append(
-      append(mse.person, as.list(mse.items)), list(conv.rate = conv.rate))
+    c(mse.person,
+      as.list(mse.items),
+      list(mc.se.items = mc.se.items),
+      list(conv.rate = conv.rate))
   )
 
 }

@@ -16,8 +16,6 @@
 #' @param scale Logical. Weather the item and person parameters are scaled.
 #' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
-#' @param item.seed Integer. (optional) Seed for drawing samples from item parameter distributions.
-#' @param person.seed Integer. (optional) Seed for drawing samples from person parameter distributions.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #'
@@ -40,8 +38,6 @@
 #'                                                0, 0, .5, 0,
 #'                                                0, 0, 0, .2), ncol =  4, byrow = TRUE),
 #'                          sdlog.sigma2 = 0.2,
-#'                          item.seed = NULL,
-#'                          person.seed = NULL
 #'                          )
 #'}
 #'
@@ -49,10 +45,10 @@
 #'
 plot_RT <- function(level ,
                          logRT = FALSE,
-                         N = 5e4,
+                         N = 1e5,
                          I = 20,
                          mu.person = c(0,0),
-                         mu.item = c(1,0,1,4),
+                         mu.item = c(1,0,1,0),
                          meanlog.sigma2 = log(.3),
                          cov.m.person = matrix(c(1,.5,
                                                  .5,1), ncol = 2, byrow = TRUE),
@@ -60,13 +56,11 @@ plot_RT <- function(level ,
                                                0, 1, 0, 0,
                                                0, 0, 1, 0,
                                                0, 0, 0, 1), ncol =  4, byrow = TRUE),
-                         sd.item = c(.2, .5, .2, .5),
+                         sd.item = c(.2, 1, .2, .5),
                          sdlog.sigma2 = 0.2,
                          scale = TRUE,
                          random.item = TRUE,
                          item.pars.m = NULL,
-                         item.seed = NULL,
-                         person.seed = NULL,
                          cor2cov.item = TRUE
                        ) {
 
@@ -87,8 +81,6 @@ plot_RT <- function(level ,
                          scale = scale,
                          random.item = random.item,
                          item.pars.m = item.pars.m,
-                         item.seed = item.seed,
-                         person.seed = person.seed,
                          cor2cov.item = cor2cov.item,
                          sd.item = sd.item)
 
@@ -127,7 +119,6 @@ plot_RT <- function(level ,
           linewidth = 0.6
         ) +
         xlim(lims) +
-        theme_minimal() +
         labs(
           x      = if (logRT) "Log response time" else "Response time in seconds",
           y      = "Density",
@@ -149,31 +140,49 @@ plot_RT <- function(level ,
       colnames(long_dat) <- c("RT", "item")
       long_dat$item <- factor(long_dat$item)
 
-      # density
-      dens_dat <- long_dat %>%
-        group_by(item) %>%
-        do({
-          d <- density(.$RT, adjust = 2)
-          data.frame(x = d$x, density = d$y)
-        })
-
       # limits
-      lims <- quantile(long_dat$RT, c(.01, .99), na.rm = TRUE)
+      if (logRT) {
+        lab = "Response time in log-seconds"
+        axis.scale = "fixed"
+        lims <- quantile(long_dat$RT, c(.025/I, 1-.025/I), na.rm = TRUE)
+      } else {
+        lab = "Response time in seconds"
+        axis.scale = "free_y"
+        lims <- NULL
+        long_dat <- long_dat %>%
+          group_by(item) %>%
+          filter(RT <= quantile(RT, 0.975, na.rm = TRUE)) %>%
+          ungroup()
 
+      }
       # plot
-      p <- ggplot(dens_dat, aes(x = x, y = density, colour = item)) +
-          geom_line() +
-          coord_cartesian(xlim = lims) +
-          theme_minimal() +
-          labs(
+      p <- ggplot(long_dat, aes(x = RT, fill = item)) +
+        geom_density(alpha = 0.2, trim = TRUE) +
+        stat_summary(aes(xintercept = after_stat(x), y = 0), fun = median, geom = "vline", orientation = "y", linetype = 2) +
+         labs(
             x      = if (logRT) "Log response time" else "Response time in seconds",
             y      = "Density",
             colour = "Item",
-            title  = "Within-item response time distributions (per-item KDE)"
-          )
-      return(p)
+            title  = "Within-item response time distributions"
+          ) +
+        facet_wrap(~ item, scales = axis.scale,
+                   ) +
+        labs(x = lab, y = "Density")
+
+
+      return(
+        if (logRT) { p + coord_cartesian(xlim = lims)
+          } else {
+          p
+        }
+      )
     }
 }
 
-plot_RT(level = "person", I = 30, logRT = TRUE)
+plot_RT(level = "item",
+        mu.item = c(1,0,1,1),
+        sd.item = c(.2, 1, .2, .5),
+        meanlog.sigma2 = log(.2),
+        I = 30,
+        logRT = FALSE)
 

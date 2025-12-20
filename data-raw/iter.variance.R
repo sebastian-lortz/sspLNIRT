@@ -63,7 +63,7 @@ if (HPC ) {
   # set cores
   n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
-  future::plan(future::multicore, workers = n.cores)
+  future::plan(future::multisession, workers = n.cores)
 } else {
   n.cores <- 6
   future::plan(future::multisession, workers = n.cores)
@@ -76,8 +76,9 @@ if (HPC ) {
 
 # generate the design conditions for low and high N
 design <- expand.grid(
-  XG = c(1000, 3000, 6000, 9000),
-  iter = c(100, 500)
+  XG = c(3000, 6000),
+  iter = c(100, 250, 500),
+  seed = c(NA, 1234)
 )
 
 # storage
@@ -85,7 +86,13 @@ result.list <- list()
 
 # compute MSE
 start.time = Sys.time()
-for (i in 2:nrow(design)) {
+for (i in 1:nrow(design)) {
+
+  if (is.na(design$seed[i])) {
+    seed = NULL
+  } else {
+    seed = design$seed[i]
+  }
 
   result <- list()
   iter <- design$iter[i]
@@ -96,26 +103,24 @@ for (i in 2:nrow(design)) {
       FUN = comp_mse,
       thresh = .01,
       lb = 100,
-      ub = 500,
-      tol = .0001,
+      ub = 2000,
       out.par = 'mse.alpha',
       iter = iter,
-      I = 15,
+      I = 30,
       mu.person = c(0,0),
-      mu.item = c(1,0,1,0),
-      meanlog.sigma2 = log(.3),
-      cov.m.person = matrix(c(1,0.5,
-                              0.5,1), ncol = 2, byrow = TRUE),
+      mu.item = c(1,0,1,1),
+      meanlog.sigma2 = log(.6),
+      cov.m.person = matrix(c(1,0.4,
+                              0.4,1), ncol = 2, byrow = TRUE),
       cov.m.item = matrix(c(1, 0, 0, 0,
-                            0, 1, 0, 0.3,
+                            0, 1, 0, 0.4,
                             0, 0, 1, 0,
-                            0, 0.3, 0, 1), ncol =  4, byrow = TRUE),
-      sd.item         = c(.2, .5, .2, .5),
+                            0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
+      sd.item         = c(.2, 1, .2, 1),
       cor2cov.item    = TRUE,
       sdlog.sigma2 = 0.2,
-      person.seed = NULL,
-      item.seed = NULL,
-      XG = XG)
+      XG = XG,
+      ssp.seed = seed)
     result[[k]] <- res
     cat("iteration", k, "of", 100, "done!!!! \n\n")
     rm(res)
@@ -141,27 +146,36 @@ library(tidyr)
 
 # load results
 ssp.variance.no.seed.1 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.1"))
-#ssp.variance.no.seed.2 <- readRDS(paste0(save.dir, "mse.variance.no.seed.2"))
+ssp.variance.no.seed.2 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.2"))
 
-res.names <- list(
-  ssp.variance.no.seed.1 #, ssp.variance.no.seed.2
-)
-ssp.variance.no.seed.1[[1]][[6]]
 
 ## check convergence
-# optim_sample didnt return conv rates for [[64]]
+# optim_sample didnt return conv rates for 2 runs (stopped early)
 lengths(ssp.variance.no.seed.1)
-which(lengths(ssp.variance.no.seed.1) < 6)
-subset.list <- ssp.variance.no.seed.1[-64]
+lengths(ssp.variance.no.seed.2)
 
+which(lengths(ssp.variance.no.seed.1) < 6)
+which(lengths(ssp.variance.no.seed.2) < 6)
+
+subset.list1 <- ssp.variance.no.seed.1[-64]
+subset.list2 <- ssp.variance.no.seed.2[-7]
+
+res.names <- list(
+  subset.list1, subset.list2
+)
+
+lapply(res.names, FUN = function(z) {
 summary(
-  unlist(sapply(subset.list, FUN = function(x) {
+  unlist(sapply(z, FUN = function(x) {
   #x[[6]]
   sapply(x[[6]], FUN = function(y) {
     colMeans(y)
   })
-  })))
+  })
+  ))
+})
 # conv rates min = 99.85%
+
 
 # get ssp data
 ssp.res <- lapply(res.names, FUN = function(x) {
@@ -170,71 +184,121 @@ t(sapply(x, FUN = function(y) {
   }))
 })
 
-# drop the ub violation iteration
-ssp.res[[1]] <- ssp.res[[1]][-64,]
-
-ssp.data <- lapply(ssp.res, FUN = function(x) {
+ssp.data <- cbind(
+  condition = factor(rep(1:2, each = 99)),
+  do.call(rbind, lapply(ssp.res, FUN = function(x) {
   as.data.frame(cbind(
     N.best = as.numeric(x[,1]),
     res.best = as.numeric(x[,2]),
     reps = as.numeric(x[,3]),
     time.taken = as.numeric(x[,4])))
-})
+}))
+)
 
-
-sum.stats <- ssp.data[[1]] %>%
-  slice(-64) %>%  # drop row 64
+sum.stats <- ssp.data %>%
+  group_by(condition) %>%
   summarise(
     across(
-      1:4,
+      c(N.best, res.best, reps, time.taken),
       list(
         mean = ~ mean(.x, na.rm = TRUE),
         sd   = ~ sd(.x,   na.rm = TRUE),
         min  = ~ min(.x,  na.rm = TRUE),
-        max  = ~ max(.x,  na.rm = TRUE)
+        max  = ~ max(.x,  na.rm = TRUE),
+        lb.sd = ~ mean(.x, na.rm = TRUE) - sd(.x,   na.rm = TRUE),
+        ub.sd = ~ mean(.x, na.rm = TRUE) + sd(.x,   na.rm = TRUE)
       ),
       .names = "{.col}_{.fn}"
-    )
+    ),
+    .groups = "drop"
   ) %>%
   pivot_longer(
-    everything(),
+    cols = -condition,
     names_to  = c("variable", ".value"),
-    names_sep = "_"
+    names_pattern = "^(.*)_(mean|sd|min|max|lb.sd|ub.sd)$"
   ) %>%
-  data.frame()
+  as.data.frame()
 
 
-
-
-# plot ssp variance
-cond_labels <- apply(design, 1, function(x) {
-  paste(sprintf("%s = %s", names(x), x), collapse = " & ")
-})
-
-# density plot
-N.mu = sum.stats$mean[1]
-N.sd = sum.stats$sd[1]
-
-ggplot(ssp.data[[1]], aes(x = N.best)) +
-  geom_density(alpha = .5) +
-  geom_vline(xintercept = c(N.mu-N.sd, N.mu, N.mu + N.sd), color = "red") +
-  geom_vline(xintercept = sum.stats$mean[1]-sum.stats$sd1, linetype = "dotted")
-
-# histogram
-ggplot(ssp.data[[1]], aes(x = N.best)) +
-  geom_histogram() +
-  geom_vline(xintercept = c(N.mu-N.sd, N.mu, N.mu + N.sd), color = "red") +
-  geom_vline(xintercept = sum.stats$mean[1]-sum.stats$sd1, linetype = "dotted")
-
-
-  facet_wrap(
-    ~ condition,
-    ncol = 1,
-    labeller = labeller(condition = cond_labels[1:2])
+# density plot N.best
+lines_N.best <- sum.stats %>%
+  filter(variable == "N.best") %>%
+  pivot_longer(
+    cols = c(lb.sd, ub.sd),
+    names_to = "bound",
+    values_to = "xint"
   )
 
+ggplot(ssp.data, aes(x = N.best, fill = condition)) +
+  geom_density(alpha = .5) +
+  geom_vline(
+    data = lines_N.best,
+    aes(xintercept = xint, color = condition, linetype = bound)) +
+  scale_linetype_manual(values = c(lb.sd = "dashed", ub.sd = "dashed"))
+
+lines_res.best <- sum.stats %>%
+  filter(variable == "res.best") %>%
+  pivot_longer(
+    cols = c(min, max),
+    names_to = "bound",
+    values_to = "xint"
+  )
+ggplot(ssp.data, aes(x = res.best, fill = condition)) +
+  geom_density(alpha = .5) +
+  geom_vline(
+    data = lines_res.best,
+    aes(xintercept = xint, color = condition, linetype = bound)) +
+  scale_linetype_manual(values = c(min = "dashed", max = "dashed"))
+
 # violin plot
-ggplot(data  = mse.data, mapping = aes(x = parameter, y = mse, fill = condition)) +
+ggplot(data  = ssp.data, mapping = aes(x = condition, y = N.best, fill = condition)) +
   geom_violin()
 
+
+# check if variance is dependent on number of reps
+ssp.data %>%
+  group_by(condition) %>%
+  filter(reps >=11) %>%
+  summarise(sd = sd(N.best))
+ssp.data %>%
+  group_by(condition) %>%
+  filter(reps >=10) %>%
+  summarise(sd = sd(N.best))
+ssp.data %>%
+  group_by(condition) %>%
+  filter(reps >=9) %>%
+  summarise(sd = sd(N.best))
+ssp.data %>%
+  group_by(condition) %>%
+  filter(reps >=8) %>%
+  summarise(sd = sd(N.best))
+ssp.data %>%
+  group_by(condition) %>%
+  filter(reps >=0) %>%
+  summarise(sd = sd(N.best))
+# variance is indeed smaller if algorithm runs until the end
+
+ggplot(ssp.data, aes(x = N.best, fill = condition)) +
+  geom_density(alpha = .5) +
+  geom_density(
+    data = dplyr::filter(ssp.data, reps >= 11),
+    aes(x = N.best, color = condition),
+    fill = NA,
+    linetype = "dotdash"  )
+
+ggplot(ssp.data, aes(x = N.best)) +
+  geom_density(alpha = .5) +
+  geom_density(
+    data = filter(ssp.data, reps >= 10),
+    fill = NA,
+    linetype = "dotted",
+    linewidth = 0.9
+  ) +
+  geom_density(
+    data = filter(ssp.data, reps >= 11),
+    fill = NA,
+    linetype = "dotdash",
+    linewidth = 0.9
+  ) +
+  facet_wrap(~ condition, ncol = 1)
 

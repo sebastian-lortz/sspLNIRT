@@ -61,7 +61,7 @@ if (HPC ) {
   # set cores
   n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
-  future::plan(future::multicore, workers = n.cores)
+  future::plan(future::multisession, workers = n.cores)
 } else {
   n.cores <- 6
   future::plan(future::multisession, workers = n.cores)
@@ -75,13 +75,12 @@ if (HPC ) {
 
 # generate the design conditions for low and high N
 design <- expand.grid(
-  I = c(15,45),
+  I = c(30,50),
   N = c(100, 2000),
-  mu.alpha = c(.7, 1.3),
-  meanlog.sigma2 = c(log(.3), log(1)),
+  mu.alpha = c(.6, 1.4),
+  meanlog.sigma2 = c(log(.2), log(1)),
   rho = c(0, .6),
-  cor.item = c(0, 0.6),
-  sd.factor = c(1,2)
+  sd.factor = c(1,.5)
   )
 
 # storage
@@ -104,20 +103,19 @@ res <- comp_mse(
           N = N,
           I = I,
           mu.person = c(0,0),
-          mu.item = c(mu.alpha,0,1,4),
+          mu.item = c(mu.alpha,0,1,1),
           meanlog.sigma2 = meanlog.sigma2,
           cov.m.person = matrix(c(1,rho,
                                   rho,1), ncol = 2, byrow = TRUE),
           cov.m.item = matrix(c(1, 0, 0, 0,
-                                 0, 1, 0, cor.item,
+                                 0, 1, 0, .4,
                                  0, 0, 1, 0,
-                                 0, cor.item, 0, 1), ncol =  4, byrow = TRUE),
-          sd.item         = sd.factor*c(.2, .5, .2, .5),
+                                 0, .4, 0, 1), ncol =  4, byrow = TRUE),
+          sd.item         = sd.factor*c(.2, 1, .2, 1),
           cor2cov.item    = TRUE,
           sdlog.sigma2 = 0.2,
-          person.seed = NULL,
-          item.seed = NULL,
-          XG = 3000)
+          XG = 6000,
+          mse.seed = NULL)
 bounds.res[[i]] <- res
 cat("design row", i, "of", nrow(design), "done!! \n\n")
 rm(res)
