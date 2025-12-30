@@ -229,6 +229,6 @@ plot_RA <- function(level ,
 plot_RA(level = "item",
         by.theta = TRUE,
         mu.item = c(1,0,1,1),
-        sd.item = c(.2, 1, .2, 1),
+        sd.item = c(.2, .5, .2, .5),
         meanlog.sigma2 = log(.2),
-        I = 10)
+        I = 20)

@@ -123,3 +123,91 @@ gc()
 }
 
 saveRDS(bounds.res, paste0(save.dir, "design.bounds"))
+
+
+
+
+
+# Results -----------------------------------------------------------------
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(patchwork)
+
+
+L = nrow(design)
+
+# load results
+res.names <- readRDS(paste0(save.dir, "design.bounds"))
+
+# check convergence
+conv.data =
+  sapply(res.names, FUN = function(y) {
+    nrow(y$conv.rate)
+  })
+sum_conv <- data.frame(design, prop = conv.data/1000)
+
+
+# get mse data
+mse.list <- round(as.data.frame(t(sapply(res.names, FUN = function(y) {
+    cbind(y$mse.alpha,
+          y$mse.beta,
+          y$mse.phi,
+          y$mse.lambda,
+          y$mse.sigma2,
+          y$mse.theta,
+          y$mse.zeta)
+  }))),7)
+colnames(mse.list) <- c("alpha", "beta", "phi", "lambda", "sigma2", "theta", "zeta")
+mse.data <- data.frame(condition = rep(1:64, each = 7),
+                  pivot_longer(mse.list, cols = c(1:7), values_to = "mse", names_to = "parameter"))
+
+
+out.data <- cbind(sum_conv, mse.list)
+
+# design parameters
+x_vars <- names(out.data)[1:6]
+
+make_plot <- function(df, x, param, predictors = x_vars, show_legend = FALSE) {
+  others <- setdiff(predictors, x)
+  d <- df
+
+  # discrete x-axis (ordered if numeric)
+  if (is.numeric(d[[x]])) d[[x]] <- factor(d[[x]], levels = sort(unique(d[[x]])))
+  else d[[x]] <- factor(d[[x]])
+
+  # one line per combination of other predictors
+  d$cond <- interaction(d[others], drop = TRUE, sep = " | ")
+
+  # line uses mean in case there are repeated rows per (cond, x)
+  m <- aggregate(d[[param]], list(cond = d$cond, x = d[[x]]), mean, na.rm = TRUE)
+  names(m)[3] <- "y"
+
+  p <- ggplot(d, aes(x = .data[[x]], y = .data[[param]], group = cond, colour = cond)) +
+    geom_line(data = m, aes(x = x, y = y), linewidth = 0.7) +
+    geom_point(size = 2) +
+    labs(x = x, y = "MSE") +
+    theme_minimal(base_size = 12)
+
+  if (!show_legend) p <- p + guides(colour = "none")
+  p
+}
+
+cond_grid <- function(param, df = out.data,
+                      predictors = x_vars, ncol = 3, show_legend = FALSE) {
+  plots <- lapply(predictors, \(x) make_plot(df, x, param, predictors, show_legend))
+  wrap_plots(plots, ncol = ncol) +
+    plot_annotation(title = paste0("Conditioned effects on ", param))
+}
+
+# plots
+cond_grid("prop")
+cond_grid("alpha")
+cond_grid("beta")
+cond_grid("phi")
+cond_grid("lambda")
+cond_grid("theta")
+cond_grid("zeta")
+
+

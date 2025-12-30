@@ -76,9 +76,8 @@ if (HPC ) {
 
 # generate the design conditions for low and high N
 design <- expand.grid(
-  XG = c(3000, 6000),
-  iter = c(100, 250, 500),
-  seed = c(NA, 1234)
+  XG = c(6000),
+  iter = c(100)
 )
 
 # storage
@@ -87,12 +86,6 @@ result.list <- list()
 # compute MSE
 start.time = Sys.time()
 for (i in 1:nrow(design)) {
-
-  if (is.na(design$seed[i])) {
-    seed = NULL
-  } else {
-    seed = design$seed[i]
-  }
 
   result <- list()
   iter <- design$iter[i]
@@ -103,7 +96,7 @@ for (i in 1:nrow(design)) {
       FUN = comp_mse,
       thresh = .01,
       lb = 100,
-      ub = 2000,
+      ub = 1000,
       out.par = 'mse.alpha',
       iter = iter,
       I = 30,
@@ -116,11 +109,11 @@ for (i in 1:nrow(design)) {
                             0, 1, 0, 0.4,
                             0, 0, 1, 0,
                             0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
-      sd.item         = c(.2, 1, .2, 1),
+      sd.item         = c(.2, .5, .2, .5),
       cor2cov.item    = TRUE,
       sdlog.sigma2 = 0.2,
       XG = XG,
-      ssp.seed = seed)
+      ssp.seed = NULL)
     result[[k]] <- res
     cat("iteration", k, "of", 100, "done!!!! \n\n")
     rm(res)
@@ -148,33 +141,24 @@ library(tidyr)
 ssp.variance.no.seed.1 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.1"))
 ssp.variance.no.seed.2 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.2"))
 
-
 ## check convergence
-# optim_sample didnt return conv rates for 2 runs (stopped early)
-lengths(ssp.variance.no.seed.1)
-lengths(ssp.variance.no.seed.2)
-
-which(lengths(ssp.variance.no.seed.1) < 6)
-which(lengths(ssp.variance.no.seed.2) < 6)
-
-subset.list1 <- ssp.variance.no.seed.1[-64]
-subset.list2 <- ssp.variance.no.seed.2[-7]
-
 res.names <- list(
-  subset.list1, subset.list2
+  ssp.variance.no.seed.1, ssp.variance.no.seed.2
 )
+
 
 lapply(res.names, FUN = function(z) {
 summary(
-  unlist(sapply(z, FUN = function(x) {
+  unlist(lapply(z, FUN = function(x) {
   #x[[6]]
-  sapply(x[[6]], FUN = function(y) {
-    colMeans(y)
+  lapply(x[[6]], FUN = function(y) {
+    nrow(y)
   })
   })
   ))
 })
-# conv rates min = 99.85%
+
+# conv rates
 
 
 # get ssp data
@@ -185,7 +169,7 @@ t(sapply(x, FUN = function(y) {
 })
 
 ssp.data <- cbind(
-  condition = factor(rep(1:2, each = 99)),
+  condition = factor(rep(1:2, each = 100)),
   do.call(rbind, lapply(ssp.res, FUN = function(x) {
   as.data.frame(cbind(
     N.best = as.numeric(x[,1]),
@@ -255,6 +239,7 @@ ggplot(data  = ssp.data, mapping = aes(x = condition, y = N.best, fill = conditi
   geom_violin()
 
 
+### OLD Design with tolerance stopping criterion ####
 # check if variance is dependent on number of reps
 ssp.data %>%
   group_by(condition) %>%
@@ -276,7 +261,7 @@ ssp.data %>%
   group_by(condition) %>%
   filter(reps >=0) %>%
   summarise(sd = sd(N.best))
-# variance is indeed smaller if algorithm runs until the end
+# -> variance is indeed smaller if algorithm runs until the end
 
 ggplot(ssp.data, aes(x = N.best, fill = condition)) +
   geom_density(alpha = .5) +
@@ -302,3 +287,4 @@ ggplot(ssp.data, aes(x = N.best)) +
   ) +
   facet_wrap(~ condition, ncol = 1)
 
+# -> tolerance stopping criterion removed
