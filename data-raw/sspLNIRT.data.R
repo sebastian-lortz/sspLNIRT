@@ -1,4 +1,4 @@
-# Script to create the dataset `sspLNIRT.data` from the computed results
+# Script to create the dataset `sspLNIRT.data` from the precomputed results
 
 
 
