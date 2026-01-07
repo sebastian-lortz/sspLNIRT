@@ -41,7 +41,6 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_mse.R",
-  "R/fct_design_conditions.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -97,7 +96,7 @@ for (i in 1:nrow(design)) {
       thresh = .01,
       lb = 100,
       ub = 1000,
-      out.par = 'mse.alpha',
+      out.par = 'alpha',
       iter = iter,
       I = 30,
       mu.person = c(0,0),
@@ -109,7 +108,7 @@ for (i in 1:nrow(design)) {
                             0, 1, 0, 0.4,
                             0, 0, 1, 0,
                             0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
-      sd.item         = c(.2, .5, .2, .5),
+      sd.item         = c(.2, 1, .2, .5),
       cor2cov.item    = TRUE,
       sdlog.sigma2 = 0.2,
       XG = XG,
@@ -137,69 +136,58 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
+
 # load results
 ssp.variance.no.seed.1 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.1"))
-ssp.variance.no.seed.2 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.2"))
 
 ## check convergence
-res.names <- list(
-  ssp.variance.no.seed.1, ssp.variance.no.seed.2
-)
-
+res.names <- list(ssp.variance.no.seed.1)
 
 lapply(res.names, FUN = function(z) {
-summary(
-  unlist(lapply(z, FUN = function(x) {
-  #x[[6]]
-  lapply(x[[6]], FUN = function(y) {
-    nrow(y)
-  })
-  })
-  ))
+  summary(
+    unlist(lapply(z, FUN = function(x) {
+      lapply(x[[6]], FUN = function(y) nrow(y))
+    }))
+  )
 })
 
-# conv rates
+# conv rates: > .99
 
 
 # get ssp data
 ssp.res <- lapply(res.names, FUN = function(x) {
-t(sapply(x, FUN = function(y) {
-    (y[c(1,2,3,7)])
-  }))
+  t(sapply(x, FUN = function(y) y[c(1, 2, 3, 7)]))
 })
 
-ssp.data <- cbind(
-  condition = factor(rep(1:2, each = 100)),
-  do.call(rbind, lapply(ssp.res, FUN = function(x) {
+ssp.data <- do.call(rbind, lapply(ssp.res, FUN = function(x) {
   as.data.frame(cbind(
-    N.best = as.numeric(x[,1]),
-    res.best = as.numeric(x[,2]),
-    reps = as.numeric(x[,3]),
-    time.taken = as.numeric(x[,4])))
+    N.best     = as.numeric(x[, 1]),
+    res.best   = as.numeric(x[, 2]),
+    reps       = as.numeric(x[, 3]),
+    time.taken = as.numeric(x[, 4])
+  ))
 }))
-)
 
+# summary stats
 sum.stats <- ssp.data %>%
-  group_by(condition) %>%
   summarise(
     across(
       c(N.best, res.best, reps, time.taken),
       list(
-        mean = ~ mean(.x, na.rm = TRUE),
-        sd   = ~ sd(.x,   na.rm = TRUE),
-        min  = ~ min(.x,  na.rm = TRUE),
-        max  = ~ max(.x,  na.rm = TRUE),
-        lb.sd = ~ mean(.x, na.rm = TRUE) - sd(.x,   na.rm = TRUE),
-        ub.sd = ~ mean(.x, na.rm = TRUE) + sd(.x,   na.rm = TRUE)
+        mean  = ~ mean(.x, na.rm = TRUE),
+        sd    = ~ sd(.x,   na.rm = TRUE),
+        min   = ~ min(.x,  na.rm = TRUE),
+        max   = ~ max(.x,  na.rm = TRUE),
+        lb.sd = ~ mean(.x, na.rm = TRUE) - sd(.x, na.rm = TRUE),
+        ub.sd = ~ mean(.x, na.rm = TRUE) + sd(.x, na.rm = TRUE)
       ),
       .names = "{.col}_{.fn}"
-    ),
-    .groups = "drop"
+    )
   ) %>%
   pivot_longer(
-    cols = -condition,
+    cols = everything(),
     names_to  = c("variable", ".value"),
-    names_pattern = "^(.*)_(mean|sd|min|max|lb.sd|ub.sd)$"
+    names_pattern = "^(.*)_(mean|sd|min|max|lb\\.sd|ub\\.sd)$"
   ) %>%
   as.data.frame()
 
@@ -213,13 +201,16 @@ lines_N.best <- sum.stats %>%
     values_to = "xint"
   )
 
-ggplot(ssp.data, aes(x = N.best, fill = condition)) +
+ggplot(ssp.data, aes(x = N.best)) +
   geom_density(alpha = .5) +
   geom_vline(
     data = lines_N.best,
-    aes(xintercept = xint, color = condition, linetype = bound)) +
+    aes(xintercept = xint, linetype = bound)
+  ) +
   scale_linetype_manual(values = c(lb.sd = "dashed", ub.sd = "dashed"))
 
+
+# density plot res.best
 lines_res.best <- sum.stats %>%
   filter(variable == "res.best") %>%
   pivot_longer(
@@ -227,16 +218,16 @@ lines_res.best <- sum.stats %>%
     names_to = "bound",
     values_to = "xint"
   )
-ggplot(ssp.data, aes(x = res.best, fill = condition)) +
+
+ggplot(ssp.data, aes(x = res.best)) +
   geom_density(alpha = .5) +
   geom_vline(
     data = lines_res.best,
-    aes(xintercept = xint, color = condition, linetype = bound)) +
+    aes(xintercept = xint, linetype = bound)
+  ) +
   scale_linetype_manual(values = c(min = "dashed", max = "dashed"))
 
-# violin plot
-ggplot(data  = ssp.data, mapping = aes(x = condition, y = N.best, fill = condition)) +
-  geom_violin()
+
 
 
 ### OLD Design with tolerance stopping criterion ####

@@ -1,5 +1,4 @@
-# script to determine if the parametrization has an impact on running time
-
+# Exploration for large rho
 
 # Setup Config ------------------------------------------------------------
 
@@ -16,7 +15,7 @@ Sys.setenv(
 options(repos=c(CRAN="https://ftp.belnet.be/mirror/CRAN/"))
 
 # setup for HPC or local
-HPC = TRUE
+HPC = FALSE
 
 if (HPC) {
   # set root path
@@ -31,7 +30,7 @@ if (HPC) {
   root.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/"
 
   # set save path
-  #save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
+  save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
   #dir.create(save.dir, recursive = TRUE, showWarnings = FALSE)
 
 
@@ -59,7 +58,7 @@ invisible (
 # cores
 if (HPC ) {
   # set cores
-  n.cores <- future::availableCores() - 1
+  n.cores <- future::availableCores() - 5
   cat("running with ", n.cores, "cores! \n\n")
   future::plan(future::multisession, workers = n.cores)
 } else {
@@ -69,67 +68,79 @@ if (HPC ) {
 
 
 
-
-
 # Run the Job -------------------------------------------------------------
 
-# benchmark
-# par1 = TRUE
-start.time = Sys.time()
-for (i in 1:20) {
-comp_mse(
-  iter = 1,
+exp0 <- comp_mse(
+  iter = 100,
   N = 100,
-  I = 10,
+  I = 30,
   mu.person = c(0,0),
-  mu.item = c(1,0,1,0),
-  meanlog.sigma2 = log(.3),
+  mu.item = c(1,0,1,1),
+  meanlog.sigma2 = log(.2),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0,
-                        0, 1, 0, 0,
+                        0, 1, 0, .4,
                         0, 0, 1, 0,
-                        0, 0, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, .5, .2, .5),
+                        0, .4, 0, 1), ncol =  4, byrow = TRUE),
+  sd.item         = c(.2, 1, .2, .5),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  n.cores = 1,
-  par1 = TRUE)
-}
-# track time
-end.time = Sys.time()
-time.taken = end.time - start.time
-print(time.taken)
+  XG = 6000,
+  mse.seed = 12)
+
+exp1 <- comp_mse(
+  iter = 100,
+  N = 100,
+  I = 30,
+  mu.person = c(0,0),
+  mu.item = c(1,0,1,1),
+  meanlog.sigma2 = log(.2),
+  cov.m.person = matrix(c(1,.9,
+                          .9,1), ncol = 2, byrow = TRUE),
+  cov.m.item = matrix(c(1, 0, 0, 0,
+                        0, 1, 0, .4,
+                        0, 0, 1, 0,
+                        0, .4, 0, 1), ncol =  4, byrow = TRUE),
+  sd.item         = c(.2, 1, .2, .5),
+  cor2cov.item    = TRUE,
+  sdlog.sigma2 = 0.2,
+  XG = 6000,
+  mse.seed = 123)
 
 
-# par 1 = FALSE
-start.time = Sys.time()
-for (i in 1:20) {
-  comp_mse(
-    iter = 1,
-    N = 100,
-    I = 10,
-    mu.person = c(0,0),
-    mu.item = c(1,0,1,0),
-    meanlog.sigma2 = log(.3),
-    cov.m.person = matrix(c(1,0,
-                            0,1), ncol = 2, byrow = TRUE),
-    cov.m.item = matrix(c(1, 0, 0, 0,
-                          0, 1, 0, 0,
-                          0, 0, 1, 0,
-                          0, 0, 0, 1), ncol =  4, byrow = TRUE),
-    sd.item         = c(.2, .5, .2, .5),
-    cor2cov.item    = TRUE,
-    sdlog.sigma2 = 0.2,
-    person.seed = NULL,
-    item.seed = NULL,
-    n.cores = 1,
-    par1 = FALSE)
-}
-# track time
-end.time = Sys.time()
-time.taken = end.time - start.time
-print(time.taken)
+save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/"
+saveRDS(exp0, paste0(save.dir, "exp0"))
+saveRDS(exp1, paste0(save.dir, "exp1"))
 
-#### conclusion
-# par1 = FALSE is not substantially slower compared to par1 = TRUE
+
+# Results -----------------------------------------------------------------
+
+exp0 <- readRDS(paste0(save.dir,"exp0"))
+exp1 <- readRDS(paste0(save.dir,"exp1"))
+
+
+exp0$conv.rate
+exp1$conv.rate
+
+exp0$mse.theta
+exp1$mse.theta
+
+exp0$mse.zeta
+exp1$mse.zeta
+
+exp0$mse.alpha
+exp1$mse.alpha
+
+exp0$mse.beta
+exp1$mse.beta
+
+exp0$mse.phi
+exp1$mse.phi
+
+exp0$mse.lambda
+exp1$mse.lambda
+
+
+
+

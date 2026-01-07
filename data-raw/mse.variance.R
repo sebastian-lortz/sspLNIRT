@@ -41,7 +41,6 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_mse.R",
-  "R/fct_design_conditions.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -105,7 +104,7 @@ for (i in 1:nrow(design)) {
                             0, 1, 0, 0.4,
                             0, 0, 1, 0,
                             0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
-      sd.item         = c(.2, .5, .2, .5),
+      sd.item         = c(.2, 1, .2, .5),
       cor2cov.item    = TRUE,
       sdlog.sigma2 = 0.2,
       XG = XG,

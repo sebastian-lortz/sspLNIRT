@@ -44,9 +44,9 @@
 #'     thresh = .01,
 #'     lb = 100,
 #'     ub = 500,
-#'     out.par = 'mse.alpha',
+#'     out.par = 'alpha',
 #'     iter = 5,
-#'     I = 15,
+#'     I = 10,
 #'     mu.person = c(0,0),
 #'     mu.item = c(1,0,1,0),
 #'     meanlog.sigma2 = log(.3),
@@ -59,8 +59,6 @@
 #'     sd.item         = c(.2, .5, .2, .5),
 #'     cor2cov.item    = TRUE,
 #'     sdlog.sigma2 = 0.2,
-#'     person.seed = NULL,
-#'     item.seed = NULL,
 #'     XG = 1000)
 #' }
 #' @export
@@ -70,7 +68,7 @@ optim_sample <- function(FUN = comp_mse,
                          thresh,
                          lb,
                          ub,
-                         out.par = 'mse.alpha',
+                         out.par = 'alpha',
                          N = NULL,
                          iter = 1,
                          I = 20,
@@ -120,9 +118,13 @@ optim_sample <- function(FUN = comp_mse,
 
     return(
       list(
-        res = FUN.out[[out.par]],
-        mc.se = FUN.out$mc.sd.items[[out.par]],
-        conv.rate = FUN.out$conv.rate)
+        res = FUN.out$mse.items[[out.par]],
+        mc.sd = FUN.out$mc.sd.mse[[out.par]],
+        conv.rate = FUN.out$conv.rate,
+        mse.items = FUN.out$mse.items,
+        bias.items = FUN.out$bias.items,
+        var.items  = FUN.out$var.items,
+        err.dat    = FUN.out$err.dat)
     )
   }
 
@@ -139,11 +141,16 @@ optim_sample <- function(FUN = comp_mse,
                 track.res = data.frame(res.lb = "res.lb < thresh",
                                        res.ub = NA,
                                        res.temp = c("res.lb < thresh"),
-                                       mc.se = c(res.lb$mc.se)),
+                                       mc.sd = c(res.lb$mc.sd)),
                 track.N = data.frame(N.lb = rep(lb),
                                      N.ub = rep(ub),
                                      N.temp = NA),
-                track.conv = list(res.lb$conv.rate)))}
+                track.conv = list(res.lb$conv.rate),
+                mse.items = res.lb$mse.items,
+                bias.items = res.lb$bias.items,
+                var.items  = res.lb$var.items,
+                err.dat    = res.lb$err.dat
+                ))}
 
   # compute N for upper bound
   res.ub <- compute_obj(newN = ub)
@@ -158,12 +165,17 @@ optim_sample <- function(FUN = comp_mse,
                 track.res = data.frame(res.lb = res.lb$res,
                                        res.ub = "res.ub > thresh",
                                        res.temp = c(res.lb$res, "res.ub > thresh"),
-                                       mc.se = c(res.lb$mc.se, res.ub$mc.se)),
+                                       mc.sd = c(res.lb$mc.sd, res.ub$mc.sd)),
                 track.N = data.frame(N.lb = rep(lb, 2),
                                      N.ub = rep(ub, 2),
                                      N.temp = c(lb, ub)),
                 track.conv = list(res.lb$conv.rate,
-                                  res.ub$conv.rate)))}
+                                  res.ub$conv.rate),
+                mse.items = res.ub$mse.items,
+                bias.items = res.ub$bias.items,
+                var.items  = res.ub$var.items,
+                err.dat    = res.ub$err.dat
+                ))}
 
   # track N and resulting output parameter
   track.N <- data.frame(N.lb = rep(lb, 2),
@@ -172,7 +184,7 @@ optim_sample <- function(FUN = comp_mse,
   track.res <- data.frame(res.lb = res.lb$res,
                           res.ub = res.ub$res,
                           res.temp = c(res.lb$res, res.ub$res),
-                          mc.se = c(res.lb$mc.se, res.ub$mc.se))
+                          mc.sd = c(res.lb$mc.sd, res.ub$mc.sd))
   track.conv <- list(res.lb$conv.rate,
                      res.ub$conv.rate)
 
@@ -233,7 +245,7 @@ optim_sample <- function(FUN = comp_mse,
 
     # track results
     reps <- reps + 1
-    track.res[reps,] <- c(res.lb$res, res.ub$res, res.temp$res, res.temp$mc.se)
+    track.res[reps,] <- c(res.lb$res, res.ub$res, res.temp$res, res.temp$mc.sd)
     track.N[reps, ] <- c(N.lb, N.ub, N.temp)
     track.conv[[reps]] <- res.temp$conv.rate
     cat("New result is", c(res.lb$res, res.ub$res), "\n")
@@ -252,11 +264,16 @@ optim_sample <- function(FUN = comp_mse,
   time.taken = end.time - start.time
 
   # return output
-  return(list(N.best,
-              res.best,
-              reps,
-              track.res,
-              track.N,
-              track.conv,
-              time.taken))
+  return(list(N.best = N.best,
+              res.best = res.best,
+              reps = reps,
+              track.res = track.res,
+              track.N = track.N,
+              track.conv = track.conv,
+              time.taken = time.taken,
+              mse.items = res.ub$mse.items,
+              bias.items = res.ub$bias.items,
+              var.items  = res.ub$var.items,
+              err.dat    = res.ub$err.dat
+              ))
 }

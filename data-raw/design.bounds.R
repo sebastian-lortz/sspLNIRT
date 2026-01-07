@@ -30,7 +30,7 @@ if (HPC) {
   root.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/"
 
   # set save path
-  #save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
+  save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
   #dir.create(save.dir, recursive = TRUE, showWarnings = FALSE)
 
 
@@ -39,7 +39,6 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_mse.R",
-  "R/fct_design_conditions.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -79,8 +78,7 @@ design <- expand.grid(
   N = c(100, 2000),
   mu.alpha = c(.6, 1.4),
   meanlog.sigma2 = c(log(.2), log(1)),
-  rho = c(0, .6),
-  sd.factor = c(1,.5)
+  rho = c(0, .6)
   )
 
 # storage
@@ -95,7 +93,6 @@ I = design$I[i]
 meanlog.sigma2 = design$meanlog.sigma2[i]
 rho = design$rho[i]
 cor.item = design$cor.item[i]
-sd.factor = design$sd.factor[i]
 mu.alpha = design$mu.alpha[i]
 # comp MSE
 res <- comp_mse(
@@ -111,7 +108,7 @@ res <- comp_mse(
                                  0, 1, 0, .4,
                                  0, 0, 1, 0,
                                  0, .4, 0, 1), ncol =  4, byrow = TRUE),
-          sd.item         = sd.factor*c(.2, 1, .2, 1),
+          sd.item         = c(.2, 1, .2, .5),
           cor2cov.item    = TRUE,
           sdlog.sigma2 = 0.2,
           XG = 6000,
@@ -209,5 +206,3 @@ cond_grid("phi")
 cond_grid("lambda")
 cond_grid("theta")
 cond_grid("zeta")
-
-

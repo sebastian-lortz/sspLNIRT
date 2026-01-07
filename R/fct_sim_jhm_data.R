@@ -116,7 +116,7 @@ sim.jhm.data <- function(iter,
 
     # generate RT using 3par lognormal model
     for (r in 1:I) {
-      time[,r] <- item$lambda[r] - item$phi[r] * person$zeta + rnorm(N, 0, sqrt(item$log.sigma2[r]))
+      time[,r] <- item$lambda[r] - item$phi[r] * person$zeta + rnorm(N, 0, sqrt(item$sigma2[r]))
     }
 
     # assemble data in long format

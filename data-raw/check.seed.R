@@ -40,7 +40,6 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_mse.R",
-  "R/fct_design_conditions.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",

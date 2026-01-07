@@ -42,7 +42,6 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_mse.R",
-  "R/fct_design_conditions.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -78,7 +77,7 @@ ssp.seed = 310779
 
 # generate the design conditions
 design <- expand.grid(
-  out.par         = c("mse.alpha", "mse.beta", "mse.phi", "mse.lambda"),
+  out.par         = c("alpha", "beta", "phi", "lambda"),
   thresh          = c(.05, .02, .01),
   I               = c(30, 50),
   rho             = c(.2, .4, .6),
@@ -98,7 +97,7 @@ for (b in seq_along(batches)) {
 
   batch <- batches[[b]]
 
-  # preallocate (faster + cleaner)
+  # preallocate
   res.batch <- vector("list", nrow(batch))
 
   for (i in seq_len(nrow(batch))) {
@@ -112,14 +111,14 @@ for (b in seq_along(batches)) {
       I = batch$I[i],
       mu.person = c(0, 0),
       mu.item = c(batch$mu.alpha[i], 0, 1, 1),
-      meanlog.sigma2 = batch$meanlog.sigma2[i],  # <-- FIXED
+      meanlog.sigma2 = batch$meanlog.sigma2[i],
       cov.m.person = matrix(c(1, batch$rho[i],
                               batch$rho[i], 1), ncol = 2, byrow = TRUE),
       cov.m.item = matrix(c(1, 0, 0, 0,
                             0, 1, 0, 0.4,
                             0, 0, 1, 0,
                             0, 0.4, 0, 1), ncol = 4, byrow = TRUE),
-      sd.item = c(.2, .5, .2, .5),
+      sd.item = c(.2, 1, .2, .5),
       cor2cov.item = TRUE,
       sdlog.sigma2 = 0.2,
       XG = 6000,

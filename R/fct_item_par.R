@@ -41,7 +41,7 @@ item.par <- function(I,
 ) {
 
   # sample sigma2 from lognormal distribution
-  log.sigma2 <- rlnorm(I, meanlog = meanlog.sigma2, sdlog = sdlog.sigma2)
+  sigma2 <- rlnorm(I, meanlog = meanlog.sigma2, sdlog = sdlog.sigma2)
 
   # if correlation matrix is supplied
   if (cor2cov.item) {
@@ -59,7 +59,7 @@ item.par <- function(I,
 
   # combine item parameters
   pars.out <- as.data.frame(
-    cbind(item.pars, log.sigma2)
+    cbind(item.pars, sigma2)
   )
 
   # return output

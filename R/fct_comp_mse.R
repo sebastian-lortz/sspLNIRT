@@ -34,12 +34,12 @@
 #'
 #' @examples
 #'  \dontrun{
-#' comp_mse(
-#'           iter = 6,
-#'           N = 500,
-#'           I = 100,
+#' test = comp_mse(
+#'           iter = 100,
+#'           N = 100,
+#'           I = 30,
 #'           mu.person = c(0,0),
-#'           mu.item = c(1,0,1,4),
+#'           mu.item = c(1,0,1,1),
 #'           meanlog.sigma2 = log(1),
 #'           cov.m.person = matrix(c(1,0,
 #'                                   0,1), ncol = 2, byrow = TRUE),
@@ -47,9 +47,10 @@
 #'                                 0, 1, 0, 0,
 #'                                 0, 0, 1, 0,
 #'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
-#'           sd.item         = c(.2, .5, .2, .5),
+#'           sd.item         = c(.2, 1, .2, .5),
 #'           cor2cov.item    = TRUE,
-#'           sdlog.sigma2 = 0.2
+#'           sdlog.sigma2 = 0.2,
+#'           XG = 6000)
 #' }
 #' @export
 #'
@@ -167,15 +168,20 @@ comp_mse <- function(N,
                                   c.alpha = data$scale.factor[[1]]$c.alpha,
                                   c.phi = data$scale.factor[[1]]$c.phi)
 
-        # calculate (mean) squared errors on input scale
+        # calculate squared errors on input scale
         res <- list(
           mse.theta = mean((re.scaled.post$person.pars.scaled$post.theta - re.scaled.data$person.pars.scaled$theta)^2),
           mse.zeta = mean((re.scaled.post$person.pars.scaled$post.zeta - re.scaled.data$person.pars.scaled$zeta)^2),
-          se.alpha = (re.scaled.post$items.pars.scaled$post.alpha - re.scaled.data$items.pars.scaled$alpha)^2,
-          se.beta = (re.scaled.post$items.pars.scaled$post.beta - re.scaled.data$items.pars.scaled$beta)^2,
-          se.phi = (re.scaled.post$items.pars.scaled$post.phi - re.scaled.data$items.pars.scaled$phi)^2,
-          se.lambda = (re.scaled.post$items.pars.scaled$post.lambda - re.scaled.data$items.pars.scaled$lambda)^2,
-          se.sigma2 = (re.scaled.post$items.pars.scaled$post.sigma2 - re.scaled.data$items.pars.scaled$log.sigma2)^2,
+          err.alpha = (re.scaled.post$items.pars.scaled$post.alpha - re.scaled.data$items.pars.scaled$alpha),
+          err.beta = (re.scaled.post$items.pars.scaled$post.beta - re.scaled.data$items.pars.scaled$beta),
+          err.phi = (re.scaled.post$items.pars.scaled$post.phi - re.scaled.data$items.pars.scaled$phi),
+          err.lambda = (re.scaled.post$items.pars.scaled$post.lambda - re.scaled.data$items.pars.scaled$lambda),
+          err.sigma2 = (re.scaled.post$items.pars.scaled$post.sigma2 - re.scaled.data$items.pars.scaled$sigma2),
+          sim.alpha = data$item.par[[1]]$alpha,
+          sim.beta = data$item.par[[1]]$beta,
+          sim.phi = data$item.par[[1]]$phi,
+          sim.lambda = data$item.par[[1]]$lambda,
+          sim.sigma2 = data$item.par[[1]]$sigma2,
           conv.rate = r.hat.rates
         )
 
@@ -213,43 +219,62 @@ comp_mse <- function(N,
   },
   handlers = handler)
 
+  # keep non-NA replications
+  out <- out[!is.na(out)]
+
   # take mean across iterations and items/persons
-  mse.theta = list(mse.theta = mean(unlist(lapply(out[!is.na(out)], FUN = function(x) {
+  mse.theta = list(theta = mean(unlist(lapply(out, FUN = function(x) {
     x$mse.theta
   }))))
-  mse.zeta= list(mse.zeta = mean(unlist(lapply(out[!is.na(out)], FUN = function(x) {
+  mse.zeta= list(zeta = mean(unlist(lapply(out, FUN = function(x) {
     x$mse.zeta
   }))))
-  mse.person = append(mse.theta, mse.zeta)
-  mse.items =
-    colMeans(apply(
-      simplify2array(
-        lapply(out[!is.na(out)], FUN = function(x) {
-          cbind(mse.alpha = x$se.alpha,
-                mse.beta = x$se.beta,
-                mse.phi = x$se.phi,
-                mse.lambda = x$se.lambda,
-                mse.sigma2 = x$se.sigma2)
-        })), MARGIN = c(1,2), FUN = function(x) {
-          mean(x, na.rm = TRUE)
-        }))
+  mse.person = do.call(c, c(mse.theta, mse.zeta))
 
-  # sd of MSE over replications
-  mc.sd.items =
-    apply(apply(
-      simplify2array(
-        lapply(out[!is.na(out)], FUN = function(x) {
-          cbind(mse.alpha = x$se.alpha,
-                mse.beta = x$se.beta,
-                mse.phi = x$se.phi,
-                mse.lambda = x$se.lambda,
-                mse.sigma2 = x$se.sigma2)
-        })), MARGIN = c(3,2), FUN = function(x) {
-          mean(x, na.rm = TRUE)
-        }), 2, sd)
+  # error array item x parameter x replication
+  err <- simplify2array(lapply(out, function(x) {
+    cbind(
+      alpha  = x$err.alpha,
+      beta   = x$err.beta,
+      phi    = x$err.phi,
+      lambda = x$err.lambda,
+      sigma2 = x$err.sigma2
+    )
+  }))
 
-  # store convergence rates
-  conv.rate = as.data.frame(t(sapply(out[!is.na(out)], FUN = function(x) {
+  # pooled bias per parameter
+  bias.items <- apply(err, 2, mean, na.rm = TRUE)
+
+  # pooled MSE per parameter
+  mse.items <- apply(err^2, 2, mean, na.rm = TRUE)
+
+  # Monte Carlo SD (over replications) of MSE per parameter
+  mse.rep <- apply(err^2, c(3, 2), mean, na.rm = TRUE)
+  mc.sd.mse  <- apply(mse.rep, 2, sd, na.rm = TRUE)
+
+  # variance
+  var.items  <- mse.items - bias.items^2
+
+  # full error data
+  err.dat <- do.call(rbind, Map(function(x, r) {
+
+    data.frame(
+      rep     = r,
+      par     = rep(c("alpha","beta","phi","lambda","sigma2"),
+                    times = c(length(x$err.alpha),
+                              length(x$err.beta),
+                              length(x$err.phi),
+                              length(x$err.lambda),
+                              length(x$err.sigma2))),
+      sim.val = c(x$sim.alpha, x$sim.beta, x$sim.phi, x$sim.lambda, x$sim.sigma2),
+      err     = c(x$err.alpha, x$err.beta, x$err.phi, x$err.lambda, x$err.sigma2),
+      stringsAsFactors = FALSE
+    )
+
+  }, out, seq_along(out)))
+
+  # convergence rates
+  conv.rate = as.data.frame(t(sapply(out, FUN = function(x) {
     x$conv.rate
   })))
 
@@ -259,10 +284,13 @@ comp_mse <- function(N,
 
   # return output
   return(
-    c(mse.person,
-      as.list(mse.items),
-      list(mc.se.items = mc.se.items),
-      list(conv.rate = conv.rate))
+    c(list(mse.person = mse.person),
+      list(mse.items = mse.items),
+      list(mc.sd.mse = mc.sd.mse),
+      list(bias.items = bias.items),
+      list(var.items = var.items),
+      list(conv.rate = conv.rate),
+      list(err.dat = err.dat))
   )
 
 }
