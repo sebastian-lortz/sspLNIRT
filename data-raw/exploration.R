@@ -71,38 +71,38 @@ if (HPC ) {
 # Run the Job -------------------------------------------------------------
 
 exp0 <- comp_mse(
-  iter = 100,
+  iter = 200,
   N = 100,
-  I = 30,
+  I = 10,
   mu.person = c(0,0),
   mu.item = c(1,0,1,1),
   meanlog.sigma2 = log(.2),
   cov.m.person = matrix(c(1,0,
                           0,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0,
-                        0, 1, 0, .4,
+                        0, 1, 0, 0,
                         0, 0, 1, 0,
-                        0, .4, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, 1, .2, .5),
+                        0, 0, 0, 1), ncol =  4, byrow = TRUE),
+  sd.item         = c(.2, 1, .1, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   XG = 6000,
-  mse.seed = 12)
+  mse.seed = 123)
 
 exp1 <- comp_mse(
-  iter = 100,
+  iter = 200,
   N = 100,
-  I = 30,
+  I = 10,
   mu.person = c(0,0),
   mu.item = c(1,0,1,1),
   meanlog.sigma2 = log(.2),
-  cov.m.person = matrix(c(1,.9,
-                          .9,1), ncol = 2, byrow = TRUE),
+  cov.m.person = matrix(c(1,0.9,
+                          0.9,1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0,
-                        0, 1, 0, .4,
+                        0, 1, 0, 0.4,
                         0, 0, 1, 0,
-                        0, .4, 0, 1), ncol =  4, byrow = TRUE),
-  sd.item         = c(.2, 1, .2, .5),
+                        0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
+  sd.item         = c(.2, 1, .1, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
   XG = 6000,
@@ -123,24 +123,23 @@ exp1 <- readRDS(paste0(save.dir,"exp1"))
 exp0$conv.rate
 exp1$conv.rate
 
-exp0$mse.theta
-exp1$mse.theta
+exp0$mse.person
+exp1$mse.person
 
-exp0$mse.zeta
-exp1$mse.zeta
+exp0$mse.items
+exp1$mse.items
 
-exp0$mse.alpha
-exp1$mse.alpha
+# diff item pars
+diff.items <- c(exp0$mse.items - exp1$mse.items)
+names(diff.items) <- c("alpha", "beta", "phi", "lambda", "sigma2")
+plot(diff.items,
+     ylab = "Difference")
 
-exp0$mse.beta
-exp1$mse.beta
+plot_precision(exp0)
+plot_precision(exp1)
 
-exp0$mse.phi
-exp1$mse.phi
 
-exp0$mse.lambda
-exp1$mse.lambda
-
+# no measurable difference on precision of item parameters
 
 
 

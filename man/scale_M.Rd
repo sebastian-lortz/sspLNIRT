@@ -4,7 +4,7 @@
 \alias{scale_M}
 \title{Scale Item and Person Matrices}
 \usage{
-scale_M(item.pars, person.pars)
+scale_M(item.pars, person.pars, re.scale = FALSE, c.alpha = NULL, c.phi = NULL)
 }
 \arguments{
 \item{item.pars}{Data frame or Matrix. The item parameters.}

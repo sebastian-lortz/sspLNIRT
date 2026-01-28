@@ -7,8 +7,7 @@
 person.par(
   N,
   mu.person = c(0, 0),
-  cov.m.person = matrix(c(1, 0.5, 0.5, 1), ncol = 2, byrow = TRUE),
-  person.seed = NULL
+  cov.m.person = matrix(c(1, 0.5, 0.5, 1), ncol = 2, byrow = TRUE)
 )
 }
 \arguments{

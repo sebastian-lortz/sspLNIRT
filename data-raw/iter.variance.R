@@ -94,8 +94,7 @@ for (i in 1:nrow(design)) {
     res <- optim_sample(
       FUN = comp_mse,
       thresh = .01,
-      lb = 100,
-      ub = 1000,
+      range = c(100,ub = 1000),
       out.par = 'alpha',
       iter = iter,
       I = 30,
@@ -112,12 +111,13 @@ for (i in 1:nrow(design)) {
       cor2cov.item    = TRUE,
       sdlog.sigma2 = 0.2,
       XG = XG,
-      ssp.seed = NULL)
+      ssp.seed = NULL,
+      rhat = 1.05)
     result[[k]] <- res
     cat("iteration", k, "of", 100, "done!!!! \n\n")
     rm(res)
   }
-  saveRDS(result, paste0(save.dir, "ssp.variance.no.seed.", i))
+  saveRDS(result, paste0(save.dir, "ssp.variance.no.seed.", 2))
 
   result.list[[i]] <- result
   cat("Design row", i, "done!!!! \n\n")
@@ -136,7 +136,6 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
-
 # load results
 ssp.variance.no.seed.1 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.1"))
 
@@ -151,7 +150,7 @@ lapply(res.names, FUN = function(z) {
   )
 })
 
-# conv rates: > .99
+# conv rates: > .69
 
 
 # get ssp data
@@ -196,18 +195,18 @@ sum.stats <- ssp.data %>%
 lines_N.best <- sum.stats %>%
   filter(variable == "N.best") %>%
   pivot_longer(
-    cols = c(lb.sd, ub.sd),
+    cols = c(lb.sd, mean, ub.sd),
     names_to = "bound",
     values_to = "xint"
   )
 
 ggplot(ssp.data, aes(x = N.best)) +
-  geom_density(alpha = .5) +
+  geom_histogram(alpha = .5) +
   geom_vline(
     data = lines_N.best,
     aes(xintercept = xint, linetype = bound)
   ) +
-  scale_linetype_manual(values = c(lb.sd = "dashed", ub.sd = "dashed"))
+  scale_linetype_manual(values = c(lb.sd = "dashed", mean = "solid", ub.sd = "dashed"))
 
 
 # density plot res.best

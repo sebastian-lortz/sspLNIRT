@@ -13,8 +13,6 @@
 #' @param cov.m.person Matrix. The covariance matrix of theat and zeta
 #' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
 #' @param sdlog.sigma2 Numeric. The sdlog of sigma2
-#' @param scale Logical. Weather the item and person parameters are scaled.
-#' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
@@ -62,8 +60,6 @@ sim.jhm.data <- function(iter,
                                                0, -.35, .5, .15,
                                                0, -.15, .15, .2), ncol =  4, byrow = TRUE),
                          sdlog.sigma2 = 0.2,
-                         scale = TRUE,
-                         random.item = TRUE,
                          item.pars.m = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL
@@ -81,7 +77,7 @@ sim.jhm.data <- function(iter,
                          mu.person = mu.person)
 
     # item parameters
-    if (random.item) {
+    if (is.null(item.pars.m)) {
       item <- item.par(I = I,
                        mu.item = mu.item,
                        cov.m.item = cov.m.item,
@@ -96,12 +92,10 @@ sim.jhm.data <- function(iter,
     }
 
     # scale parameters
-    if (scale) {
       scaled.pars <- scale_M(item.pars = item,
                              person.pars = person)
       item <- scaled.pars$items.pars.scaled
       person <- scaled.pars$person.pars.scaled
-    }
 
     # open output matrix
     time <- response <- matrix(nrow = N, ncol =  I)
@@ -119,17 +113,7 @@ sim.jhm.data <- function(iter,
       time[,r] <- item$lambda[r] - item$phi[r] * person$zeta + rnorm(N, 0, sqrt(item$sigma2[r]))
     }
 
-    # assemble data in long format
-    data <- data.frame(
-      ID = rep(1:N, I),
-      Item = rep(seq_len(I), each = N),
-      y = as.vector(response),
-      RT = exp(as.vector(time)),
-      logRT = as.vector(time)
-    )
-
     # add to list per iteration
-    sim.data[[k]] <- data
     sim.time[[k]] <- time
     sim.response[[k]] <- response
     person.par[[k]] <- person
@@ -144,7 +128,6 @@ sim.jhm.data <- function(iter,
 
   # return output
   return(list(
-    long.data = sim.data,
     time.data = sim.time,
     response.data = sim.response,
     person.par = person.par,

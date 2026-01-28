@@ -12,8 +12,7 @@ item.par(
   meanlog.sigma2 = log(0.3),
   sdlog.sigma2 = 0.2,
   cor2cov.item = FALSE,
-  sd.item = NULL,
-  item.seed = NULL
+  sd.item = NULL
 )
 }
 \arguments{
@@ -30,8 +29,6 @@ item.par(
 \item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied}
 
 \item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda}
-
-\item{item.seed}{Integer. (optional) Seed for drawing samples from distributions.}
 }
 \value{
 A data frame containing item parameters

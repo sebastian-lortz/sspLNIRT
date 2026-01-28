@@ -10,12 +10,11 @@
 #'
 #' @examples
 #'  \dontrun{
-#'    plot_precision(object = test)
+#'    plot_precision(object = test.optim.sample)
 #'}
 #'
 #' @export
 #'
-err.dat = test$err.dat
 
 plot_precision <- function(object, y.val = "mse", n.bins = NULL) {
 

@@ -15,7 +15,11 @@ Imports:
     LNIRT,
     future,
     progressr,
-    purrr
+    purrr,
+    bslib,
+    bsicons,
+    shinyMatrix,
+    dplyr
 Suggests: 
     knitr,
     rmarkdown,

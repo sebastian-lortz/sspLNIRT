@@ -70,10 +70,9 @@ if (HPC ) {
 }
 
 
-
 # Run the Job -------------------------------------------------------------
 
-ssp.seed = 310779
+ssp.seed0 <- 310779
 
 # generate the design conditions
 design <- expand.grid(
@@ -85,6 +84,9 @@ design <- expand.grid(
   meanlog.sigma2  = c(log(.2), log(.6), log(1)),
   stringsAsFactors = FALSE
 )
+
+# incorporate a unique seed per design row
+design$ssp.seed <- seq(from = ssp.seed0, length.out = nrow(design))
 
 # create batches
 batch_size <- 50
@@ -104,10 +106,9 @@ for (b in seq_along(batches)) {
 
     arg <- list(
       thresh = batch$thresh[i],
-      lb = 100,
-      ub = 2000,
+      range = c(50, 1000),
       out.par = as.character(batch$out.par[i]),
-      iter = 100,
+      iter = 5,
       I = batch$I[i],
       mu.person = c(0, 0),
       mu.item = c(batch$mu.alpha[i], 0, 1, 1),
@@ -122,9 +123,8 @@ for (b in seq_along(batches)) {
       cor2cov.item = TRUE,
       sdlog.sigma2 = 0.2,
       XG = 6000,
-      ssp.seed = ssp.seed
+      ssp.seed = batch$ssp.seed[i]
     )
-    ssp.seed = ssp.seed + 1
     res <- tryCatch(
       do.call(optim_sample, args = arg),
       error = function(e) e

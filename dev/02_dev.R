@@ -20,8 +20,8 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "ssp_lnirt", with_test = TRUE) # Name of the module
-#golem::add_module(name = "about", with_test = TRUE) # Name of the module
+golem::add_module(name = "ssp_data", with_test = TRUE) # Name of the module
+golem::add_module(name = "ssp_custom", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
@@ -84,6 +84,12 @@ usethis::use_jenkins()
 
 # GitLab CI
 usethis::use_gitlab_ci()
+
+
+# render about doc
+rmarkdown::render("/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/about.Rmd",
+                  output_format = "github_document",
+                  output_file   = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/about.md")
 
 # You're now set! ----
 # go to dev/03_deploy.R

@@ -13,8 +13,6 @@
 #' @param cov.m.person Matrix. The covariance matrix of theat and zeta
 #' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
 #' @param sdlog.sigma2 Numeric. The sdlog of sigma2
-#' @param scale Logical. Weather the item and person parameters are scaled.
-#' @param random.item Logical. Weather the item parameters are sampled.
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
@@ -23,22 +21,12 @@
 #'
 #' @examples
 #'  \dontrun{
-#'     test.plot <- plot_RA(level,
-#'                          logRT = FALSE,
-#'                          iter = 10,
-#'                          N = 1000,
-#'                          I = 10,
-#'                          mu.person = c(0,0),
-#'                          mu.item = c(1,0,1,0),
-#'                          meanlog.sigma2 = log(.3),
-#'                          cov.m.person = matrix(c(1,0.5,
-#'                                                  0.5,1), ncol = 2, byrow = TRUE),
-#'                          cov.m.item = matrix(c(.2, 0, 0, 0,
-#'                                                0, .5, 0, 0,
-#'                                                0, 0, .5, 0,
-#'                                                0, 0, 0, .2), ncol =  4, byrow = TRUE),
-#'                          sdlog.sigma2 = 0.2,
-#'                          )
+#'     plot_RA(level = "item",
+#'             by.theta = TRUE,
+#'             mu.item = c(1,0,1,1),
+#'             sd.item = c(.2, .5, .2, .5),
+#'             meanlog.sigma2 = log(.2),
+#'             I = 20)
 #'}
 #'
 #' @export
@@ -58,8 +46,6 @@ plot_RA <- function(level ,
                                           0, 0, 0, 1), ncol =  4, byrow = TRUE),
                     sd.item = c(.2, 1, .2, .5),
                     sdlog.sigma2 = 0.2,
-                    scale = TRUE,
-                    random.item = TRUE,
                     item.pars.m = NULL,
                     cor2cov.item = TRUE
 ) {
@@ -78,8 +64,6 @@ plot_RA <- function(level ,
                        cov.m.person = cov.m.person,
                        cov.m.item = cov.m.item,
                        sdlog.sigma2 = sdlog.sigma2,
-                       scale = scale,
-                       random.item = random.item,
                        item.pars.m = item.pars.m,
                        cor2cov.item = cor2cov.item,
                        sd.item = sd.item)
@@ -120,10 +104,11 @@ plot_RA <- function(level ,
           linewidth = 0.6
         ) +
         scale_x_continuous(breaks = 0:I, limits = c(-0.5, I + 0.5)) +
+        scale_colour_grey(start = 0.1, end = 0.5) +
         labs(
           x      = "Total correct score",
           y      = "Count",
-          colour = "Quantiles"
+          colour = "Score Quantiles"
         ) +
         ggtitle(head)
 
@@ -154,10 +139,11 @@ plot_RA <- function(level ,
           linetype = "dashed",
           linewidth = 0.6
         ) +
+        scale_colour_grey(start = 0.1, end = 0.5) +
         labs(
           x      = "Theta",
           y      = "Total correct score",
-          colour = "Quantiles"
+          colour = "Theta Quantiles"
         ) +
         ggtitle(head)
 
@@ -195,7 +181,7 @@ plot_RA <- function(level ,
     # plot
     if (!by.theta) {
       p <- ggplot(prob_long, aes(x = prob, fill = item)) +
-        geom_density(alpha = 0.2, trim = TRUE) +
+        geom_density(alpha = 0.2, trim = TRUE, fill = "grey50", color = "grey30") +
         stat_summary(aes(xintercept = after_stat(x), y = 0), fun = median, geom = "vline", orientation = "y", linetype = 2) +
         labs(
           x      = "Response accuracy",
@@ -209,7 +195,7 @@ plot_RA <- function(level ,
 
     } else {
       p <- ggplot(prob_long, aes(x = theta, y = prob, colour = item)) +
-        geom_line(alpha = 0.4) +
+        geom_line(alpha = 0.4, color = "grey30") +
         labs(
           x      = "Response accuracy",
           y      = "Density",
@@ -225,10 +211,3 @@ plot_RA <- function(level ,
   }
 }
 
-
-plot_RA(level = "item",
-        by.theta = TRUE,
-        mu.item = c(1,0,1,1),
-        sd.item = c(.2, .5, .2, .5),
-        meanlog.sigma2 = log(.2),
-        I = 20)

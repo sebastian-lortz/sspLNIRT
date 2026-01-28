@@ -1,0 +1,26 @@
+about
+================
+
+## About the Project
+
+I introduce the sspLNIRT app … . It is available as R package and shiny
+app via Github page: <link>
+
+### Publications
+
+The method is introduced in the research project titled ‘insert title’.
+
+### Contributors
+
+- Sebastian A. J. Lortz
+
+### Questions and Comments
+
+If you have any questions or comments please write to Sebastian Lortz to
+the following email address: <s.a.j.lortz@gmail.com>
+
+Or submit an issue on the apps Github page: <link>
+
+### Version
+
+You are using version: 0.0.0.9000

@@ -3,7 +3,7 @@
 # libraries
 library(tibble)
 
-# load the batches
+##### load the batches
 save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
 
 files <- list.files(
@@ -20,6 +20,7 @@ batch_id <- as.integer(sub("^batch_([0-9]{3})\\.rds$", "\\1", basename(files)))
 batch.list <- setNames(lapply(files, readRDS), sprintf("batch_%03d", batch_id))
 
 
+#### combine the batches into one data frame
 
 rows <- lapply(names(batch.list), function(bn) {
   batch <- batch.list[[bn]]
@@ -63,12 +64,6 @@ rows <- lapply(names(batch.list), function(bn) {
 
 # flatten into a single tibble
 all_tbl <- do.call(rbind, unlist(rows, recursive = FALSE))
-
-all_tbl$conv
-batch.list$batch_005[[47]][[1]]
-
-
-# combine the batches into one data frame
-
-
-# usethis::use_data(res, overwrite = TRUE)
+# names(all_tbl)
+#### write data in file
+usethis::use_data(all_tbl, overwrite = TRUE)

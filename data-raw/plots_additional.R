@@ -5,14 +5,14 @@
 RA.plot <- plot_RA(level = "item",
         by.theta = TRUE,
         mu.item = c(1,0,1,1),
-        sd.item = c(.2, .5, .2, .5),
+        sd.item = c(.2, 1, .2, .5),
         meanlog.sigma2 = log(.2),
         I = 12)
 
 
 RT.plot <- plot_RT(level = "item",
         mu.item = c(1,0,1,1),
-        sd.item = c(.2, .5, .2, .5),
+        sd.item = c(.2, 1, .2, .5),
         meanlog.sigma2 = log(.2),
         I = 12,
         logRT = FALSE)

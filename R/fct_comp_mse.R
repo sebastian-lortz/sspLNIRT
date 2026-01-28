@@ -1,61 +1,56 @@
-#' Compute MSE of Parameters
+#' Compute RMSE of Parameters
 #'
 #' The function computes the mean squared errors of estimated parameters based on
-#' simulated data under the the Joint Hierarchical Model using a 2-pl normal
+#' simulated data under the Joint Hierarchical Model using a 2-pl normal
 #' ogive model for response accuracy and a 3-pl log-normal model for response
 #' time.
 #'
 #' @param N Integer. The sample size.
-#' @param iter Integer. The number of iteration or the number of data sets.
+#' @param iter Integer. The number of iterations or the number of data sets.
 #' @param I Integer. The test length.
-#' @param mu.person Numeric vector. Means of theta and zeta
-#' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda
+#' @param mu.person Numeric vector. Means of theta and zeta.
+#' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda.
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
-#' @param cov.m.person Matrix. The covariance matrix of theat and zeta
-#' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
-#' @param sdlog.sigma2 Numeric. The sdlog of sigma2
-#' @param scale Logical. Weather the item and person parameters are scaled.
-#' @param random.item Logical. Weather the item parameters are sampled.
-#' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
-#' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
-#' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
+#' @param cov.m.person Matrix. The covariance matrix of theta and zeta.
+#' @param cov.m.item Matrix. The covariance matrix of alpha, beta, phi, and lambda.
+#' @param sdlog.sigma2 Numeric. The sdlog of sigma2.
+#' @param item.pars.m Matrix. (optional) A matrix containing item parameters.
+#' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied.
+#' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda.
+#' @param XG Integer. The number of Gibbs sampler iterations.
+#' @param burnin Integer. The burn-in percentage.
+#' @param mse.seed Integer or NULL. Seed for reproducibility.
+#' @param keep.err.dat Logical. Whether to keep the full error data.
+#' @param rhat Numeric. The R-hat convergence cutoff.
 #'
-#' @return A list of containing:
+#' @return A list of class `sspLNIRT.object` containing:
 #' \describe{
-#'   \item{mse.theta}{Numeric. The pooled MSE of the theta parameters.}
-#'   \item{mse.alpha}{Numeric. The pooled MSE of the alpha paramters.}
-#'   \item{mse.beta}{Numeric. The pooled MSE of the beta paramters.}
-#'   \item{mse.phi}{Numeric. The pooled MSE of the phi paramters.}
-#'   \item{mse.lambda}{Numeric. The pooled MSE of the lambda paramters.}
-#'   \item{mse.sigma2}{Numeric. The pooled MSE of the sigma2 paramters.}
-#'   \item{conv.rate}{Data Frame. The Rhat convergence rate per iteration (rows)
-#'   by parameter blocks (columns).}
+#'   \item{person}{List with `rmse` (named vector), `mc.sd.rmse` (named vector), and `bias` (named vector) for theta and zeta.}
+#'   \item{item}{List with `rmse` (named vector), `mc.sd.rmse` (named vector), and `bias` (named vector) for alpha, beta, phi, lambda, and sigma2.}
+#'   \item{conv.rate}{Data frame. The R-hat convergence rate per iteration (rows) by parameter blocks (columns).}
+#'   \item{err.dat}{List with `person` and `item` data frames containing per-replication errors (if `keep.err.dat = TRUE`).}
 #' }
 #'
 #' @examples
-#'  \dontrun{
-#' test = comp_mse(
-#'           iter = 100,
-#'           N = 100,
-#'           I = 30,
-#'           mu.person = c(0,0),
-#'           mu.item = c(1,0,1,1),
-#'           meanlog.sigma2 = log(1),
-#'           cov.m.person = matrix(c(1,0,
-#'                                   0,1), ncol = 2, byrow = TRUE),
-#'           cov.m.item = matrix(c(1, 0, 0, 0,
-#'                                 0, 1, 0, 0,
-#'                                 0, 0, 1, 0,
-#'                                 0, 0, 0, 1), ncol =  4, byrow = TRUE),
-#'           sd.item         = c(.2, 1, .2, .5),
-#'           cor2cov.item    = TRUE,
-#'           sdlog.sigma2 = 0.2,
-#'           XG = 6000)
+#' \dontrun{
+#' test <- comp_mse(
+#'   iter = 5,
+#'   N = 100,
+#'   I = 10,
+#'   mu.person = c(0, 0),
+#'   mu.item = c(1, 0, 1, 1),
+#'   meanlog.sigma2 = log(1),
+#'   cov.m.person = matrix(c(1, 0, 0, 1), ncol = 2, byrow = TRUE),
+#'   cov.m.item = diag(4),
+#'   sd.item = c(.2, 1, .2, .5),
+#'   cor2cov.item = TRUE,
+#'   sdlog.sigma2 = 0.2,
+#'   XG = 2000,
+#'   keep.err.dat = TRUE,
+#'   rhat = 1.1
+#' )
 #' }
 #' @export
-#'
-
-
 comp_mse <- function(N,
                      iter,
                      I,
@@ -69,15 +64,14 @@ comp_mse <- function(N,
                                            0, -.35, .5, .15,
                                            0, -.15, .15, .2), ncol =  4, byrow = TRUE),
                      sdlog.sigma2 = 0.2,
-                     scale = TRUE,
-                     random.item = TRUE,
                      item.pars.m = NULL,
                      cor2cov.item = FALSE,
                      sd.item = NULL,
                      XG = 3000,
                      burnin = 20,
-                     par1 = TRUE,
-                     mse.seed = NULL) {
+                     mse.seed = NULL,
+                     keep.err.dat = TRUE,
+                     rhat = 1.05) {
 
   if (is.null(mse.seed)) {
     seed = TRUE } else {
@@ -105,54 +99,53 @@ comp_mse <- function(N,
                              cov.m.person = cov.m.person,
                              cov.m.item = cov.m.item,
                              sdlog.sigma2 = sdlog.sigma2,
-                             scale = scale,
-                             random.item = random.item,
                              item.pars.m = item.pars.m,
                              cor2cov.item = cor2cov.item,
                              sd.item = sd.item)
 
+        RT <- data$time.data[[1]]
+        Y  <- data$response.data[[1]]
+        item.par   <- data$item.par[[1]]
+        person.par <- data$person.par[[1]]
+        scale.factor <- data$scale.factor[[1]]
+
+        rm(data); gc()
+
         # i=1
         # fit LNIRT with 4 chains
-        fit.list <- list()
+        fit.list <- vector("list", 4)
         for (f in 1:4) {
           fit.list[[f]] <- LNIRT::LNIRT(
-            RT = data$time.data[[1]],
-            Y = data$response.data[[1]],
+            RT = RT,
+            Y = Y,
             XG = XG,
             burnin = burnin,
             residual = FALSE,
-            par1 = par1
+            par1 = TRUE
           )}
 
         # compute r.hat of item parameter samples
-        r.hat.out <- rhat_LNIRT(fit.list, chains = 4, cutoff = 1.05)
+        r.hat.out <- rhat_LNIRT(fit.list, chains = 4, cutoff = rhat)
         r.hat.rates <- unlist(r.hat.out$rate)
 
         # compute posterior means
         XGburnin <- ceiling(fit.list[[1]]$XG * fit.list[[1]]$burnin / 100)
-        post.theta = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          colMeans(x$MCMC.Samples$Person.Ability[XGburnin:x$XG,])
-        })))
+        idx <- XGburnin:fit.list[[1]]$XG
+        nchains <- length(fit.list)
 
-        post.zeta = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          colMeans(x$MCMC.Samples$Person.Speed[XGburnin:x$XG,])
-        })))
+        post.theta <- Reduce(`+`, lapply(fit.list, \(x) colMeans(x$MCMC.Samples$Person.Ability[idx, , drop=FALSE]))) / nchains
+        post.zeta  <- Reduce(`+`, lapply(fit.list, \(x) colMeans(x$MCMC.Samples$Person.Speed[idx, , drop=FALSE])))   / nchains
 
-        post.alpha = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          (x$Post.Means$Item.Discrimination)
-        })))
-        post.beta = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          (x$Post.Means$Item.Difficulty)
-        })))
-        post.phi = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          (x$Post.Means$Time.Discrimination)
-        })))
-        post.lambda = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          (x$Post.Means$Time.Intensity)
-        })))
-        post.sigma2 = rowMeans(as.data.frame(lapply(fit.list, FUN = function(x) {
-          (x$Post.Means$Sigma2)
-        })))
+        post.alpha  <- Reduce(`+`, lapply(fit.list, \(x) x$Post.Means$Item.Discrimination)) / nchains
+        post.beta   <- Reduce(`+`, lapply(fit.list, \(x) x$Post.Means$Item.Difficulty))      / nchains
+        post.phi    <- Reduce(`+`, lapply(fit.list, \(x) x$Post.Means$Time.Discrimination))  / nchains
+        post.lambda <- Reduce(`+`, lapply(fit.list, \(x) x$Post.Means$Time.Intensity))       / nchains
+        post.sigma2 <- Reduce(`+`, lapply(fit.list, \(x) x$Post.Means$Sigma2))               / nchains
+
+        # drop objects in workers
+        for (f in seq_along(fit.list)) fit.list[[f]]$MCMC.Samples <- NULL
+        rm(fit.list, RT, Y)
+        gc()
 
         # re-scale to input scale
         post.item.pars <- cbind(post.alpha, post.beta, post.phi, post.lambda, post.sigma2)
@@ -160,37 +153,40 @@ comp_mse <- function(N,
         re.scaled.post <- scale_M(item.pars = post.item.pars,
                                   person.pars = post.person.pars,
                                   re.scale = TRUE,
-                                  c.alpha = data$scale.factor[[1]]$c.alpha,
-                                  c.phi = data$scale.factor[[1]]$c.phi)
-        re.scaled.data <- scale_M(item.pars = data$item.par[[1]],
-                                  person.pars = data$person.par[[1]],
+                                  c.alpha = scale.factor$c.alpha,
+                                  c.phi = scale.factor$c.phi)
+        re.scaled.data <- scale_M(item.pars = item.par,
+                                  person.pars = person.par,
                                   re.scale = TRUE,
-                                  c.alpha = data$scale.factor[[1]]$c.alpha,
-                                  c.phi = data$scale.factor[[1]]$c.phi)
+                                  c.alpha = scale.factor$c.alpha,
+                                  c.phi = scale.factor$c.phi)
 
-        # calculate squared errors on input scale
+        # calculate (mean squared) errors on input scale
         res <- list(
-          mse.theta = mean((re.scaled.post$person.pars.scaled$post.theta - re.scaled.data$person.pars.scaled$theta)^2),
-          mse.zeta = mean((re.scaled.post$person.pars.scaled$post.zeta - re.scaled.data$person.pars.scaled$zeta)^2),
+          err.theta = (re.scaled.post$person.pars.scaled$post.theta - re.scaled.data$person.pars.scaled$theta),
+          err.zeta = (re.scaled.post$person.pars.scaled$post.zeta - re.scaled.data$person.pars.scaled$zeta),
           err.alpha = (re.scaled.post$items.pars.scaled$post.alpha - re.scaled.data$items.pars.scaled$alpha),
           err.beta = (re.scaled.post$items.pars.scaled$post.beta - re.scaled.data$items.pars.scaled$beta),
           err.phi = (re.scaled.post$items.pars.scaled$post.phi - re.scaled.data$items.pars.scaled$phi),
           err.lambda = (re.scaled.post$items.pars.scaled$post.lambda - re.scaled.data$items.pars.scaled$lambda),
           err.sigma2 = (re.scaled.post$items.pars.scaled$post.sigma2 - re.scaled.data$items.pars.scaled$sigma2),
-          sim.alpha = data$item.par[[1]]$alpha,
-          sim.beta = data$item.par[[1]]$beta,
-          sim.phi = data$item.par[[1]]$phi,
-          sim.lambda = data$item.par[[1]]$lambda,
-          sim.sigma2 = data$item.par[[1]]$sigma2,
           conv.rate = r.hat.rates
         )
 
+        if (keep.err.dat) {
+          res$sim.alpha  <- item.par$alpha
+          res$sim.beta   <- item.par$beta
+          res$sim.phi    <- item.par$phi
+          res$sim.lambda <- item.par$lambda
+          res$sim.sigma2 <- item.par$sigma2
+          res$sim.theta  <- person.par$theta
+          res$sim.zeta   <- person.par$zeta
+        }
+
         # empty memory
-        rm(fit.list,
-           post.theta, post.zeta,
-           post.alpha, post.beta, post.phi, post.lambda, post.sigma2,
-           post.item.pars, post.person.pars,
-           re.scaled.post, re.scaled.data)
+        rm(post.theta, post.zeta, post.alpha, post.beta, post.phi, post.lambda, post.sigma2,
+           post.item.pars, post.person.pars, re.scaled.post, re.scaled.data,
+           item.par, person.par, scale.factor)
         gc()
 
         # track and return
@@ -220,19 +216,35 @@ comp_mse <- function(N,
   handlers = handler)
 
   # keep non-NA replications
-  out <- out[!is.na(out)]
+  keep <- vapply(out, function(x) !(length(x) == 1 && is.na(x)), logical(1))
+  out  <- out[keep]
 
-  # take mean across iterations and items/persons
-  mse.theta = list(theta = mean(unlist(lapply(out, FUN = function(x) {
-    x$mse.theta
-  }))))
-  mse.zeta= list(zeta = mean(unlist(lapply(out, FUN = function(x) {
-    x$mse.zeta
-  }))))
-  mse.person = do.call(c, c(mse.theta, mse.zeta))
+  # error array person x parameter x replication
+  err.person <- simplify2array(lapply(out, function(x) {
+    cbind(
+      theta  = x$err.theta,
+      zeta   = x$err.zeta
+    )
+  }))
+
+  # pooled bias per parameter
+  bias.person <- apply(err.person, 2, mean, na.rm = TRUE)
+
+  # pooled RMSE per replication
+  rmse.rep.person <- sqrt(apply(err.person^2, c(3, 2), mean, na.rm = TRUE))
+
+  # mean and MC sd
+  rmse.person <- apply(rmse.rep.person, 2, mean, na.rm = TRUE)
+  mc.sd.person  <- apply(rmse.rep.person, 2, sd, na.rm = TRUE)
+
+  person = list(
+    rmse = rmse.person,
+    mc.sd.rmse = mc.sd.person,
+    bias = bias.person
+  )
 
   # error array item x parameter x replication
-  err <- simplify2array(lapply(out, function(x) {
+  err.item <- simplify2array(lapply(out, function(x) {
     cbind(
       alpha  = x$err.alpha,
       beta   = x$err.beta,
@@ -243,20 +255,26 @@ comp_mse <- function(N,
   }))
 
   # pooled bias per parameter
-  bias.items <- apply(err, 2, mean, na.rm = TRUE)
+  bias.item <- apply(err.item, 2, mean, na.rm = TRUE)
 
-  # pooled MSE per parameter
-  mse.items <- apply(err^2, 2, mean, na.rm = TRUE)
+  # pooled RMSE per replication
+  rmse.rep.item <- sqrt(apply(err.item^2, c(3, 2), mean, na.rm = TRUE))
 
-  # Monte Carlo SD (over replications) of MSE per parameter
-  mse.rep <- apply(err^2, c(3, 2), mean, na.rm = TRUE)
-  mc.sd.mse  <- apply(mse.rep, 2, sd, na.rm = TRUE)
+  # mean and MC sd
+  rmse.item <- apply(rmse.rep.item, 2, mean, na.rm = TRUE)
+  mc.sd.item  <- apply(rmse.rep.item, 2, sd, na.rm = TRUE)
 
-  # variance
-  var.items  <- mse.items - bias.items^2
+  # compile item
+  item = list(
+    rmse = rmse.item,
+    mc.sd.rmse = mc.sd.item,
+    bias = bias.item
+  )
 
   # full error data
-  err.dat <- do.call(rbind, Map(function(x, r) {
+  if (keep.err.dat) {
+
+  err.item <- do.call(rbind, Map(function(x, r) {
 
     data.frame(
       rep     = r,
@@ -273,6 +291,23 @@ comp_mse <- function(N,
 
   }, out, seq_along(out)))
 
+  err.person <- do.call(rbind, Map(function(x, r) {
+
+    data.frame(
+      rep     = r,
+      par     = rep(c("theta","zeta"),
+                    times = c(length(x$err.theta),
+                              length(x$err.zeta))),
+      sim.val = c(x$sim.theta, x$sim.zeta),
+      err     = c(x$err.theta, x$err.zeta),
+      stringsAsFactors = FALSE
+    )
+
+  }, out, seq_along(out)))
+  } else {
+    err.item <- err.person <- NULL
+  }
+
   # convergence rates
   conv.rate = as.data.frame(t(sapply(out, FUN = function(x) {
     x$conv.rate
@@ -283,16 +318,13 @@ comp_mse <- function(N,
   gc()
 
   # return output
-  return(
-    c(list(mse.person = mse.person),
-      list(mse.items = mse.items),
-      list(mc.sd.mse = mc.sd.mse),
-      list(bias.items = bias.items),
-      list(var.items = var.items),
-      list(conv.rate = conv.rate),
-      list(err.dat = err.dat))
-  )
-
+  output <- c(list(person = person),
+              list(item = item),
+              list(conv.rate = conv.rate),
+              list(err.dat = list(
+                person = err.person,
+                item = err.item)))
+  class(output) <- "sspLNIRT.object"
+  return(output)
 }
-
 

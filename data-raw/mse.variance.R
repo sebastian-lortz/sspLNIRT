@@ -130,6 +130,7 @@ print(time.taken)
 
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 
 L = nrow(design)
 
@@ -184,7 +185,6 @@ mse.data <- data.frame(
   parameter = factor(rep(c("alpha", "beta", "phi", "lambda", "sigma2"), each = L*100)),
   mse = unlist(dplyr::bind_rows(list.mse)), row.names = NULL)
 
-
 sum.stats <- mse.data %>%
   summarise(
     mu  = mean(mse),
@@ -206,9 +206,9 @@ cond_labs <- setNames(cond_labels, levels(mse.data$condition))
 
 # density plot
 mse.data <- mse.data %>%
-  filter(condition == 1 |
-         condition == 2 |
-         condition == 3)
+  filter(condition == 3 |
+         condition == 6 |
+         condition == 9)
 
 ggplot(mse.data , aes(x = mse, fill = condition)) +
   geom_density(alpha = .5) +
@@ -247,7 +247,7 @@ ggplot(data  = sum.stats %>%
 
 # rel.sd plots
 ggplot(data  = sum.stats %>%
-         filter(condition %in% c(3, 6, 9)) %>%
+         filter(condition %in% c(1, 3, 3)) %>%
          mutate(across(c(sd, rel.sd), ~round(.x, 5))),
        mapping = aes(x = condition, y = rel.sd, group = 1)) +
   geom_line() +
@@ -329,6 +329,13 @@ mse.conv.plot <- ggplot(
     x = "Number of Posterior Samples (XG)"
   )
 
+gg.conv <- gg.conv %>%
+  mutate(condition = factor(condition, levels = sort(unique(condition)), labels = sort(unique(condition))))
+
+mse.conv.plot <- ggplot(gg.conv, aes(x = conv, fill = condition)) +
+  geom_density(alpha = 0.5, color = "grey20", linewidth = 0.3) +
+  scale_fill_grey(name = "Posterior samples (XG)", start = 0.85, end = 0.25) +
+  labs(x = "Convergence Rate", y = "Density")
 
 library(patchwork)
 

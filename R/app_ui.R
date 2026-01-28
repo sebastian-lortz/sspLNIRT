@@ -2,18 +2,45 @@
 #'
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
-#' @import shiny
+#' @import shiny bslib
 #' @noRd
 app_ui <- function(request) {
   tagList(
-    # Leave this function for adding external resources
     golem_add_external_resources(),
-    # Your application UI logic
+
     fluidPage(
-      golem::golem_welcome_page() # Remove this line to start building your UI
+      bslib::navset_tab(
+        id = "tab",
+
+        bslib::nav_panel(
+          title = "home",
+          # put whatever you want on the home tab
+          h2("Welcome"),
+          p("Use the tabs to navigate.")
+        ),
+
+        # precomputed data
+        bslib::nav_panel(
+          title = "Precomputations",
+          mod_ssp_data_ui("ssp_data")
+        ),
+
+        # customizable functions
+        bslib::nav_panel(
+          title = "Custom Functions",
+          mod_ssp_custom_ui("ssp_custom")
+        ),
+
+        # about the app
+        bslib::nav_panel(
+          title = "about",
+          shiny::includeMarkdown("/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/about.md")
+        )
+      )
     )
   )
 }
+
 
 #' Add external Resources to the Application
 #'

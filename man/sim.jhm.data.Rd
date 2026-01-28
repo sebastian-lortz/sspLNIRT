@@ -15,11 +15,7 @@ sim.jhm.data(
   cov.m.item = matrix(c(0.2, 0, 0, 0, 0, 0.5, -0.35, -0.15, 0, -0.35, 0.5, 0.15, 0,
     -0.15, 0.15, 0.2), ncol = 4, byrow = TRUE),
   sdlog.sigma2 = 0.2,
-  scale = TRUE,
-  random.item = TRUE,
   item.pars.m = NULL,
-  item.seed = NULL,
-  person.seed = NULL,
   cor2cov.item = FALSE,
   sd.item = NULL
 )
@@ -43,15 +39,7 @@ sim.jhm.data(
 
 \item{sdlog.sigma2}{Numeric. The sdlog of sigma2}
 
-\item{scale}{Logical. Weather the item and person parameters are scaled.}
-
-\item{random.item}{Logical. Weather the item parameters are sampled.}
-
 \item{item.pars.m}{Matrix. (optional) A Matrix containing item parameters.}
-
-\item{item.seed}{Integer. (optional) Seed for drawing samples from item parameter distributions.}
-
-\item{person.seed}{Integer. (optional) Seed for drawing samples from person parameter distributions.}
 
 \item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied}
 
@@ -75,21 +63,19 @@ time.
 \examples{
  \dontrun{
 test.data <- sim.jhm.data(iter = 2,
-                         N = 50,
+                         N = 100,
                          I = 10,
                          mu.person = c(0,0),
-                         mu.item = c(1,0,4,0),
+                         mu.item = c(1,0,1,0),
                          meanlog.sigma2 = log(.3),
-                         cov.m.person = matrix(c(1,.5,
-                                                 .5,1), ncol = 2, byrow = TRUE),
+                         cov.m.person = matrix(c(1,0.5,
+                                                 0.5,1), ncol = 2, byrow = TRUE),
                          cov.m.item = matrix(c(.2, 0, 0, 0,
-                                               0, .5, -.35, -.15,
-                                               0, -.35, .5, .15,
-                                               0, -.15, .15, .2), ncol =  4, byrow = TRUE),
-                         sdlog.sigma2 = 0.2,
-                         item.seed = 456,
-                         person.seed = NULL
-                         )$person.par
+                                               0, .5, 0, 0,
+                                               0, 0, .5, 0,
+                                               0, 0, 0, .2), ncol =  4, byrow = TRUE),
+                         sdlog.sigma2 = 0.2
+                         )
 }
 
 }

@@ -15,7 +15,7 @@ Sys.setenv(
 options(repos=c(CRAN="https://ftp.belnet.be/mirror/CRAN/"))
 
 # setup for HPC or local
-HPC = TRUE
+HPC = FALSE
 
 if (HPC) {
   # set root path
@@ -164,7 +164,7 @@ mse.data <- data.frame(condition = rep(1:64, each = 7),
 out.data <- cbind(sum_conv, mse.list)
 
 # design parameters
-x_vars <- names(out.data)[1:6]
+x_vars <- names(out.data)[1:5]
 
 make_plot <- function(df, x, param, predictors = x_vars, show_legend = FALSE) {
   others <- setdiff(predictors, x)
@@ -206,3 +206,5 @@ cond_grid("phi")
 cond_grid("lambda")
 cond_grid("theta")
 cond_grid("zeta")
+
+

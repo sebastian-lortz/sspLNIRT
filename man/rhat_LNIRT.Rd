@@ -4,7 +4,7 @@
 \alias{rhat_LNIRT}
 \title{Rhat for LNIRT objects}
 \usage{
-rhat_LNIRT(object.list, chains = 4, cutoff = 1.01)
+rhat_LNIRT(object.list, chains = 4, cutoff = 1.05)
 }
 \arguments{
 \item{object.list}{List. A list containing fitted LNIRT objects.}

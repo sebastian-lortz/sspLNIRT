@@ -9,20 +9,19 @@ comp_mse(
   iter,
   I,
   mu.person = c(0, 0),
-  mu.item = c(1, 0, 4, 0),
-  meanlog.sigma2 = log(0.3),
+  mu.item = c(1, 0, 1, 1),
+  meanlog.sigma2 = log(0.2),
   cov.m.person = matrix(c(1, 0.5, 0.5, 1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(0.2, 0, 0, 0, 0, 0.5, -0.35, -0.15, 0, -0.35, 0.5, 0.15, 0,
     -0.15, 0.15, 0.2), ncol = 4, byrow = TRUE),
   sdlog.sigma2 = 0.2,
-  scale = TRUE,
-  random.item = TRUE,
   item.pars.m = NULL,
-  item.seed = NULL,
-  person.seed = NULL,
   cor2cov.item = FALSE,
   sd.item = NULL,
-  n.cores = NULL
+  XG = 3000,
+  burnin = 20,
+  mse.seed = NULL,
+  keep.err.dat = TRUE
 )
 }
 \arguments{
@@ -44,21 +43,11 @@ comp_mse(
 
 \item{sdlog.sigma2}{Numeric. The sdlog of sigma2}
 
-\item{scale}{Logical. Weather the item and person parameters are scaled.}
-
-\item{random.item}{Logical. Weather the item parameters are sampled.}
-
 \item{item.pars.m}{Matrix. (optional) A Matrix containing item parameters.}
-
-\item{item.seed}{Integer. (optional) Seed for drawing samples from item parameter distributions.}
-
-\item{person.seed}{Integer. (optional) Seed for drawing samples from person parameter distributions.}
 
 \item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied}
 
 \item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda}
-
-\item{n.cores}{Integer. (optional) The number of cores for parallel computation.}
 }
 \value{
 A list of containing:
@@ -81,22 +70,23 @@ time.
 }
 \examples{
  \dontrun{
-comp_mse(
+test = comp_mse(
           iter = 5,
-          N = 5000,
+          N = 100,
           I = 10,
           mu.person = c(0,0),
-          mu.item = c(2,0,4,0),
-          meanlog.sigma2 = log(.3),
-          cov.m.person = matrix(c(1,.5,
-                                  .5,1), ncol = 2, byrow = TRUE),
-                                  cov.m.item = matrix(c(.2, 0, 0, 0,
-                                                        0, .5, -.35, -.15,
-                                                        0, -.35, .5, .15,
-                                                        0, -.15, .15, .2), ncol =  4, byrow = TRUE),
+          mu.item = c(1,0,1,1),
+          meanlog.sigma2 = log(1),
+          cov.m.person = matrix(c(1,0,
+                                  0,1), ncol = 2, byrow = TRUE),
+          cov.m.item = matrix(c(1, 0, 0, 0,
+                                0, 1, 0, 0,
+                                0, 0, 1, 0,
+                                0, 0, 0, 1), ncol =  4, byrow = TRUE),
+          sd.item         = c(.2, 1, .2, .5),
+          cor2cov.item    = TRUE,
           sdlog.sigma2 = 0.2,
-          person.seed = NULL,
-          item.seed = 3456,
-          n.cores = 5)
+          XG = 2000,
+          keep.err.dat = TRUE)
 }
 }
