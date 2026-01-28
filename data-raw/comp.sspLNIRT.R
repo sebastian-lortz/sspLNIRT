@@ -77,8 +77,8 @@ ssp.seed0 <- 310779
 # generate the design conditions
 design <- expand.grid(
   out.par         = c("alpha", "beta", "phi", "lambda"),
-  thresh          = c(.05, .02, .01),
-  K               = c(30, 50),
+  thresh          = c(.2, .1, .05),
+  K               = c(10, 30, 50),
   rho             = c(.2, .4, .6),
   mu.alpha        = c(.6, 1.0, 1.4),
   meanlog.sigma2  = c(log(.2), log(.6), log(1)),
@@ -123,7 +123,8 @@ for (b in seq_along(batches)) {
       cor2cov.item = TRUE,
       sdlog.sigma2 = 0.2,
       XG = 6000,
-      ssp.seed = batch$ssp.seed[i]
+      ssp.seed = batch$ssp.seed[i],
+      rhat = 1.05
     )
     res <- tryCatch(
       do.call(optim_sample, args = arg),

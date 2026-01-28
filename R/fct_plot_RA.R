@@ -26,7 +26,7 @@
 #'             mu.item = c(1,0,1,1),
 #'             sd.item = c(.2, .5, .2, .5),
 #'             meanlog.sigma2 = log(.2),
-#'             I = 20)
+#'             K = 20)
 #'}
 #'
 #' @export
@@ -34,7 +34,7 @@
 plot_RA <- function(level ,
                     by.theta = FALSE,
                     N = 1e5,
-                    I = 20,
+                    K = 20,
                     mu.person = c(0,0),
                     mu.item = c(1,0,1,0),
                     meanlog.sigma2 = log(.3),
@@ -57,7 +57,7 @@ plot_RA <- function(level ,
   # simulate data
   data <- sim.jhm.data(iter = 1,
                        N = N,
-                       I = I,
+                       K = I,
                        mu.person = mu.person,
                        mu.item = mu.item,
                        meanlog.sigma2 = meanlog.sigma2,
