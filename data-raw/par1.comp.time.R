@@ -39,7 +39,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -77,7 +77,7 @@ if (HPC ) {
 # par1 = TRUE
 start.time = Sys.time()
 for (i in 1:20) {
-comp_mse(
+comp_rmse(
   iter = 1,
   N = 100,
   I = 10,
@@ -105,7 +105,7 @@ print(time.taken)
 # par 1 = FALSE
 start.time = Sys.time()
 for (i in 1:20) {
-  comp_mse(
+  comp_rmse(
     iter = 1,
     N = 100,
     I = 10,

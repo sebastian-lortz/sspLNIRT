@@ -4,7 +4,7 @@
 #' multivariate normal distribution for alpha, beta, phi, lambda, and from a
 #' lognormal distribution for sigma2.
 #'
-#' @param I Integer. The test length or number of items.
+#' @param K Integer. The test length or number of items.
 #' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda
 #' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2
@@ -28,7 +28,7 @@
 #' @export
 #'
 
-item.par <- function(I,
+item.par <- function(K,
                      mu.item = c(1,0,4,0),
                      cov.m.item = matrix(c(.2, 0, 0, 0,
                                            0, .5, -.35, -.15,
@@ -41,7 +41,7 @@ item.par <- function(I,
 ) {
 
   # sample sigma2 from lognormal distribution
-  sigma2 <- rlnorm(I, meanlog = meanlog.sigma2, sdlog = sdlog.sigma2)
+  sigma2 <- rlnorm(K, meanlog = meanlog.sigma2, sdlog = sdlog.sigma2)
 
   # if correlation matrix is supplied
   if (cor2cov.item) {
@@ -49,7 +49,7 @@ item.par <- function(I,
   }
 
   # sample alpha, beta, phi, lambda
-  item.pars <- tmvtnorm::rtmvnorm(n = I,
+  item.pars <- tmvtnorm::rtmvnorm(n = K,
                                   mean = mu.item,
                                   sigma = cov.m.item,
                                   lower = c(0, -Inf, 0, -Inf),

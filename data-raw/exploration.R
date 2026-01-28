@@ -38,7 +38,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -70,10 +70,10 @@ if (HPC ) {
 
 # Run the Job -------------------------------------------------------------
 
-exp0 <- comp_mse(
+exp0 <- comp_rmse(
   iter = 200,
   N = 100,
-  I = 10,
+  K = 10,
   mu.person = c(0,0),
   mu.item = c(1,0,1,1),
   meanlog.sigma2 = log(.2),
@@ -89,10 +89,10 @@ exp0 <- comp_mse(
   XG = 6000,
   mse.seed = 123)
 
-exp1 <- comp_mse(
+exp1 <- comp_rmse(
   iter = 200,
   N = 100,
-  I = 10,
+  K = 10,
   mu.person = c(0,0),
   mu.item = c(1,0,1,1),
   meanlog.sigma2 = log(.2),

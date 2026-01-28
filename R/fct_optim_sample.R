@@ -5,12 +5,12 @@
 #' under the Joint Hierarchical Model using a 2-pl normal ogive model for
 #' response accuracy and a 3-pl log-normal model for response time.
 #'
-#' @param FUN Function. The function to calculate the target parameter (default: `comp_mse`).
+#' @param FUN Function. The function to calculate the target parameter (default: `comp_rmse`).
 #' @param thresh Numeric. The desired RMSE threshold of the target parameter to be achieved.
 #' @param range Vector. Integer vector of length 2 specifying the lower and upper bounds of the sample size.
 #' @param out.par Character. The name of the target parameter for the threshold.
 #' @param iter Integer. The number of iterations or the number of data sets.
-#' @param I Integer. The test length.
+#' @param K Integer. The test length.
 #' @param mu.person Numeric vector. Means of theta and zeta.
 #' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda.
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
@@ -30,19 +30,19 @@
 #' \describe{
 #'   \item{N.best}{Integer (or character if bounds not met). The minimum sample size achieving the threshold.}
 #'   \item{res.best}{Numeric. The RMSE result at the optimal N.}
-#'   \item{comp.mse}{List. The full output from `comp_mse` at the optimal N.}
+#'   \item{comp.mse}{List. The full output from `comp_rmse` at the optimal N.}
 #'   \item{trace}{List containing optimization diagnostics: `steps` (integer), `track.res` (data frame), `track.N` (data frame), and `time.taken` (difftime).}
 #' }
 #'
 #' @examples
 #' \dontrun{
 #' test.optim.sample <- optim_sample(
-#'   FUN = comp_mse,
+#'   FUN = comp_rmse,
 #'   thresh = .1,
 #'   range = c(100, 500),
 #'   out.par = "alpha",
 #'   iter = 5,
-#'   I = 10,
+#'   K = 10,
 #'   mu.person = c(0, 0),
 #'   mu.item = c(1, 0, 1, 0),
 #'   meanlog.sigma2 = log(.3),
@@ -58,12 +58,13 @@
 #' )
 #' }
 #' @export
-optim_sample <- function(FUN = comp_mse,
+#'
+optim_sample <- function(FUN = comp_rmse,
                          thresh,
                          range,
                          out.par = 'alpha',
                          iter = 100,
-                         I = 10,
+                         K = 10,
                          mu.person = c(0,0),
                          mu.item = c(1,0,1,1),
                          meanlog.sigma2 = log(.6),
@@ -97,7 +98,7 @@ optim_sample <- function(FUN = comp_mse,
     FUN.out <- FUN(
       N = newN,
       iter = iter,
-      I = I,
+      K = K,
       mu.person = mu.person,
       mu.item = mu.item,
       meanlog.sigma2 = meanlog.sigma2,

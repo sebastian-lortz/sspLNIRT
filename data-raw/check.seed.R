@@ -39,7 +39,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -86,10 +86,10 @@ if (is.na(design$seed1[i])) {
   seed = design$seed1[i]
 }
   print(seed)
-res.mse.seeds[[i]] <- comp_mse(
+res.mse.seeds[[i]] <- comp_rmse(
                                 N = 250,
                                 iter = 6,
-                                I = 15,
+                                K = 15,
                                 mu.person = c(0,0),
                                 mu.item = c(1,0,1,0),
                                 meanlog.sigma2 = log(.2),
@@ -106,13 +106,13 @@ res.mse.seeds[[i]] <- comp_mse(
                                 mse.seed = seed)
 
 res.ssp.seeds[[i]] <- optim_sample(
-  FUN = comp_mse,
+  FUN = comp_rmse,
   thresh = .02,
   lb = 100,
   ub = 400,
   out.par = 'mse.alpha',
   iter = 6,
-  I = 15,
+  K = 15,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.2),

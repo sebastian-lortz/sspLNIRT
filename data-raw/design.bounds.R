@@ -38,7 +38,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -74,7 +74,7 @@ if (HPC ) {
 
 # generate the design conditions for low and high N
 design <- expand.grid(
-  I = c(30,50),
+  K = c(30,50),
   N = c(100, 2000),
   mu.alpha = c(.6, 1.4),
   meanlog.sigma2 = c(log(.2), log(1)),
@@ -95,10 +95,10 @@ rho = design$rho[i]
 cor.item = design$cor.item[i]
 mu.alpha = design$mu.alpha[i]
 # comp MSE
-res <- comp_mse(
+res <- comp_rmse(
           iter = 1000,
           N = N,
-          I = I,
+          K = K,
           mu.person = c(0,0),
           mu.item = c(mu.alpha,0,1,1),
           meanlog.sigma2 = meanlog.sigma2,

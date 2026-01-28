@@ -6,7 +6,7 @@
 #'
 #' @param iter Integer. The number of iteration or the number of data sets.
 #' @param N Integer. The sample size.
-#' @param I Integer. The test length.
+#' @param K Integer. The test length.
 #' @param mu.person Numeric vector. Means of theta and zeta
 #' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
@@ -30,7 +30,7 @@
 #'  \dontrun{
 #' test.data <- sim.jhm.data(iter = 2,
 #'                          N = 100,
-#'                          I = 10,
+#'                          K = 10,
 #'                          mu.person = c(0,0),
 #'                          mu.item = c(1,0,1,0),
 #'                          meanlog.sigma2 = log(.3),
@@ -49,7 +49,7 @@
 
 sim.jhm.data <- function(iter,
                          N,
-                         I,
+                         K,
                          mu.person = c(0,0),
                          mu.item = c(1,0,4,0),
                          meanlog.sigma2 = log(.3),
@@ -78,7 +78,7 @@ sim.jhm.data <- function(iter,
 
     # item parameters
     if (is.null(item.pars.m)) {
-      item <- item.par(I = I,
+      item <- item.par(K = K,
                        mu.item = mu.item,
                        cov.m.item = cov.m.item,
                        meanlog.sigma2 = meanlog.sigma2,
@@ -98,18 +98,18 @@ sim.jhm.data <- function(iter,
       person <- scaled.pars$person.pars.scaled
 
     # open output matrix
-    time <- response <- matrix(nrow = N, ncol =  I)
-    colnames(time) <- colnames(response) <- paste0("Item", seq_len( I))
+    time <- response <- matrix(nrow = N, ncol =  K)
+    colnames(time) <- colnames(response) <- paste0("Item", seq_len(K))
 
     # generate RA using 2par normal ogive model
-    for (i in 1:I) {
+    for (i in 1:K) {
       response[,i] <- rbinom(N,
                              1,
                              prob = pnorm(item$alpha[i] * (person$theta - item$beta[i])))
     }
 
     # generate RT using 3par lognormal model
-    for (r in 1:I) {
+    for (r in 1:K) {
       time[,r] <- item$lambda[r] - item$phi[r] * person$zeta + rnorm(N, 0, sqrt(item$sigma2[r]))
     }
 

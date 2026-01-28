@@ -36,7 +36,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -71,10 +71,10 @@ if (HPC ) {
 
 
 # no cor between alpha and beta
-res.no.cor <- comp_mse(
+res.no.cor <- comp_rmse(
     iter = 1000,
     N = 250,
-    I = 30,
+    K = 30,
     mu.person = c(0,0),
     mu.item = c(1,0,1,0),
     meanlog.sigma2 = log(.6),
@@ -95,10 +95,10 @@ res.no.cor <- comp_mse(
 saveRDS(res.no.cor, paste0(save.dir, "res.no.cor"))
 
 # no cor between alpha and beta for large test length
-res.no.cor2 <- comp_mse(
+res.no.cor2 <- comp_rmse(
   iter = 1000,
   N = 250,
-  I = 50,
+  K = 50,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.6),
@@ -117,10 +117,10 @@ res.no.cor2 <- comp_mse(
 saveRDS(res.no.cor2, paste0(save.dir, "res.no.cor.I50"))
 
 # cor between alpha and beta
-res.cor <- comp_mse(
+res.cor <- comp_rmse(
     iter = 1000,
     N = 250,
-    I = 30,
+    K = 30,
     mu.person = c(0,0),
     mu.item = c(1,0,1,0),
     meanlog.sigma2 = log(.6),
@@ -141,10 +141,10 @@ res.cor <- comp_mse(
 saveRDS(res.cor, paste0(save.dir, "res.cor.alpha.beta"))
 
 # cor between beta and lambda
-res.cor2 <- comp_mse(
+res.cor2 <- comp_rmse(
   iter = 1000,
   N = 250,
-  I = 30,
+  K = 30,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.6),
@@ -165,10 +165,10 @@ res.cor2 <- comp_mse(
 saveRDS(res.cor2, paste0(save.dir, "res.cor.beta.lambda"))
 
 # cor between beta and lambda for large test length
-res.cor3 <- comp_mse(
+res.cor3 <- comp_rmse(
   iter = 1000,
   N = 250,
-  I = 50,
+  K = 50,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.6),
@@ -189,10 +189,10 @@ res.cor3 <- comp_mse(
 saveRDS(res.cor3, paste0(save.dir, "res.cor.beta.lambda.I50"))
 
 # cor between alpha and beta for long tests
-res.cor4 <- comp_mse(
+res.cor4 <- comp_rmse(
   iter = 1000,
   N = 250,
-  I = 50,
+  K = 50,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.6),
@@ -213,10 +213,10 @@ res.cor4 <- comp_mse(
 saveRDS(res.cor4, paste0(save.dir, "res.cor.alpha.beta.I50"))
 
 # cor between alpha, beta and lambda
-res.cor5 <- comp_mse(
+res.cor5 <- comp_rmse(
   iter = 1000,
   N = 250,
-  I = 30,
+  K = 30,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.6),
@@ -237,10 +237,10 @@ res.cor5 <- comp_mse(
 saveRDS(res.cor5, paste0(save.dir, "res.cor.alpha.beta.lambda"))
 
 # cor between alpha, beta and lambda for long test lengths
-res.cor6 <- comp_mse(
+res.cor6 <- comp_rmse(
   iter = 1000,
   N = 250,
-  I = 50,
+  K = 50,
   mu.person = c(0,0),
   mu.item = c(1,0,1,0),
   meanlog.sigma2 = log(.6),
@@ -328,4 +328,4 @@ ggplot(data = ggdat.I50, aes(x = condition, y = mse, group = parameter)) +
 ggplot(data = ggdat, aes(x = condition, y = mse, group = parameter)) +
   geom_line(aes(color = parameter)) +
   geom_point()
-# approximately similar for I = 30
+# approximately similar for K = 30

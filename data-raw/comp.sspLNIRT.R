@@ -41,7 +41,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -78,7 +78,7 @@ ssp.seed0 <- 310779
 design <- expand.grid(
   out.par         = c("alpha", "beta", "phi", "lambda"),
   thresh          = c(.05, .02, .01),
-  I               = c(30, 50),
+  K               = c(30, 50),
   rho             = c(.2, .4, .6),
   mu.alpha        = c(.6, 1.0, 1.4),
   meanlog.sigma2  = c(log(.2), log(.6), log(1)),
@@ -109,7 +109,7 @@ for (b in seq_along(batches)) {
       range = c(50, 1000),
       out.par = as.character(batch$out.par[i]),
       iter = 5,
-      I = batch$I[i],
+      K = batch$I[i],
       mu.person = c(0, 0),
       mu.item = c(batch$mu.alpha[i], 0, 1, 1),
       meanlog.sigma2 = batch$meanlog.sigma2[i],

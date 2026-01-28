@@ -40,7 +40,7 @@ if (HPC) {
 
 # required functions
 fct.names <- list(
-  "R/fct_comp_mse.R",
+  "R/fct_comp_rmse.R",
   "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
@@ -91,10 +91,10 @@ for (i in 1:nrow(design)) {
   XG <- design$XG[i]
 
   for (k in 1:100) {
-    res <- comp_mse(
+    res <- comp_rmse(
       N = 250,
       iter = iter,
-      I = 30,
+      K = 30,
       mu.person = c(0,0),
       mu.item = c(1,0,1,1),
       meanlog.sigma2 = log(.6),

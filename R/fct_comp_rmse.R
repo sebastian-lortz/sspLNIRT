@@ -7,7 +7,7 @@
 #'
 #' @param N Integer. The sample size.
 #' @param iter Integer. The number of iterations or the number of data sets.
-#' @param I Integer. The test length.
+#' @paramK Integer. The test length.
 #' @param mu.person Numeric vector. Means of theta and zeta.
 #' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda.
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
@@ -33,10 +33,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' test <- comp_mse(
+#' test <- comp_rmse(
 #'   iter = 5,
 #'   N = 100,
-#'   I = 10,
+#'  K = 10,
 #'   mu.person = c(0, 0),
 #'   mu.item = c(1, 0, 1, 1),
 #'   meanlog.sigma2 = log(1),
@@ -51,9 +51,9 @@
 #' )
 #' }
 #' @export
-comp_mse <- function(N,
+comp_rmse <- function(N,
                      iter,
-                     I,
+                     K,
                      mu.person = c(0,0),
                      mu.item = c(1,0,1,1),
                      meanlog.sigma2 = log(.2),
@@ -92,7 +92,7 @@ comp_mse <- function(N,
         # simulate data
         data <- sim.jhm.data(iter = 1,
                              N = N,
-                             I = I,
+                             K = K ,
                              mu.person = mu.person,
                              mu.item = mu.item,
                              meanlog.sigma2 = meanlog.sigma2,
