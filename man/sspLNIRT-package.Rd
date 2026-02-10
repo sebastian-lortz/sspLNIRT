@@ -9,7 +9,7 @@
 Sample size planning tools for the Joint Hierarchical Model using a 2-PL normal ogive model for response accuracy and a 3-PL log-normal model for response time, estimated via the LNIRT package.
 }
 \author{
-\strong{Maintainer}: Sebastian Alexander Johannes Lortz \email{s.a.j.lortz@gmail.com}
+\strong{Maintainer}: Sebastian Alexander Jens Lortz \email{s.a.j.lortz@gmail.com}
 
 }
 \keyword{internal}

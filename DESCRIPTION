@@ -1,6 +1,7 @@
 Package: sspLNIRT
 Title: Sample Size Planning for Item Calibration using the Joint Hierarchical Model
 Version: 0.0.0.9000
+Data: 2026
 Authors@R: 
     person(given = "Sebastian Alexander Jens",
            family = "Lortz",
