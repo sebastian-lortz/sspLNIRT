@@ -290,7 +290,7 @@ mod_ssp_data_ui <- function(id) {
             icon  = bsicons::bs_icon("graph-up"),
 
             shiny::div(
-              style = "height: 62vh; overflow-y: auto;",
+              style = "height: 62vh; overflow: auto;",
               bslib::navset_pill(
 
                 # === Precision panel (FIRST) ===
@@ -316,7 +316,7 @@ mod_ssp_data_ui <- function(id) {
                           selected = "rmse"
                         )
                       ),
-                      shiny::plotOutput(ns("plot3"), height = "35vh")
+                      shiny::plotOutput(ns("plot3"), height = "40vh")
                     )
                   )
                 ),
@@ -329,7 +329,7 @@ mod_ssp_data_ui <- function(id) {
                   bslib::card(
                     bslib::card_header("Power Curve of Optimization Steps", class = "bg-light"),
                     bslib::card_body(
-                      shiny::plotOutput(ns("plot4"), height = "45vh")
+                      shiny::plotOutput(ns("plot4"), height = "40vh")
                     )
                   )
                 ),
@@ -340,7 +340,7 @@ mod_ssp_data_ui <- function(id) {
                   icon  = bsicons::bs_icon("clock"),
 
                   bslib::card(
-                    bslib::card_header("Response Time Distribution at Optimal N", class = "bg-light"),
+                    bslib::card_header("Response Time Distribution at Minimum N", class = "bg-light"),
                     bslib::card_body(
                       bslib::layout_columns(
                         col_widths = c(4, 4, 4),
@@ -366,7 +366,7 @@ mod_ssp_data_ui <- function(id) {
                           )
                         )
                       ),
-                      shiny::plotOutput(ns("plot1"), height = "35vh")
+                      shiny::plotOutput(ns("plot1"), height = "40vh")
                     )
                   )
                 ),
@@ -377,7 +377,7 @@ mod_ssp_data_ui <- function(id) {
                   icon  = bsicons::bs_icon("check-circle"),
 
                   bslib::card(
-                    bslib::card_header("Response Accuracy Distribution at Optimal N", class = "bg-light"),
+                    bslib::card_header("Response Accuracy Distribution at Minimum N", class = "bg-light"),
                     bslib::card_body(
                       bslib::layout_columns(
                         col_widths = c(4, 4, 4),
@@ -403,7 +403,7 @@ mod_ssp_data_ui <- function(id) {
                           )
                         )
                       ),
-                      shiny::plotOutput(ns("plot2"), height = "35vh")
+                      shiny::plotOutput(ns("plot2"), height = "40vh")
                     )
                   )
                 )
@@ -611,6 +611,7 @@ mod_ssp_data_server <- function(id) {
         sdlog.sigma2 = cfg$sdlog.sigma2,
         cor2cov.item = cfg$cor2cov.item
       )
+
     }, res = 120)
 
     # ============================================
@@ -634,6 +635,7 @@ mod_ssp_data_server <- function(id) {
         y.val = input$precision_yval,
         n.bins = 30
       )
+
     }, res = 120)
 
     # ============================================

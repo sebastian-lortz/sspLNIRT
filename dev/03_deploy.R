@@ -46,6 +46,19 @@ golem::add_shinyappsio_file()
 
 ## Deploy to Posit Connect or ShinyApps.io ----
 
+# install own package from Git and snapshot
+# FIRST find and delete all .o .so files
+# find . -type f -name '*.so'
+# find . -type f -name '*.o'
+# ./src/discourse.so
+# rm ./src/discourse.so
+
+# THEN commit and push!
+
+#renv::install("rstudio/rsconnect")
+renv::install("github::sebastian-lortz/sspLNIRT")
+renv::snapshot(prompt = FALSE)
+
 ## Add/update manifest file (optional; for Git backed deployment on Posit )
 rsconnect::writeManifest()
 
@@ -57,7 +70,8 @@ rsconnect::setAccountInfo(name='sebastian-lortz',
                           secret='Z31qmjL4VXZYShJHwbNhBQMoLlHGGLycUcjz8m+r')
 
 # deploy
-remotes::install_github("yourusername/sspLNIRT")
+
+#options(rsconnect.dependency.lock = FALSE)
 
 rsconnect::deployApp(
   appName  = "sspLNIRT",

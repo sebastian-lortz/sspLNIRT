@@ -23,7 +23,8 @@ Imports:
     shiny,
     shinyMatrix,
     tmvtnorm,
-    markdown
+    markdown,
+    plotly
 Suggests: 
     knitr,
     spelling,

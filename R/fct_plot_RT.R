@@ -26,7 +26,7 @@
 #'            mu.item = c(1, 0, .4, 1),
 #'            sd.item = c(.2, 1, .2, .5),
 #'            meanlog.sigma2 = log(1),
-#'            K = 1,
+#'            K = 30,
 #'            logRT = FALSE)
 #' }
 #'
