@@ -50,14 +50,15 @@ golem::add_shinyappsio_file()
 rsconnect::writeManifest()
 
 # one-time: install rsconnect if needed
-install.packages("rsconnect")
-
+#install.packages("rsconnect")
 
 rsconnect::setAccountInfo(name='sebastian-lortz',
                           token='E49AD05B5F9E8CDCE2462D3590F39BC1',
                           secret='Z31qmjL4VXZYShJHwbNhBQMoLlHGGLycUcjz8m+r')
 
 # deploy
+remotes::install_github("yourusername/sspLNIRT")
+
 rsconnect::deployApp(
   appName  = "sspLNIRT",
   appTitle = "sspLNIRT",
