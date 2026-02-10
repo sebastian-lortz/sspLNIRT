@@ -1,7 +1,5 @@
-about
+About the Project
 ================
-
-## About the Project
 
 I introduce the sspLNIRT app … . It is available as R package and shiny
 app via Github page: <link>

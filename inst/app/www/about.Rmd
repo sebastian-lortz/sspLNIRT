@@ -1,9 +1,8 @@
 ---
-title: "about"
+title: "About the Project"
 output: html_document
 ---
 
-## About the Project
 
 I introduce the sspLNIRT app ... .  It is available as R package and shiny app via Github page: <link>
 
