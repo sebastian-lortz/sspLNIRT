@@ -34,7 +34,7 @@ app_ui <- function(request) {
         # about the app
         bslib::nav_panel(
           title = "about",
-          shiny::includeMarkdown("/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/about.md")
+          shiny::includeMarkdown(system.file("app/www/about.md", package = "sspLNIRT"))
         )
       )
     )
