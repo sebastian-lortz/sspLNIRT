@@ -1,168 +1,148 @@
-#' Plot the simulated response time data on the population level
+#' Plot the simulated response time data
 #'
-#' The function simulates data under the the Joint Hierarchical Model using a
+#' The function simulates data under the Joint Hierarchical Model using a
 #' 2-pl normal ogive model for response accuracy and a 3-pl log-normal model for response
 #' time, and plots the resulting response time data.
 #'
-#' @param iter Integer. The number of iteration or the number of data sets.
+#' @param level String. Either "person" or "item".
+#' @param logRT Logical. Whether to plot on the log-RT scale.
 #' @param N Integer. The sample size.
-#' @param I Integer. The test length.
-#' @param mu.person Numeric vector. Means of theta and zeta
-#' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda
+#' @param K Integer. The test length.
+#' @param mu.person Numeric vector. Means of theta and zeta.
+#' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda.
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
-#' @param cov.m.person Matrix. The covariance matrix of theat and zeta
-#' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
-#' @param sdlog.sigma2 Numeric. The sdlog of sigma2
-#' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
-#' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
-#' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
+#' @param cov.m.person Matrix. The covariance matrix of theta and zeta.
+#' @param cov.m.item Matrix. The covariance matrix of alpha, beta, phi, and lambda.
+#' @param sd.item Numeric vector. The standard deviations of alpha, beta, phi, and lambda.
+#' @param sdlog.sigma2 Numeric. The sdlog of sigma2.
+#' @param item.pars.m Matrix (optional). A matrix containing item parameters.
+#' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied.
 #'
-#' @return A ggplot object
+#' @return A ggplot object.
 #'
 #' @examples
 #'  \dontrun{
-#'     plot_RT(level = "item",
-#'             mu.item = c(1,0,1,1),
-#'             sd.item = c(.2, 1, .2, .5),
-#'             meanlog.sigma2 = log(.2),
-#'             K = 9,
-#'             logRT = FALSE)
-#'}
+#'    plot_RT(level = "item",
+#'            mu.item = c(1, 0, .4, 1),
+#'            sd.item = c(.2, 1, .2, .5),
+#'            meanlog.sigma2 = log(1),
+#'            K = 1,
+#'            logRT = FALSE)
+#' }
 #'
 #' @export
 #'
-plot_RT <- function(level ,
-                         logRT = FALSE,
-                         N = 1e5,
-                         K = 20,
-                         mu.person = c(0,0),
-                         mu.item = c(1,0,1,0),
-                         meanlog.sigma2 = log(.3),
-                         cov.m.person = matrix(c(1,.5,
-                                                 .5,1), ncol = 2, byrow = TRUE),
-                         cov.m.item = matrix(c(1, 0, 0, 0,
-                                               0, 1, 0, 0,
-                                               0, 0, 1, 0,
-                                               0, 0, 0, 1), ncol =  4, byrow = TRUE),
-                         sd.item = c(.2, 1, .2, .5),
-                         sdlog.sigma2 = 0.2,
-                         item.pars.m = NULL,
-                         cor2cov.item = TRUE
-                       ) {
+plot_RT <- function(level,
+                    logRT = FALSE,
+                    N = 1e5,
+                    K = 20,
+                    mu.person = c(0, 0),
+                    mu.item = c(1, 0, 1, 0),
+                    meanlog.sigma2 = log(.3),
+                    cov.m.person = matrix(c(1, .5,
+                                            .5, 1), ncol = 2, byrow = TRUE),
+                    cov.m.item = matrix(c(1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0, 1, 0,
+                                          0, 0, 0, 1), ncol = 4, byrow = TRUE),
+                    sd.item = c(.2, 1, .2, .5),
+                    sdlog.sigma2 = 0.2,
+                    item.pars.m = NULL,
+                    cor2cov.item = TRUE) {
 
-  require(ggplot2)
-  require(dplyr)
-  require(sspLNIRT)
+  # --- input checks ---
+  level <- match.arg(level, choices = c("person", "item"))
 
+  # --- simulate data ---
+  data <- sim.jhm.data(iter = 1,
+                       N = N, K = K,
+                       mu.person = mu.person,
+                       mu.item = mu.item,
+                       meanlog.sigma2 = meanlog.sigma2,
+                       cov.m.person = cov.m.person,
+                       cov.m.item = cov.m.item,
+                       sdlog.sigma2 = sdlog.sigma2,
+                       item.pars.m = item.pars.m,
+                       cor2cov.item = cor2cov.item,
+                       sd.item = sd.item,
+                       scale = FALSE)
 
-    # simulate data
-    data <- sim.jhm.data(iter = 1,
-                         N = N,
-                         K = I,
-                         mu.person = mu.person,
-                         mu.item = mu.item,
-                         meanlog.sigma2 = meanlog.sigma2,
-                         cov.m.person = cov.m.person,
-                         cov.m.item = cov.m.item,
-                         sdlog.sigma2 = sdlog.sigma2,
-                         item.pars.m = item.pars.m,
-                         cor2cov.item = cor2cov.item,
-                         sd.item = sd.item)
+  logRT.data <- as.data.frame(data$time.data)
+  RT.data    <- exp(logRT.data)
 
-    # get RT
-    logRT.data <- as.data.frame(data$time.data)
-    RT.data    <- exp(logRT.data)
+  # --- person level: aggregate over items ---
+  if (level == "person") {
 
-    # person level, aggregate over items
-    if (level == "person") {
-
-      if (logRT) {
-        dat  <- data.frame(logRT = rowMeans(logRT.data))
-        X    <- "logRT"
-        head <- "Log response time of persons over items"
-      } else {
-        dat  <- data.frame(RT = rowMeans(RT.data))
-        X    <- "RT"
-        head <- "Response time of persons over items"
-      }
-
-      # quantiles
-      probs <- c(.01, .1, .5, .9, .99)
-      quant <- apply(dat, 2, function(x) quantile(x, probs))
-      quant_df <- data.frame(
-        q        = as.numeric(quant),
-        quantile = paste0(probs)
-      )
-      lims <- apply(dat, 2, function(x) quantile(x, c(.01, .99)))
-
-      p <- ggplot(dat, aes(x = .data[[X]])) +
-        geom_density() +
-        geom_vline(
-          data = quant_df,
-          aes(xintercept = q, colour = quantile),
-          linetype = "dashed",
-          linewidth = 0.6
-        ) +
-        scale_colour_grey(start = 0.1, end = 0.5) +  # Same as in plot_RA
-        xlim(lims) +
-        labs(
-          x      = if (logRT) "Log response time" else "Response time in seconds",
-          y      = "Density",
-          colour = "Quantiles"
-        ) +
-        ggtitle(head)
-
-      return(p)
+    if (logRT) {
+      dat  <- data.frame(val = rowMeans(logRT.data))
+      lims <- c(NA_real_, NA_real_)
+      x_lab <- "Log response time"
+    } else {
+      dat  <- data.frame(val = rowMeans(RT.data))
+      lims <- c(0, stats::quantile(dat$val, 0.99))
+      x_lab <- "Response time in seconds"
     }
 
-    # item level
-    if (level == "item") {
+    probs    <- c(.01, .1, .5, .9, .99)
+    quant_df <- data.frame(
+      q        = as.numeric(stats::quantile(dat$val, probs)),
+      quantile = factor(probs)
+    )
 
-      # choose log
-      mat_sub <- if (logRT) logRT.data else RT.data
+    p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data[["val"]])) +
+      ggplot2::geom_density(fill = "grey80", colour = "grey30", alpha = 0.6) +
+      ggplot2::geom_vline(
+        data    = quant_df,
+        ggplot2::aes(xintercept = q, colour = quantile),
+        linetype = "dashed", linewidth = 0.5
+      ) +
+      ggplot2::scale_colour_viridis_d(option = "D", end = 0.85) +
+      ggplot2::coord_cartesian(xlim = lims) +
+      ggplot2::labs(
+        x      = x_lab,
+        y      = "Density",
+        colour = "Quantile",
+        title  = paste0(if (logRT) "Log r" else "R",
+                        "esponse time of persons over items")
+      ) +
+      ggplot2::theme_minimal()
 
-      # long format
-      long_dat <- stack(mat_sub)
-      colnames(long_dat) <- c("RT", "item")
-      long_dat$item <- factor(long_dat$item)
+    return(p)
+  }
 
-      # limits
-      if (logRT) {
-        lab = "Response time in log-seconds"
-        axis.scale = "fixed"
-        lims <- quantile(long_dat$RT, c(.025/I, 1-.025/I), na.rm = TRUE)
-      } else {
-        lab = "Response time in seconds"
-        axis.scale = "free_y"
-        lims <- NULL
-        long_dat <- long_dat %>%
-          group_by(item) %>%
-          filter(RT <= quantile(RT, 0.975, na.rm = TRUE)) %>%
-          ungroup()
+  # --- item level ---
+  mat_sub <- if (logRT) logRT.data else RT.data
 
-      }
-      # plot
-      p <- ggplot(long_dat, aes(x = RT, fill = item)) +
-        geom_density(alpha = 0.2, trim = TRUE, fill = "grey50", color = "grey30") +
-        stat_summary(aes(xintercept = after_stat(x), y = 0), fun = median, geom = "vline", orientation = "y", linetype = 2) +
-         labs(
-            x      = if (logRT) "Log response time" else "Response time in seconds",
-            y      = "Density",
-            colour = "Item",
-            title  = "Within-item response time distributions"
-          ) +
-        facet_wrap(~ item, scales = axis.scale,
-                   ) +
-        labs(x = lab, y = "Density")
+  long_dat <- stats::setNames(utils::stack(mat_sub), c("RT", "item"))
+  long_dat$item <- factor(long_dat$item)
 
+  if (logRT) {
+    x_lab      <- "Log response time"
+    axis.scale <- "fixed"
+  } else {
+    x_lab      <- "Response time in seconds"
+    axis.scale <- "free_y"
+    # trim extreme right tail per item
+    long_dat <- do.call(rbind, lapply(split(long_dat, long_dat$item), function(d) {
+      d[d$RT <= stats::quantile(d$RT, 0.975, na.rm = TRUE), ]
+    }))
+  }
 
-      return(
-        if (logRT) { p + coord_cartesian(xlim = lims)
-          } else {
-          p
-        }
-      )
-    }
+  p <- ggplot2::ggplot(long_dat, ggplot2::aes(x = .data[["RT"]])) +
+    ggplot2::geom_density(fill = "grey75", colour = "grey30",
+                          alpha = 0.5, trim = TRUE) +
+    ggplot2::stat_summary(
+      ggplot2::aes(xintercept = ggplot2::after_stat(x), y = 0),
+      fun = stats::median, geom = "vline", orientation = "y",
+      linetype = "dashed", linewidth = 0.4
+    ) +
+    ggplot2::facet_wrap(~ item, scales = axis.scale) +
+    ggplot2::labs(
+      x     = x_lab,
+      y     = "Density",
+      title = "Within-item response time distributions"
+    ) +
+    ggplot2::theme_minimal()
+
+  return(p)
 }
-
-

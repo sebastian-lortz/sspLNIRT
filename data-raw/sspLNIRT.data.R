@@ -1,9 +1,10 @@
-# Script to create the dataset `sspLNIRT.data` from the precomputed results
+# Script to create the tibble `sspLNIRT.data` from the precomputed results
 
 # libraries
 library(tibble)
+library(dplyr)
 
-##### load the batches
+# load the batches
 save.dir <- "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/results/"
 
 files <- list.files(
@@ -12,58 +13,72 @@ files <- list.files(
   full.names = TRUE
 )
 
-#numeric batch id
+# numeric batch id
 batch_id <- as.integer(sub("^batch_([0-9]{3})\\.rds$", "\\1", basename(files)))
-
 
 # read all batches into a named list
 batch.list <- setNames(lapply(files, readRDS), sprintf("batch_%03d", batch_id))
 
-
-#### combine the batches into one data frame
-
+# combine the batches into one data frame
 rows <- lapply(names(batch.list), function(bn) {
   batch <- batch.list[[bn]]
-
-  # one tibble row per element inside this batch
   lapply(seq_along(batch), function(i) {
+    res <- batch[[i]][[1]]
+    cfg <- batch[[i]][[2]]
 
-    res <- batch[[i]][[1]]  # results
-    cfg <- batch[[i]][[2]]  # config
+    # pre bin the err data
+    n.bins = 30
+    item.bin.means <- res$comp.rmse$err.dat$item %>%
+      dplyr::filter(par != "sigma2") %>%
+      group_by(par) %>%
+      mutate(bin = ntile(sim.val, n.bins)) %>%
+      group_by(par, bin) %>%
+      summarise(
+        mean_sim = mean(sim.val, na.rm = TRUE),
+        mean_err = mean(err, na.rm = TRUE),
+        mean_rmse = sqrt(mean(err^2, na.rm = TRUE)),
+        .groups = "drop"
+      )
+    person.bin.means <- res$comp.rmse$err.dat$person %>%
+      group_by(par) %>%
+      mutate(bin = ntile(sim.val, n.bins)) %>%
+      group_by(par, bin) %>%
+      summarise(
+        mean_sim = mean(sim.val, na.rm = TRUE),
+        mean_err = mean(err, na.rm = TRUE),
+        mean_rmse = sqrt(mean(err^2, na.rm = TRUE)),
+        .groups = "drop"
+      )
+
+    # fit power curve
+    if (res$trace$steps > 2) {
+      fit <- lm(log(res$trace$track.res$res.temp) ~ log(res$trace$track.N$N.temp))
+      a <- coef(fit)[1]
+      b <- coef(fit)[2]
+      N.curve <- as.numeric(ceiling(exp((log(cfg$thresh) - a) / b)))
+    } else {
+      N.curve <- NA
+    }
+
+    # replace err.dat with binned version, add N.curve
+    res$comp.rmse$err.dat <- list(item = item.bin.means, person = person.bin.means)
+    res$N.curve <- N.curve
+    class(cfg) <- "sspLNIRT.design"
 
     tibble(
       batch   = bn,
       element = i,
-
-      N    = res[[1]],
-      mse  = res[[2]],
-      conv = nrow(res[[6]][[res[[3]]]]),
-
-      thresh = cfg$thresh,
-      lb     = cfg$lb,
-      ub     = cfg$ub,
-      out.par = cfg$out.par,
-      iter   = cfg$iter,
-      I      = cfg$I,
-
-      mu.person = list(cfg$mu.person),
-      mu.item   = list(cfg$mu.item),
-      meanlog.sigma2 = cfg$meanlog.sigma2,
-
-      cov.m.person = list(cfg$cov.m.person),
-      cov.m.item   = list(cfg$cov.m.item),
-
-      sd.item      = list(cfg$sd.item),
-      cor2cov.item = cfg$cor2cov.item,
-      sdlog.sigma2 = cfg$sdlog.sigma2,
-      XG           = cfg$XG,
-      ssp.seed     = cfg$ssp.seed
+      res = list(res),
+      cfg = list(cfg)
     )
   })
 })
 
 # flatten into a single tibble
-all_tbl <- do.call(rbind, unlist(rows, recursive = FALSE))
-# names(all_tbl)
+sspLNIRT.data <- do.call(rbind, unlist(rows, recursive = FALSE))
+
 #### write data in file
-usethis::use_data(all_tbl, overwrite = TRUE)
+usethis::use_data(sspLNIRT.data, overwrite = TRUE)
+
+
+sspLNIRT.data[[3]][[1]]

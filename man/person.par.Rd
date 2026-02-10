@@ -15,13 +15,13 @@ person.par(
 
 \item{mu.person}{Numeric vector. Means of theta and zeta}
 
-\item{cov.m.person}{Matrix. The covariance matrix of theat and zeta}
+\item{cov.m.person}{Matrix. The covariance matrix of theta and zeta.}
 }
 \value{
-A data frame containing person parameters
+A data frame containing person parameters:
 \describe{
-  \column{theta}{Numeric vector. The values of theta.}
-  \column{zeta}{Numeric vector. The values of zeta,}
+  \item{theta}{Numeric vector. The values of theta.}
+  \item{zeta}{Numeric vector. The values of zeta.}
 }
 }
 \description{

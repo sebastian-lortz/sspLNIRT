@@ -11,7 +11,14 @@
 #### CURRENT FILE: DEPLOY SCRIPT #####
 ######################################
 
+# check dependencies
+# shows every file + line where each package is referenced
+renv::dependencies("R/")
+
+#spelling::update_wordlist()
+
 # Test your app
+devtools::document()
 
 ## Run checks ----
 ## Check the package before sending to prod
@@ -33,21 +40,28 @@ golem::add_dockerfile_with_renv_shinyproxy()
 
 ## Posit ----
 ## If you want to deploy on Posit related platforms
-golem::add_positconnect_file()
+#golem::add_positconnect_file()
 golem::add_shinyappsio_file()
-golem::add_shinyserver_file()
+#golem::add_shinyserver_file()
 
 ## Deploy to Posit Connect or ShinyApps.io ----
 
 ## Add/update manifest file (optional; for Git backed deployment on Posit )
 rsconnect::writeManifest()
 
-## In command line.
+# one-time: install rsconnect if needed
+install.packages("rsconnect")
+
+
+rsconnect::setAccountInfo(name='sebastian-lortz',
+                          token='E49AD05B5F9E8CDCE2462D3590F39BC1',
+                          secret='Z31qmjL4VXZYShJHwbNhBQMoLlHGGLycUcjz8m+r')
+
+# deploy
 rsconnect::deployApp(
-  appName = desc::desc_get_field("Package"),
-  appTitle = desc::desc_get_field("Package"),
+  appName  = "sspLNIRT",
+  appTitle = "sspLNIRT",
   appFiles = c(
-    # Add any additional files unique to your app here.
     "R/",
     "inst/",
     "data/",
@@ -55,7 +69,7 @@ rsconnect::deployApp(
     "DESCRIPTION",
     "app.R"
   ),
-  appId = rsconnect::deployments(".")$appID,
   lint = FALSE,
   forceUpdate = TRUE
 )
+

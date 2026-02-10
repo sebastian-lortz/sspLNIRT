@@ -2,66 +2,68 @@
 % Please edit documentation in R/fct_plot_RA.R
 \name{plot_RA}
 \alias{plot_RA}
-\title{Plot the simulated response accuracy data on the population level}
+\title{Plot the simulated response accuracy data}
 \usage{
 plot_RA(
   level,
   by.theta = FALSE,
   N = 1e+05,
-  I = 20,
+  K = 20,
   mu.person = c(0, 0),
-  mu.item = c(1, 0, 1, 0),
+  mu.item = c(1, 0, 0.5, 0),
   meanlog.sigma2 = log(0.3),
-  cov.m.person = matrix(c(1, 0.5, 0.5, 1), ncol = 2, byrow = TRUE),
+  cov.m.person = matrix(c(1, 0.4, 0.4, 1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), ncol = 4, byrow
     = TRUE),
   sd.item = c(0.2, 1, 0.2, 0.5),
-  sdlog.sigma2 = 0.2,
+  sdlog.sigma2 = 0,
   item.pars.m = NULL,
   cor2cov.item = TRUE
 )
 }
 \arguments{
+\item{level}{String. Either "person" or "item".}
+
+\item{by.theta}{Logical. Whether to plot as a function of theta.}
+
 \item{N}{Integer. The sample size.}
 
-\item{I}{Integer. The test length.}
+\item{K}{Integer. The test length.}
 
-\item{mu.person}{Numeric vector. Means of theta and zeta}
+\item{mu.person}{Numeric vector. Means of theta and zeta.}
 
-\item{mu.item}{Numeric vector. Means of alpha, beta, phi, and lambda}
+\item{mu.item}{Numeric vector. Means of alpha, beta, phi, and lambda.}
 
 \item{meanlog.sigma2}{Numeric. The meanlog of sigma2.}
 
-\item{cov.m.person}{Matrix. The covariance matrix of theat and zeta}
+\item{cov.m.person}{Matrix. The covariance matrix of theta and zeta.}
 
-\item{cov.m.item}{Matrix. The covariance matrix of of alpha, beta, phi, and lambda}
+\item{cov.m.item}{Matrix. The covariance matrix of alpha, beta, phi, and lambda.}
 
-\item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda}
+\item{sd.item}{Numeric vector. The standard deviations of alpha, beta, phi, and lambda.}
 
-\item{sdlog.sigma2}{Numeric. The sdlog of sigma2}
+\item{sdlog.sigma2}{Numeric. The sdlog of sigma2.}
 
-\item{item.pars.m}{Matrix. (optional) A Matrix containing item parameters.}
+\item{item.pars.m}{Matrix (optional). A matrix containing item parameters.}
 
-\item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied}
-
-\item{iter}{Integer. The number of iteration or the number of data sets.}
+\item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied.}
 }
 \value{
-A ggplot object
+A ggplot object.
 }
 \description{
-The function simulates data under the the Joint Hierarchical Model using a
+The function simulates data under the Joint Hierarchical Model using a
 2-pl normal ogive model for response accuracy and a 3-pl log-normal model for response
 time, and plots the resulting response accuracy data.
 }
 \examples{
  \dontrun{
-    plot_RA(level = "item",
-            by.theta = TRUE,
-            mu.item = c(1,0,1,1),
-            sd.item = c(.2, .5, .2, .5),
-            meanlog.sigma2 = log(.2),
-            I = 20)
+   plot_RA(level = "item",
+           by.theta = TRUE,
+           mu.item = c(1, 0, 1, 1),
+           sd.item = c(.2, .5, .2, .5),
+           meanlog.sigma2 = log(.2),
+           K = 20)
 }
 
 }

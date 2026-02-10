@@ -665,7 +665,7 @@ optim.sample <- function(FUN = comp_mse,
   # check lower bound result
   if (res.lb$res < thresh) {
     cat("stop due to res.lb < thresh with", lb, "\n")
-    stop(list(N.best = NA,
+    stop(list(N.min = NA,
               res.best = "res.lb < thresh",
               reps = 1,
               track.res = data.frame(res.lb = "res.lb < thresh",
@@ -682,7 +682,7 @@ optim.sample <- function(FUN = comp_mse,
   # check upper bound result
   if (res.ub$res > thresh) {
     cat("stop due to res.ub > thresh with", ub, "\n")
-    stop(list(N.best = NA,
+    stop(list(N.min = NA,
               res.best = "res.ub > thresh",
               reps = 2,
               track.res = data.frame(res.lb = res.lb$res,
@@ -773,12 +773,12 @@ optim.sample <- function(FUN = comp_mse,
 
   # assemble output
   res.best <- max(track.res$res.temp[which(track.res$res.temp < thresh)])
-  N.best <- min(track.N[which(track.res$res.temp == res.best), ]$N.temp)
+  N.min <- min(track.N[which(track.res$res.temp == res.best), ]$N.temp)
   cat("Best result is", res.best," for threshold", thresh, "\n")
-  cat("Minimum N is", N.best, "\n")
+  cat("Minimum N is", N.min, "\n")
 
   # return output
-  return(list(N.best,
+  return(list(N.min,
               res.best,
               reps,
               track.res,

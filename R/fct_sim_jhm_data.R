@@ -10,17 +10,18 @@
 #' @param mu.person Numeric vector. Means of theta and zeta
 #' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
-#' @param cov.m.person Matrix. The covariance matrix of theat and zeta
+#' @param cov.m.person Matrix. The covariance matrix of theta and zeta
 #' @param cov.m.item Matrix. The covariance matrix of of alpha, beta, phi, and lambda
 #' @param sdlog.sigma2 Numeric. The sdlog of sigma2
 #' @param item.pars.m Matrix. (optional) A Matrix containing item parameters.
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
+#' @param scale Logical. Whether to rescale item parameters.
 #'
 #' @return A list of length `iter` containing:
 #' \describe{
 #'   \item{long.data}{Data Frame. The simulated data in long format.}
-#'   \item{time.data}{Data Frame. The simulated reponse time data.}
+#'   \item{time.data}{Data Frame. The simulated response time data.}
 #'   \item{response.data}{Data Frame. The simulated response accuracy data.}
 #'   \item{person.par}{Data Frame. The person parameters.}
 #'   \item{item.par}{Data Frame. The item parameters.}
@@ -62,7 +63,8 @@ sim.jhm.data <- function(iter,
                          sdlog.sigma2 = 0.2,
                          item.pars.m = NULL,
                          cor2cov.item = FALSE,
-                         sd.item = NULL
+                         sd.item = NULL,
+                         scale = TRUE
 ) {
 
   # open lists
@@ -92,11 +94,17 @@ sim.jhm.data <- function(iter,
     }
 
     # scale parameters
+    if (scale) {
       scaled.pars <- scale_M(item.pars = item,
                              person.pars = person)
       item <- scaled.pars$items.pars.scaled
       person <- scaled.pars$person.pars.scaled
-
+      c.alpha <- scaled.pars$c.alpha
+      c.phi <- scaled.pars$c.phi
+    } else {
+      c.alpha <- NA
+      c.phi <- NA
+}
     # open output matrix
     time <- response <- matrix(nrow = N, ncol =  K)
     colnames(time) <- colnames(response) <- paste0("Item", seq_len(K))
@@ -118,13 +126,13 @@ sim.jhm.data <- function(iter,
     sim.response[[k]] <- response
     person.par[[k]] <- person
     item.par[[k]] <- item
-    scale.factor[[k]] <- data.frame(c.alpha = scaled.pars$c.alpha,
-                          c.phi = scaled.pars$c.phi)
+    scale.factor[[k]] <- data.frame(c.alpha = c.alpha,
+                          c.phi = c.phi)
 
   }
 
   # print confirmation
-  cat(paste("Simulated", k,"complete data sets \n"))
+  #cat(paste("Simulated", k,"complete data sets \n"))
 
   # return output
   return(list(

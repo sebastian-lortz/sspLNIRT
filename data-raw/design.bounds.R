@@ -112,7 +112,7 @@ res <- comp_rmse(
           cor2cov.item    = TRUE,
           sdlog.sigma2 = 0.2,
           XG = 6000,
-          mse.seed = NULL)
+          seed = NULL)
 bounds.res[[i]] <- res
 cat("design row", i, "of", nrow(design), "done!! \n\n")
 rm(res)

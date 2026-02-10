@@ -5,16 +5,13 @@
 \title{Optimize for Sample Size}
 \usage{
 optim_sample(
-  FUN = comp_mse,
   thresh,
-  lb,
-  ub,
+  range,
   out.par = "alpha",
-  N = NULL,
   iter = 100,
-  I = 10,
+  K = 10,
   mu.person = c(0, 0),
-  mu.item = c(1, 0, 1, 1),
+  mu.item = c(1, 0, 0.5, 1),
   meanlog.sigma2 = log(0.6),
   cov.m.person = matrix(c(1, 0.2, 0.2, 1), ncol = 2, byrow = TRUE),
   cov.m.item = matrix(c(0.2, 0, 0, 0, 0, 1, 0, 0.4, 0, 0, 0.2, 0, 0, 0.4, 0, 0.5), ncol =
@@ -23,27 +20,23 @@ optim_sample(
   item.pars.m = NULL,
   cor2cov.item = FALSE,
   sd.item = NULL,
-  keep.err.dat = TRUE,
-  ssp.seed = NULL,
-  XG = 6000
+  keep.err.dat = FALSE,
+  seed = NULL,
+  XG = 6000,
+  burnin = 20,
+  rhat = 1.05
 )
 }
 \arguments{
-\item{FUN}{Function. The function to calculate the target parameter.}
+\item{thresh}{Numeric. The desired RMSE threshold of the target parameter to be achieved.}
 
-\item{thresh}{Numeric. The desired threshold of the target parameter to be achieved.}
-
-\item{lb}{Integer. The lower bound of the sample size.}
-
-\item{ub}{Integer. The upper bound of the sample size.}
+\item{range}{Integer vector. The lower and upper bounds of the sample size to be considered.}
 
 \item{out.par}{Character. The name of the target parameter for the threshold.}
 
-\item{N}{NULL. Place holder for the sample size in the optimizer.}
+\item{iter}{Integer. The number of iterations or the number of data sets.}
 
-\item{iter}{Integer. The number of iteration or the number of data sets.}
-
-\item{I}{Integer. The test length.}
+\item{K}{Integer. The test length.}
 
 \item{mu.person}{Numeric vector. Means of theta and zeta.}
 
@@ -51,59 +44,65 @@ optim_sample(
 
 \item{meanlog.sigma2}{Numeric. The meanlog of sigma2.}
 
-\item{cov.m.person}{Matrix. The covariance matrix of theat and zeta.}
+\item{cov.m.person}{Matrix. The covariance matrix of theta and zeta.}
 
-\item{cov.m.item}{Matrix. The covariance matrix of of alpha, beta, phi, and lambda.}
+\item{cov.m.item}{Matrix. The covariance matrix of alpha, beta, phi, and lambda.}
 
 \item{sdlog.sigma2}{Numeric. The sdlog of sigma2.}
 
-\item{item.pars.m}{Matrix. (optional) A Matrix containing item parameters.}
+\item{item.pars.m}{Matrix. (optional) A matrix containing item parameters.}
 
-\item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied}
+\item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied.}
 
-\item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda}
+\item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda.}
+
+\item{keep.err.dat}{Logical. Whether to keep the full error data.}
+
+\item{seed}{Integer or NULL. Seed for reproducibility.}
+
+\item{XG}{Integer. The number of Gibbs sampler iterations.}
+
+\item{burnin}{Integer. The burn-in percentage.}
+
+\item{rhat}{Numeric. The R-hat convergence cutoff.}
 }
 \value{
-A list of containing:
+A list of class `sspLNIRT.object` containing:
 \describe{
-  \item{N.best}{Integer. The minimum sample size for the closest result to the threshold.}
-  \item{res.best}{Numeric. The result of the target parameter closest to the threshold.}
-  \item{reps}{Integer. Number of optimization repetitions.}
-  \item{track.res}{Data Frame. The results around the threshold per repetition.}
-  \item{track.N}{Data Frame. The sample size in each repetition.}
-  \item{mse.sigma2}{Numeric. The pooled MSE of the sigma2 paramters.}
-  \item{track.conv}{List. The Rhat convergence rate per repetition.}
-  \item{time.taken}{Numeric. The observed running time of the function.}
+  \item{N.min}{Integer (or character if bounds not met). The minimum sample size achieving the threshold.}
+  \item{res.best}{Numeric. The RMSE result at the optimal N.}
+  \item{comp.rmse}{List. The full output from `comp_rmse` at the optimal N.}
+  \item{trace}{List containing optimization diagnostics: `steps` (integer), `track.res` (data frame), `track.N` (data frame), and `time.taken` (difftime).}
 }
 }
 \description{
-The function optimizes for the minimum sample size to reach the threshold of mean
-squared errors (MSE) of estimated parameters. MSE are based on simulated data
-under the the Joint Hierarchical Model using a 2-pl normal ogive model for
+The function optimizes for the minimum sample size to reach the threshold of root mean
+squared errors (RMSE) of estimated parameters. MSE are based on simulated data
+under the Joint Hierarchical Model using a 2-pl normal ogive model for
 response accuracy and a 3-pl log-normal model for response time.
 }
 \examples{
- \dontrun{
-test.optim.sample = optim_sample(
-    FUN = comp_mse,
-    thresh = .01,
-    lb = 100,
-    ub = 500,
-    out.par = 'alpha',
-    iter = 5,
-    I = 10,
-    mu.person = c(0,0),
-    mu.item = c(1,0,1,0),
-    meanlog.sigma2 = log(.3),
-    cov.m.person = matrix(c(1,0.5,
-                            0.5,1), ncol = 2, byrow = TRUE),
-                            cov.m.item = matrix(c(1, 0, 0, 0,
-                                                  0, 1, 0, 0.3,
-                                                  0, 0, 1, 0,
-                                                  0, 0.3, 0, 1), ncol =  4, byrow = TRUE),
-    sd.item         = c(.2, .5, .2, .5),
-    cor2cov.item    = TRUE,
-    sdlog.sigma2 = 0.2,
-    XG = 1000)
+\dontrun{
+test.optim.sample <- optim_sample(
+
+  thresh = .1,
+  range = c(100, 500),
+  out.par = "alpha",
+  iter = 5,
+  K = 10,
+  mu.person = c(0, 0),
+  mu.item = c(1, 0, 1, 0),
+  meanlog.sigma2 = log(.3),
+  cov.m.person = matrix(c(1, 0.5, 0.5, 1), ncol = 2, byrow = TRUE),
+  cov.m.item = matrix(c(1, 0, 0, 0,
+                        0, 1, 0, 0.3,
+                        0, 0, 1, 0,
+                        0, 0.3, 0, 1), ncol = 4, byrow = TRUE),
+  sd.item = c(.2, .5, .2, .5),
+  cor2cov.item = TRUE,
+  sdlog.sigma2 = 0.2,
+  XG = 1000
+)
+summary(test.optim.sample)
 }
 }

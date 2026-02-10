@@ -7,7 +7,7 @@
 sim.jhm.data(
   iter,
   N,
-  I,
+  K,
   mu.person = c(0, 0),
   mu.item = c(1, 0, 4, 0),
   meanlog.sigma2 = log(0.3),
@@ -17,7 +17,8 @@ sim.jhm.data(
   sdlog.sigma2 = 0.2,
   item.pars.m = NULL,
   cor2cov.item = FALSE,
-  sd.item = NULL
+  sd.item = NULL,
+  scale = TRUE
 )
 }
 \arguments{
@@ -25,7 +26,7 @@ sim.jhm.data(
 
 \item{N}{Integer. The sample size.}
 
-\item{I}{Integer. The test length.}
+\item{K}{Integer. The test length.}
 
 \item{mu.person}{Numeric vector. Means of theta and zeta}
 
@@ -33,7 +34,7 @@ sim.jhm.data(
 
 \item{meanlog.sigma2}{Numeric. The meanlog of sigma2.}
 
-\item{cov.m.person}{Matrix. The covariance matrix of theat and zeta}
+\item{cov.m.person}{Matrix. The covariance matrix of theta and zeta}
 
 \item{cov.m.item}{Matrix. The covariance matrix of of alpha, beta, phi, and lambda}
 
@@ -44,12 +45,14 @@ sim.jhm.data(
 \item{cor2cov.item}{Logical. Whether a correlation matrix instead of covariance matrix is supplied}
 
 \item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda}
+
+\item{scale}{Logical. Whether to rescale item parameters.}
 }
 \value{
 A list of length `iter` containing:
 \describe{
   \item{long.data}{Data Frame. The simulated data in long format.}
-  \item{time.data}{Data Frame. The simulated reponse time data.}
+  \item{time.data}{Data Frame. The simulated response time data.}
   \item{response.data}{Data Frame. The simulated response accuracy data.}
   \item{person.par}{Data Frame. The person parameters.}
   \item{item.par}{Data Frame. The item parameters.}
@@ -64,7 +67,7 @@ time.
  \dontrun{
 test.data <- sim.jhm.data(iter = 2,
                          N = 100,
-                         I = 10,
+                         K = 10,
                          mu.person = c(0,0),
                          mu.item = c(1,0,1,0),
                          meanlog.sigma2 = log(.3),

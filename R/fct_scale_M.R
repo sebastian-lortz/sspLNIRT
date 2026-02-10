@@ -5,6 +5,9 @@
 #'
 #' @param item.pars Data frame or Matrix. The item parameters.
 #' @param person.pars Data frame or Matrix. The person parameters.
+#' @param re.scale Logical. Whether to rescale.
+#' @param c.alpha Numeric. Scaling constant for alpha.
+#' @param c.phi Numeric. Scaling constant for phi.
 #'
 #' @return A list containing:
 #' \describe{

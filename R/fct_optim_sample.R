@@ -5,9 +5,8 @@
 #' under the Joint Hierarchical Model using a 2-pl normal ogive model for
 #' response accuracy and a 3-pl log-normal model for response time.
 #'
-#' @param FUN Function. The function to calculate the target parameter (default: `comp_rmse`).
 #' @param thresh Numeric. The desired RMSE threshold of the target parameter to be achieved.
-#' @param range Vector. Integer vector of length 2 specifying the lower and upper bounds of the sample size.
+#' @param range Integer vector. The lower and upper bounds of the sample size to be considered.
 #' @param out.par Character. The name of the target parameter for the threshold.
 #' @param iter Integer. The number of iterations or the number of data sets.
 #' @param K Integer. The test length.
@@ -21,23 +20,23 @@
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied.
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda.
 #' @param keep.err.dat Logical. Whether to keep the full error data.
-#' @param ssp.seed Integer or NULL. Seed for reproducibility.
+#' @param seed Integer or NULL. Seed for reproducibility.
 #' @param XG Integer. The number of Gibbs sampler iterations.
 #' @param burnin Integer. The burn-in percentage.
 #' @param rhat Numeric. The R-hat convergence cutoff.
 #'
 #' @return A list of class `sspLNIRT.object` containing:
 #' \describe{
-#'   \item{N.best}{Integer (or character if bounds not met). The minimum sample size achieving the threshold.}
+#'   \item{N.min}{Integer (or character if bounds not met). The minimum sample size achieving the threshold.}
 #'   \item{res.best}{Numeric. The RMSE result at the optimal N.}
-#'   \item{comp.mse}{List. The full output from `comp_rmse` at the optimal N.}
+#'   \item{comp.rmse}{List. The full output from `comp_rmse` at the optimal N.}
 #'   \item{trace}{List containing optimization diagnostics: `steps` (integer), `track.res` (data frame), `track.N` (data frame), and `time.taken` (difftime).}
 #' }
 #'
 #' @examples
 #' \dontrun{
 #' test.optim.sample <- optim_sample(
-#'   FUN = comp_rmse,
+#'
 #'   thresh = .1,
 #'   range = c(100, 500),
 #'   out.par = "alpha",
@@ -56,17 +55,18 @@
 #'   sdlog.sigma2 = 0.2,
 #'   XG = 1000
 #' )
+#' summary(test.optim.sample)
 #' }
 #' @export
 #'
-optim_sample <- function(FUN = comp_rmse,
+optim_sample <- function(
                          thresh,
                          range,
                          out.par = 'alpha',
                          iter = 100,
                          K = 10,
                          mu.person = c(0,0),
-                         mu.item = c(1,0,1,1),
+                         mu.item = c(1,0,.5,1),
                          meanlog.sigma2 = log(.6),
                          cov.m.person = matrix(c(1,.2,
                                                  .2,1), ncol = 2, byrow = TRUE),
@@ -78,8 +78,8 @@ optim_sample <- function(FUN = comp_rmse,
                          item.pars.m = NULL,
                          cor2cov.item = FALSE,
                          sd.item = NULL,
-                         keep.err.dat = TRUE,
-                         ssp.seed = NULL,
+                         keep.err.dat = FALSE,
+                         seed = NULL,
                          XG = 6000,
                          burnin = 20,
                          rhat = 1.05
@@ -95,7 +95,7 @@ optim_sample <- function(FUN = comp_rmse,
   # helper: compute FUN value given new N
   compute_obj <- function(newN) {
 
-    FUN.out <- FUN(
+    FUN.out <- comp_rmse(
       N = newN,
       iter = iter,
       K = K,
@@ -112,14 +112,14 @@ optim_sample <- function(FUN = comp_rmse,
       XG = XG,
       burnin = burnin,
       rhat = rhat,
-      mse.seed = ssp.seed
+      seed = seed
     )
 
     return(
       list(
         res = FUN.out$item$rmse[[out.par]],
         mc.sd = FUN.out$item$mc.sd.rmse[[out.par]],
-        comp.mse = FUN.out)
+        comp.rmse = FUN.out)
     )
   }
 
@@ -135,9 +135,10 @@ optim_sample <- function(FUN = comp_rmse,
     end.time = Sys.time()
     time.taken = end.time - start.time
 
-    output <- list(N.best = "res.lb < thresh",
+    output <- list(N.min = "res.lb < thresh",
                 res.best = res.lb$res,
-                comp.mse = res.lb$comp.mse,
+                N.curve = NA,
+                comp.rmse = res.lb$comp.rmse,
                 trace = list(steps = 1,
                              track.res = data.frame(res.lb = res.lb$res,
                                                     res.ub = NA,
@@ -164,9 +165,10 @@ optim_sample <- function(FUN = comp_rmse,
     end.time = Sys.time()
     time.taken = end.time - start.time
 
-    output <- list(N.best = "res.ub > thresh",
+    output <- list(N.min = "res.ub > thresh",
                 res.best = res.ub$res,
-                comp.mse = res.ub$comp.mse,
+                N.curve = NA,
+                comp.rmse = res.ub$comp.rmse,
                 trace = list(steps = 2,
                              track.res = data.frame(res.lb = res.lb$res,
                                                     res.ub = res.ub$res,
@@ -255,19 +257,27 @@ optim_sample <- function(FUN = comp_rmse,
   # end routine
 
   # assemble output
-  N.best  <- N.ub
+  N.min  <- N.ub
   res.best <- res.ub$res
   cat("Best result is", res.best," for threshold", thresh, "\n")
-  cat("Minimum N is", N.best, "\n")
+  cat("Minimum N is", N.min, "\n")
+
+  # fit power curve
+  fit <- lm(log(track.res$res.temp) ~ log(track.N$N.temp))
+  a <- coef(fit)[1]
+  b <- coef(fit)[2]
+  N.curve <- exp((log(thresh) - a) / b)
+  N.curve <- as.numeric(ceiling(N.curve))
 
   # track time
   end.time = Sys.time()
   time.taken = end.time - start.time
 
   # return output
-  output <- list(N.best = N.best,
+  output <- list(N.min = N.min,
                  res.best = res.best,
-                 comp.mse = res.ub$comp.mse,
+                 N.curve = N.curve,
+                 comp.rmse = res.ub$comp.rmse,
                   trace = list(steps = steps,
                                track.res = track.res,
                                track.N = track.N,

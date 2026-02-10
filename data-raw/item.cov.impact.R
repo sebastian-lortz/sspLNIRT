@@ -87,8 +87,6 @@ res.no.cor <- comp_rmse(
     sd.item         = c(.2, 1, .2, 1),
     cor2cov.item    = TRUE,
     sdlog.sigma2 = 0.2,
-    person.seed = NULL,
-    item.seed = NULL,
     par1 = TRUE,
     XG = 3000,
     burnin = 20)
@@ -133,8 +131,6 @@ res.cor <- comp_rmse(
     sd.item         = c(.2, 1, .2, 1),
     cor2cov.item    = TRUE,
     sdlog.sigma2 = 0.2,
-    person.seed = NULL,
-    item.seed = NULL,
     par1 = TRUE,
     XG = 3000,
     burnin = 20)
@@ -157,8 +153,6 @@ res.cor2 <- comp_rmse(
   sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
@@ -181,8 +175,6 @@ res.cor3 <- comp_rmse(
   sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
@@ -205,8 +197,6 @@ res.cor4 <- comp_rmse(
   sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
@@ -229,8 +219,6 @@ res.cor5 <- comp_rmse(
   sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   par1 = TRUE,
   XG = 3000,
   burnin = 20)
@@ -253,8 +241,6 @@ res.cor6 <- comp_rmse(
   sd.item         = c(.2, 1, .2, 1),
   cor2cov.item    = TRUE,
   sdlog.sigma2 = 0.2,
-  person.seed = NULL,
-  item.seed = NULL,
   par1 = TRUE,
   XG = 3000,
   burnin = 20)

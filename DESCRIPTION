@@ -1,35 +1,39 @@
 Package: sspLNIRT
-Title: Sample Size Planning for Joint Hierarcical Modelling using LNIRT
+Title: Sample Size Planning for Joint Hierarchical Modelling using LNIRT
 Version: 0.0.0.9000
 Authors@R: 
     person("Sebastian A. J.", "Lortz", , "s.a.j.lortz@gmail.com", role = c("aut", "cre"))
-Description: PKG_DESC.
+Description: Sample size planning tools for the Joint Hierarchical Model 
+    using a 2-PL normal ogive model for response accuracy and a 3-PL 
+    log-normal model for response time, estimated via the LNIRT package.
 License: MIT + file LICENSE
 Imports: 
+    bsicons,
+    bslib,
     config,
+    future.apply,
+    ggplot2,
     golem,
-    shiny,
-    MASS,
-    lavaan,
-    tmvtnorm,
     LNIRT,
-    future,
+    MASS,
+    posterior,
     progressr,
     purrr,
-    bslib,
-    bsicons,
+    rlang,
+    shiny,
     shinyMatrix,
-    dplyr
+    tmvtnorm,
+    markdown
 Suggests: 
     knitr,
-    rmarkdown,
     spelling,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 LazyData: true
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.5)

@@ -4,24 +4,27 @@
 \alias{plot_precision}
 \title{Plot the precision of item parameters}
 \usage{
-plot_precision(object, y.val = "mse", n.bins = NULL)
+plot_precision(object, pars, y.val = "rmse", n.bins = 30)
 }
 \arguments{
-\item{object}{Object. Output from optim_sample() or comp_mse(). Must contain $err.dat.}
+\item{object}{Object. Output from \code{optim_sample()} or \code{comp_rmse()}.}
 
-\item{y.val}{String. Either "mse" or "bias" for the y-axis.}
+\item{pars}{String. Either "item" or "person" for which parameters to plot.}
+
+\item{y.val}{String. Either "rmse" or "bias" for the y-axis.}
 
 \item{n.bins}{Integer (optional). Number of bins used to aggregate by sim.val within par.}
 }
 \value{
-A ggplot object
+A ggplot object.
 }
 \description{
-The function plots the mean squared error or bias across values of the true parameter.
+The function plots the mean squared error or bias across values of the true parameter. For objects from \code{optim_sample()}, the
+function uses the data at the minimum N, or, if the optimization stopped due to N being outside the specified range, at the respective bound.
 }
 \examples{
  \dontrun{
-   plot_precision(object = test.optim.sample)
+   plot_precision(object = test.optim.sample, pars = "item")
 }
 
 }

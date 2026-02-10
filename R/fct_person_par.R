@@ -5,12 +5,12 @@
 #'
 #' @param N Integer. The sample size or number of rows.
 #' @param mu.person Numeric vector. Means of theta and zeta
-#' @param cov.m.person Matrix. The covariance matrix of theat and zeta
+#' @param cov.m.person Matrix. The covariance matrix of theta and zeta.
 #'
-#' @return A data frame containing person parameters
-#'\describe{
-#'   \column{theta}{Numeric vector. The values of theta.}
-#'   \column{zeta}{Numeric vector. The values of zeta,}
+#' @return A data frame containing person parameters:
+#' \describe{
+#'   \item{theta}{Numeric vector. The values of theta.}
+#'   \item{zeta}{Numeric vector. The values of zeta.}
 #' }
 #'
 #' @examples
@@ -47,3 +47,4 @@ person.par <- function(N,
     hyper.par
   )
 }
+

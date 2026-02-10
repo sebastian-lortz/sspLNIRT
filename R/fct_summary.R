@@ -16,12 +16,12 @@ summary.sspLNIRT.object <- function(object, ...) {
     stop("Input must be a sspLNIRT.object.")
   }
 
-  if (!is.null(object$N.best)) {
+  if (!is.null(object$N.min)) {
     # optim_sample output
     summary_obj <- list(
-      N.best = object$N.best,
+      N.min = object$N.min,
       res.best = object$res.best,
-      comp.mse = object$comp.mse,
+      comp.rmse = object$comp.rmse,
       trace = object$trace
     )
   } else {

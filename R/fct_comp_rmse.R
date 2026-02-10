@@ -7,7 +7,7 @@
 #'
 #' @param N Integer. The sample size.
 #' @param iter Integer. The number of iterations or the number of data sets.
-#' @paramK Integer. The test length.
+#' @param K Integer. The test length.
 #' @param mu.person Numeric vector. Means of theta and zeta.
 #' @param mu.item Numeric vector. Means of alpha, beta, phi, and lambda.
 #' @param meanlog.sigma2 Numeric. The meanlog of sigma2.
@@ -19,7 +19,7 @@
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda.
 #' @param XG Integer. The number of Gibbs sampler iterations.
 #' @param burnin Integer. The burn-in percentage.
-#' @param mse.seed Integer or NULL. Seed for reproducibility.
+#' @param seed Integer or NULL. Seed for reproducibility.
 #' @param keep.err.dat Logical. Whether to keep the full error data.
 #' @param rhat Numeric. The R-hat convergence cutoff.
 #'
@@ -27,7 +27,7 @@
 #' \describe{
 #'   \item{person}{List with `rmse` (named vector), `mc.sd.rmse` (named vector), and `bias` (named vector) for theta and zeta.}
 #'   \item{item}{List with `rmse` (named vector), `mc.sd.rmse` (named vector), and `bias` (named vector) for alpha, beta, phi, lambda, and sigma2.}
-#'   \item{conv.rate}{Data frame. The R-hat convergence rate per iteration (rows) by parameter blocks (columns).}
+#'   \item{conv.rate}{Numeric. Proportion of iterations that converged (n converged / iter).}
 #'   \item{err.dat}{List with `person` and `item` data frames containing per-replication errors (if `keep.err.dat = TRUE`).}
 #' }
 #'
@@ -36,7 +36,7 @@
 #' test <- comp_rmse(
 #'   iter = 5,
 #'   N = 100,
-#'  K = 10,
+#'   K = 10,
 #'   mu.person = c(0, 0),
 #'   mu.item = c(1, 0, 1, 1),
 #'   meanlog.sigma2 = log(1),
@@ -46,9 +46,10 @@
 #'   cor2cov.item = TRUE,
 #'   sdlog.sigma2 = 0.2,
 #'   XG = 2000,
-#'   keep.err.dat = TRUE,
-#'   rhat = 1.1
+#'   keep.err.dat = FALSE,
+#'   rhat = 1.05
 #' )
+#' summary(test)
 #' }
 #' @export
 comp_rmse <- function(N,
@@ -69,13 +70,13 @@ comp_rmse <- function(N,
                      sd.item = NULL,
                      XG = 3000,
                      burnin = 20,
-                     mse.seed = NULL,
+                     seed = NULL,
                      keep.err.dat = TRUE,
                      rhat = 1.05) {
 
-  if (is.null(mse.seed)) {
+  if (is.null(seed)) {
     seed = TRUE } else {
-      seed = mse.seed
+      seed = seed
     }
 
   # set progressr
@@ -173,15 +174,13 @@ comp_rmse <- function(N,
           conv.rate = r.hat.rates
         )
 
-        if (keep.err.dat) {
-          res$sim.alpha  <- item.par$alpha
-          res$sim.beta   <- item.par$beta
-          res$sim.phi    <- item.par$phi
-          res$sim.lambda <- item.par$lambda
-          res$sim.sigma2 <- item.par$sigma2
-          res$sim.theta  <- person.par$theta
-          res$sim.zeta   <- person.par$zeta
-        }
+          res$sim.alpha  <- re.scaled.data$items.pars.scaled$alpha
+          res$sim.beta   <- re.scaled.data$items.pars.scaled$beta
+          res$sim.phi    <- re.scaled.data$items.pars.scaled$phi
+          res$sim.lambda <- re.scaled.data$items.pars.scaled$lambda
+          res$sim.sigma2 <- re.scaled.data$items.pars.scaled$sigma2
+          res$sim.theta  <- re.scaled.data$person.pars.scaled$theta
+          res$sim.zeta   <- re.scaled.data$person.pars.scaled$zeta
 
         # empty memory
         rm(post.theta, post.zeta, post.alpha, post.beta, post.phi, post.lambda, post.sigma2,
@@ -201,9 +200,9 @@ comp_rmse <- function(N,
       future.stdout = FALSE,
       future.packages = c("LNIRT"),
       future.globals = structure(
-        TRUE,  # <- do automatic detection
+        TRUE,  # automatic detection
         add = c(
-          # but ALWAYS also ship these helpers:
+          # ship these helpers:
           "sim.jhm.data",
           "person.par",
           "item.par",
@@ -272,8 +271,6 @@ comp_rmse <- function(N,
   )
 
   # full error data
-  if (keep.err.dat) {
-
   err.item <- do.call(rbind, Map(function(x, r) {
 
     data.frame(
@@ -304,26 +301,53 @@ comp_rmse <- function(N,
     )
 
   }, out, seq_along(out)))
-  } else {
-    err.item <- err.person <- NULL
+
+# binning error data
+  if(!keep.err.dat) {
+    n.bins <- 30
+
+    ntile_base <- function(x, n) {
+      floor((rank(x, ties.method = "first") - 1) * n / length(x)) + 1L
+    }
+
+    # helper: summarize by par and bin
+    bin_summarise <- function(df, n.bins) {
+      do.call(rbind, lapply(split(df, df$par), function(d) {
+        d$bin <- ntile_base(d$sim.val, n.bins)
+        do.call(rbind, lapply(split(d, d$bin), function(b) {
+          data.frame(
+            par       = b$par[1],
+            bin       = b$bin[1],
+            mean_sim  = mean(b$sim.val, na.rm = TRUE),
+            mean_err  = mean(b$err, na.rm = TRUE),
+            mean_rmse = sqrt(mean(b$err^2, na.rm = TRUE))
+          )
+        }))
+      }))
+    }
+
+    err.item <- bin_summarise(err.item, n.bins)
+    rownames(err.item) <- NULL
+
+    err.person <- bin_summarise(err.person, n.bins)
+    rownames(err.person) <- NULL
   }
 
   # convergence rates
-  conv.rate = as.data.frame(t(sapply(out, FUN = function(x) {
-    x$conv.rate
-  })))
+  conv.rate <- length(out) / iter
 
   # empty memory
   rm(out)
   gc()
 
   # return output
-  output <- c(list(person = person),
-              list(item = item),
-              list(conv.rate = conv.rate),
-              list(err.dat = list(
-                person = err.person,
-                item = err.item)))
+  output <- list(
+    person = person,
+    item = item,
+    conv.rate = conv.rate,
+    err.dat = list(person = err.person,
+                   item = err.item)
+  )
   class(output) <- "sspLNIRT.object"
   return(output)
 }

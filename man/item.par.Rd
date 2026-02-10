@@ -5,7 +5,7 @@
 \title{Generate Item parameters}
 \usage{
 item.par(
-  I,
+  K,
   mu.item = c(1, 0, 4, 0),
   cov.m.item = matrix(c(0.2, 0, 0, 0, 0, 0.5, -0.35, -0.15, 0, -0.35, 0.5, 0.15, 0,
     -0.15, 0.15, 0.2), ncol = 4, byrow = TRUE),
@@ -16,7 +16,7 @@ item.par(
 )
 }
 \arguments{
-\item{I}{Integer. The test length or number of items.}
+\item{K}{Integer. The test length or number of items.}
 
 \item{mu.item}{Numeric vector. Means of alpha, beta, phi, and lambda}
 
@@ -31,13 +31,13 @@ item.par(
 \item{sd.item}{Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda}
 }
 \value{
-A data frame containing item parameters
+A data frame with K rows and 5 columns:
 \describe{
-  \column{alpha}{Numeric vector. The values of the item discrimination parameter.}
-  \column{beta}{Numeric vector. The values of the item difficulty parameter.}
-  \column{phi}{Numeric vector. The values of the time discrimination parameter.}
-  \column{lambda}{Numeric vector. The values of the time intensity parameter.}
-  \column{sigma2}{Numeric vector. The values of the error variance parameter.}
+  \item{alpha}{Numeric. Item discrimination parameter.}
+  \item{beta}{Numeric. Item difficulty parameter.}
+  \item{phi}{Numeric. Time discrimination parameter.}
+  \item{lambda}{Numeric. Time intensity parameter.}
+  \item{sigma2}{Numeric. Error variance parameter.}
 }
 }
 \description{
@@ -46,7 +46,5 @@ multivariate normal distribution for alpha, beta, phi, lambda, and from a
 lognormal distribution for sigma2.
 }
 \examples{
- \dontrun{
-
-}
+NULL
 }

@@ -72,34 +72,25 @@ if (HPC ) {
 
 # Run the Job -------------------------------------------------------------
 
-
-# generate the design conditions for low and high N
-design <- expand.grid(
-  XG = c(6000),
-  iter = c(100)
-)
-
-# storage
-result.list <- list()
+# batches
+batches <- split(1:100, cut(seq_len(100), breaks = 5, labels = FALSE))
 
 # compute MSE
 start.time = Sys.time()
-for (i in 1:nrow(design)) {
+for (i in 1:length(batches)) {
 
   result <- list()
-  iter <- design$iter[i]
-  XG <- design$XG[i]
-
-  for (k in 1:100) {
+  batch <- batches[[i]]
+  for (k in 1:length(batch)) {
     res <- optim_sample(
       FUN = comp_rmse,
-      thresh = .01,
+      thresh = .1,
       range = c(100,ub = 1000),
       out.par = 'alpha',
-      iter = iter,
+      iter = 100,
       K = 30,
       mu.person = c(0,0),
-      mu.item = c(1,0,1,1),
+      mu.item = c(1,0,.5,1),
       meanlog.sigma2 = log(.6),
       cov.m.person = matrix(c(1,0.4,
                               0.4,1), ncol = 2, byrow = TRUE),
@@ -109,21 +100,19 @@ for (i in 1:nrow(design)) {
                             0, 0.4, 0, 1), ncol =  4, byrow = TRUE),
       sd.item         = c(.2, 1, .2, .5),
       cor2cov.item    = TRUE,
-      sdlog.sigma2 = 0.2,
-      XG = XG,
-      ssp.seed = NULL,
+      sdlog.sigma2 = 0,
+      XG = 6000,
+      seed = NULL,
       rhat = 1.05)
     result[[k]] <- res
-    cat("iteration", k, "of", 100, "done!!!! \n\n")
     rm(res)
   }
-  saveRDS(result, paste0(save.dir, "ssp.variance.no.seed.", 2))
+  saveRDS(result, paste0(save.dir, "ssp.variance", i))
 
-  result.list[[i]] <- result
-  cat("Design row", i, "done!!!! \n\n")
+  cat("Batch", i, "of", length(batches), "done!!!! \n\n")
+  rm(result)
   gc()
 }
-saveRDS(result.list, paste0(save.dir, "ssp.variance.no.seed.list"))
 
 end.time = Sys.time()
 time.taken = end.time-start.time
@@ -135,43 +124,42 @@ print(time.taken)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(patchwork)
 
 # load results
-ssp.variance.no.seed.1 <- readRDS(paste0(save.dir, "ssp.variance.no.seed.1"))
+ssp.variance1 <- readRDS(paste0(save.dir, "ssp.variance1"))
+ssp.variance2 <- readRDS(paste0(save.dir, "ssp.variance2"))
+ssp.variance3 <- readRDS(paste0(save.dir, "ssp.variance3"))
+ssp.variance4 <- readRDS(paste0(save.dir, "ssp.variance4"))
+ssp.variance5 <- readRDS(paste0(save.dir, "ssp.variance5"))
 
 ## check convergence
-res.names <- list(ssp.variance.no.seed.1)
+res.names <- c(ssp.variance1, ssp.variance2, ssp.variance3, ssp.variance4
+               #,ssp.variance1
+               )
 
-lapply(res.names, FUN = function(z) {
-  summary(
-    unlist(lapply(z, FUN = function(x) {
-      lapply(x[[6]], FUN = function(y) nrow(y))
-    }))
-  )
-})
+summary(sapply(res.names, FUN = function(x) {
+  x$comp.rmse$conv.rate
+}))
 
-# conv rates: > .69
+# conv rates: > .84
 
 
 # get ssp data
-ssp.res <- lapply(res.names, FUN = function(x) {
-  t(sapply(x, FUN = function(y) y[c(1, 2, 3, 7)]))
-})
-
-ssp.data <- do.call(rbind, lapply(ssp.res, FUN = function(x) {
-  as.data.frame(cbind(
-    N.best     = as.numeric(x[, 1]),
-    res.best   = as.numeric(x[, 2]),
-    reps       = as.numeric(x[, 3]),
-    time.taken = as.numeric(x[, 4])
-  ))
-}))
+ssp.res <- as.data.frame(
+  t(sapply(res.names, FUN = function(x) {
+  as.numeric(c(x$N.min,
+               x$N.curve,
+               x$res.best,
+               x$trace$time.taken))
+})))
+colnames(ssp.res) <- c("N.min", "N.curve", "res.best", "time.taken")
 
 # summary stats
-sum.stats <- ssp.data %>%
-  summarise(
+sum.stats <- ssp.res %>%
+ summarise(
     across(
-      c(N.best, res.best, reps, time.taken),
+      c(N.min, N.curve, res.best, time.taken),
       list(
         mean  = ~ mean(.x, na.rm = TRUE),
         sd    = ~ sd(.x,   na.rm = TRUE),
@@ -191,22 +179,68 @@ sum.stats <- ssp.data %>%
   as.data.frame()
 
 
-# density plot N.best
-lines_N.best <- sum.stats %>%
-  filter(variable == "N.best") %>%
+# histogram N.min
+lines_N.min <- sum.stats %>%
+  filter(variable == "N.min") %>%
   pivot_longer(
     cols = c(lb.sd, mean, ub.sd),
     names_to = "bound",
     values_to = "xint"
   )
 
-ggplot(ssp.data, aes(x = N.best)) +
+gg_N.min <- ggplot(ssp.res, aes(x = N.min)) +
   geom_histogram(alpha = .5) +
   geom_vline(
-    data = lines_N.best,
+    data = lines_N.min,
     aes(xintercept = xint, linetype = bound)
   ) +
   scale_linetype_manual(values = c(lb.sd = "dashed", mean = "solid", ub.sd = "dashed"))
+
+# histogram N.curve
+lines_N.curve <- sum.stats %>%
+  filter(variable == "N.curve") %>%
+  pivot_longer(
+    cols = c(lb.sd, mean, ub.sd),
+    names_to = "bound",
+    values_to = "xint"
+  )
+
+gg_N.curve <- ggplot(ssp.res, aes(x = N.curve)) +
+  geom_histogram(alpha = .5) +
+  geom_vline(
+    data = lines_N.curve,
+    aes(xintercept = xint, linetype = bound)
+  ) +
+  scale_linetype_manual(values = c(lb.sd = "dashed", mean = "solid", ub.sd = "dashed"))
+
+# compare the plots
+shared_xlim <- range(c(ssp.res$N.min, ssp.res$N.curve), na.rm = TRUE)
+wrap_plots(gg_N.min, gg_N.curve, ncol = 1) &
+  scale_x_continuous(limits = shared_xlim)
+
+
+# combined density plot
+plot_df <- ssp.res %>%
+  pivot_longer(cols = c(N.min, N.curve), names_to = "method", values_to = "N")
+
+lines_df <- sum.stats %>%
+  filter(variable %in% c("N.min", "N.curve")) %>%
+  pivot_longer(cols = c(lb.sd, mean, ub.sd), names_to = "bound", values_to = "xint") %>%
+  rename(method = variable)
+
+ggplot(plot_df, aes(x = N, fill = method, color = method)) +
+  geom_density(alpha = .3) +
+  geom_vline(
+    data = lines_df,
+    aes(xintercept = xint, color = method, linetype = bound)
+  ) +
+  scale_linetype_manual(
+    values = c(lb.sd = "dashed", mean = "solid", ub.sd = "dashed")
+  ) +
+  scale_fill_grey(name = "N Method", start = 0.6, end = 0.2) +
+  scale_color_grey(name = "N Method", start = 0.6, end = 0.2) +
+  labs(x = "Sample Size", y = "Density") +
+  theme_minimal()
 
 
 # density plot res.best
@@ -218,7 +252,7 @@ lines_res.best <- sum.stats %>%
     values_to = "xint"
   )
 
-ggplot(ssp.data, aes(x = res.best)) +
+ggplot(ssp.res, aes(x = res.best)) +
   geom_density(alpha = .5) +
   geom_vline(
     data = lines_res.best,
@@ -228,53 +262,39 @@ ggplot(ssp.data, aes(x = res.best)) +
 
 
 
+##### check log-log curves
+# extract power curves into a named list
+power_curves <- lapply(res.names, function(x) {
+  # raw tracking data
+  N_vec   <- x$trace$track.N$N.temp
+  res_vec <- x$trace$track.res$res.temp
 
-### OLD Design with tolerance stopping criterion ####
-# check if variance is dependent on number of reps
-ssp.data %>%
-  group_by(condition) %>%
-  filter(reps >=11) %>%
-  summarise(sd = sd(N.best))
-ssp.data %>%
-  group_by(condition) %>%
-  filter(reps >=10) %>%
-  summarise(sd = sd(N.best))
-ssp.data %>%
-  group_by(condition) %>%
-  filter(reps >=9) %>%
-  summarise(sd = sd(N.best))
-ssp.data %>%
-  group_by(condition) %>%
-  filter(reps >=8) %>%
-  summarise(sd = sd(N.best))
-ssp.data %>%
-  group_by(condition) %>%
-  filter(reps >=0) %>%
-  summarise(sd = sd(N.best))
-# -> variance is indeed smaller if algorithm runs until the end
+  # fit log-log model
+  fit <- lm(log(res_vec) ~ log(N_vec))
+  a <- coef(fit)[1]
+  b <- coef(fit)[2]
 
-ggplot(ssp.data, aes(x = N.best, fill = condition)) +
-  geom_density(alpha = .5) +
-  geom_density(
-    data = dplyr::filter(ssp.data, reps >= 11),
-    aes(x = N.best, color = condition),
-    fill = NA,
-    linetype = "dotdash"  )
+  # derive N.curve
+  N_curve <- ceiling(exp((log(.1) - a) / b))
 
-ggplot(ssp.data, aes(x = N.best)) +
-  geom_density(alpha = .5) +
-  geom_density(
-    data = filter(ssp.data, reps >= 10),
-    fill = NA,
-    linetype = "dotted",
-    linewidth = 0.9
-  ) +
-  geom_density(
-    data = filter(ssp.data, reps >= 11),
-    fill = NA,
-    linetype = "dotdash",
-    linewidth = 0.9
-  ) +
-  facet_wrap(~ condition, ncol = 1)
+  list(
+    N_vec   = N_vec,
+    res_vec = res_vec,
+    fit     = fit,
+    a       = as.numeric(a),
+    b       = as.numeric(b),
+    N_curve = as.numeric(N_curve),
+    r_sq    = summary(fit)$r.squared
+  )
+})
 
-# -> tolerance stopping criterion removed
+# tabular overview
+do.call(rbind, lapply(power_curves, function(pc) {
+  data.frame(a = pc$a, b = pc$b, N_curve = pc$N_curve, r_sq = pc$r_sq)
+}))
+
+# plot a single log-log relation
+plot(log(power_curves[[1]]$N_vec), log(power_curves[[1]]$res_vec))
+abline(power_curves[[1]]$fit, col = "red")
+
+plot_power_curve(res.names, thresh = .05)

@@ -10,6 +10,12 @@ scale_M(item.pars, person.pars, re.scale = FALSE, c.alpha = NULL, c.phi = NULL)
 \item{item.pars}{Data frame or Matrix. The item parameters.}
 
 \item{person.pars}{Data frame or Matrix. The person parameters.}
+
+\item{re.scale}{Logical. Whether to rescale.}
+
+\item{c.alpha}{Numeric. Scaling constant for alpha.}
+
+\item{c.phi}{Numeric. Scaling constant for phi.}
 }
 \value{
 A list containing:

@@ -12,19 +12,16 @@
 #' @param cor2cov.item Logical. Whether a correlation matrix instead of covariance matrix is supplied
 #' @param sd.item Numeric vector. (optional) The standard deviations of alpha, beta, phi, and lambda
 #'
-#' @return A data frame containing item parameters
-#'\describe{
-#'   \column{alpha}{Numeric vector. The values of the item discrimination parameter.}
-#'   \column{beta}{Numeric vector. The values of the item difficulty parameter.}
-#'   \column{phi}{Numeric vector. The values of the time discrimination parameter.}
-#'   \column{lambda}{Numeric vector. The values of the time intensity parameter.}
-#'   \column{sigma2}{Numeric vector. The values of the error variance parameter.}
+#' @return A data frame with K rows and 5 columns:
+#' \describe{
+#'   \item{alpha}{Numeric. Item discrimination parameter.}
+#'   \item{beta}{Numeric. Item difficulty parameter.}
+#'   \item{phi}{Numeric. Time discrimination parameter.}
+#'   \item{lambda}{Numeric. Time intensity parameter.}
+#'   \item{sigma2}{Numeric. Error variance parameter.}
 #' }
 #'
-#' @examples
-#'  \dontrun{
-#'
-#' }
+#' @examples NULL
 #' @export
 #'
 
@@ -45,7 +42,8 @@ item.par <- function(K,
 
   # if correlation matrix is supplied
   if (cor2cov.item) {
-    cov.m.item <- lavaan::cor2cov(cov.m.item , sds = sd.item)
+    D <- diag(sd.item)
+    cov.m.item <- D %*% cov.m.item %*% D
   }
 
   # sample alpha, beta, phi, lambda

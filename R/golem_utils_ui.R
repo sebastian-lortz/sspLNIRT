@@ -1,3 +1,15 @@
+#' info logo in name html wrapper
+#' @noRd
+name_with_info <- function(name, description) {
+  bslib::tooltip(
+    span(
+      name,
+      bsicons::bs_icon("info-circle-fill", class = "ms-1 text-muted", style = "font-size: 0.8em; cursor: help;")
+    ),
+    description
+  )
+}
+
 #' Turn an R list into an HTML list
 #'
 #' @param list An R list
