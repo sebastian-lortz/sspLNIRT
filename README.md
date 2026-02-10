@@ -9,8 +9,8 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges:end -->
 
-I introduce sspLNIRT: sample-size planning for item calibration with the
-joint hierarchical model of response accuracy and response time. The
+I introduce `sspLNIRT`: Sample-size Planning for Item Calibration with
+the Joint Hierarchical Model of Response Accuracy and Response Time. The
 package can be used to estimate minimum sample sizes to each a target
 item parameter precision under a specified data simulation model.
 
@@ -79,4 +79,4 @@ Conduct.
 
 You are reading the doc about version: 0.0.0.9000
 
-This README has been compiled on 2026-02-10 23:50:31.
+This README has been compiled on 2026-02-10 23:54:17.

@@ -100,3 +100,5 @@ install.packages("pkgdown")
 usethis::use_pkgdown()
 
 pkgdown::build_site()
+
+usethis::use_pkgdown_github_pages()
