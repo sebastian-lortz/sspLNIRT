@@ -14,9 +14,13 @@
 # check dependencies
 # shows every file + line where each package is referenced
 renv::dependencies("R/")
-
+rsconnect::appDependencies()
 #spelling::update_wordlist()
 
+# read me info
+system("clang --version")   # macOS C/C++ compiler
+system("gfortran --version")# Fortran compiler
+R.version.string
 # Test your app
 devtools::document()
 
@@ -55,8 +59,7 @@ golem::add_shinyappsio_file()
 
 # THEN commit and push!
 
-#renv::install("rstudio/rsconnect")
-remotes::install_github("sebastian-lortz/sspLNIRT", upgrade = "never")
+remotes::install_github("sebastian-lortz/sspLNIRT")
 renv::snapshot(prompt = FALSE)
 
 ## Add/update manifest file (optional; for Git backed deployment on Posit )
@@ -72,7 +75,10 @@ rsconnect::setAccountInfo(name='sebastian-lortz',
 # deploy
 
 #options(rsconnect.dependency.lock = FALSE)
+# update to latest CRAN release (not dev version)
+# install.packages("rsconnect")
 
+# restart R session, then:
 rsconnect::deployApp(
   appName  = "sspLNIRT",
   appTitle = "sspLNIRT",
@@ -88,3 +94,9 @@ rsconnect::deployApp(
   forceUpdate = TRUE
 )
 
+
+### pkg down
+install.packages("pkgdown")
+usethis::use_pkgdown()
+
+pkgdown::build_site()

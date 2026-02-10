@@ -4,12 +4,12 @@
 \name{sspLNIRT-package}
 \alias{sspLNIRT}
 \alias{sspLNIRT-package}
-\title{sspLNIRT: Sample Size Planning for Joint Hierarchical Modelling using LNIRT}
+\title{sspLNIRT: Sample Size Planning for Item Calibration using the Joint Hierarchical Model}
 \description{
 Sample size planning tools for the Joint Hierarchical Model using a 2-PL normal ogive model for response accuracy and a 3-PL log-normal model for response time, estimated via the LNIRT package.
 }
 \author{
-\strong{Maintainer}: Sebastian A. J. Lortz \email{s.a.j.lortz@gmail.com}
+\strong{Maintainer}: Sebastian Alexander Johannes Lortz \email{s.a.j.lortz@gmail.com}
 
 }
 \keyword{internal}

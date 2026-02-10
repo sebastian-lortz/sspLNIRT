@@ -22,8 +22,7 @@
 #'                          person.seed = 123)
 #'}
 #'
-#' @export
-#'
+#' @noRd
 
 person.par <- function(N,
                        mu.person = c(0,0),

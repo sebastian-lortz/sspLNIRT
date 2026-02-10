@@ -45,8 +45,7 @@
 #'                          )
 #'}
 #'
-#' @export
-#'
+#' @noRd
 
 sim.jhm.data <- function(iter,
                          N,

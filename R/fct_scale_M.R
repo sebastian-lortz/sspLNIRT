@@ -17,10 +17,7 @@
 #'   \item{c.phi}{Numeric. The scaling constant of phi}
 #' }
 #'
-#' @export
-#'
-
-
+#' @noRd
 
 scale_M <- function(item.pars,
                     person.pars,

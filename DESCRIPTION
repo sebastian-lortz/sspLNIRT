@@ -1,8 +1,11 @@
 Package: sspLNIRT
-Title: Sample Size Planning for Joint Hierarchical Modelling using LNIRT
+Title: Sample Size Planning for Item Calibration using the Joint Hierarchical Model
 Version: 0.0.0.9000
 Authors@R: 
-    person("Sebastian A. J.", "Lortz", , "s.a.j.lortz@gmail.com", role = c("aut", "cre"))
+    person(given = "Sebastian Alexander Johannes",
+           family = "Lortz",
+           email = "s.a.j.lortz@gmail.com",
+           role = c("aut", "cre"))
 Description: Sample size planning tools for the Joint Hierarchical Model 
     using a 2-PL normal ogive model for response accuracy and a 3-PL 
     log-normal model for response time, estimated via the LNIRT package.

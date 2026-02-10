@@ -1,0 +1,8 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "sspLNIRT: Sample Size Planning for Item Calibration using the Joint Hierarchical Model",
+  author   = person("Sebastian A. J.", "Lortz"),
+  year     = 2026,
+  note     = paste("R package version", meta$Version),
+  url      = "https://github.com/sebastian-lortz/sspLNIRT"
+)

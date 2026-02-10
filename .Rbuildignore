@@ -17,3 +17,6 @@ $run_dev.*
 ^app\.R$
 ^rsconnect$
 ^\.rscignore$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

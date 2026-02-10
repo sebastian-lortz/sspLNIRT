@@ -22,7 +22,7 @@
 #' }
 #'
 #' @examples NULL
-#' @export
+#' @noRd
 #'
 
 item.par <- function(K,
