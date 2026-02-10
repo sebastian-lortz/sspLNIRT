@@ -56,7 +56,7 @@ golem::add_shinyappsio_file()
 # THEN commit and push!
 
 #renv::install("rstudio/rsconnect")
-renv::install("github::sebastian-lortz/sspLNIRT")
+remotes::install_github("sebastian-lortz/sspLNIRT", upgrade = "never")
 renv::snapshot(prompt = FALSE)
 
 ## Add/update manifest file (optional; for Git backed deployment on Posit )
