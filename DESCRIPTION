@@ -41,3 +41,4 @@ RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.5)
+URL: https://sebastian-lortz.github.io/sspLNIRT/
