@@ -601,7 +601,8 @@ padding-top: 0px;
 
 <body>
 
-<h1 id="ssplnirt-app">sspLNIRT App</h1>
+<h1 id="welcome-to-the-ssplnirt-app">Welcome to the sspLNIRT App</h1>
+<p><br><br></p>
 <h3 id="sample-size-planning-for-item-calibration-with-the-joint-hierarchical-model">Sample
 Size Planning for Item Calibration with the Joint Hierarchical
 Model</h3>
@@ -613,34 +614,38 @@ accuracy with a 3-parameter log-normal model for response times, linked
 through higher-level joint distributions (see <a href="https://doi.org/10.1007/s11336-006-1478-z">van der Linden,
 2007</a>; <a href="https://doi.org/10.1007/s11336-008-9075-y">Klein
 Entink et al., 2009</a>).</p>
+<br>
+
 <h3 id="precomputed-results">Precomputed Results</h3>
 <p>The <strong>Precomputed</strong> tab provides instant access to
 minimum sample sizes across <strong>972 design conditions</strong>.
 Select the input parameters of your planned study, e.g., test length,
 target item parameter, desired RMSE threshold, and the app retrieves the
-corresponding result from a precomputed lookup database. No simulations
-are run.</p>
-<p>The output includes:</p>
+corresponding result from a precomputed database. <strong>No
+simulations</strong> are run. The output includes:</p>
 <ul>
 <li><strong>Minimum N</strong> — the smallest sample size achieving the
 target RMSE, from a bisection search optimizer.</li>
 <li><strong>Power Curve N</strong> — a smoothed estimate from a
 power-law curve fitted across all optimization steps, which reduces
 Monte Carlo variability.</li>
-<li><strong>Precision summary</strong> — RMSE, Monte Carlo SD, and bias
-for all item and person parameters at the minimum sample size.</li>
-<li><strong>Diagnostic plots</strong> — parameter precision and bias
-across true values, the power curve of optimization steps, and simulated
-response time and response accuracy distributions.</li>
+<li><strong>Estimation at Minimum N</strong> — RMSE, Monte Carlo SD, and
+bias for all item and person parameters at the minimum sample size.</li>
+<li><strong>Diagnostic plots</strong> — parameter precision and bias (at
+minimum N) across true values, the power curve fitted to the
+optimization steps, and simulated response time and response accuracy
+distributions.</li>
 </ul>
+<br>
+
 <h3 id="custom-optimization">Custom Optimization</h3>
 <p>The <strong>Custom</strong> tab allows running the sample size
 optimization for design conditions not covered by the precomputed grid.
 Specify custom item parameter means, covariance structures, residual
-variance settings, and other model parameters. A R script can be
-downloaed and run locally. The optimization calls
-<code>optim_sample()</code> and runs the full optimization procedure,
-which requires substantial computation time.</p>
+variance settings, and other model parameters. Download the R script
+from the App and run it locally. The script calls
+<code>optim_sample()</code> and runs the full sample size estimation
+procedure, which requires substantial computation time.</p>
 <p>More details regarding the <code>sspLNIRT</code> application in R can
 be found in this <a href="https://sebastian-lortz.github.io/sspLNIRT/articles/">tutorial</a>.</p>
 
