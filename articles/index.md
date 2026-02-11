@@ -1,5 +1,5 @@
 # Articles
 
-### All vignettes
+### Application in R
 
 - [sspLNIRT](https://sebastian-lortz.github.io/sspLNIRT/articles/sspLNIRT.md):

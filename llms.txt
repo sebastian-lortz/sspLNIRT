@@ -108,6 +108,6 @@ This README has been compiled on 2026-02-10 23:54:17.
 
 # Articles
 
-### All vignettes
+### Application in R
 
 - [sspLNIRT](https://sebastian-lortz.github.io/sspLNIRT/articles/sspLNIRT.md):

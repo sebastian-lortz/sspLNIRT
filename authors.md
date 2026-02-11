@@ -6,6 +6,9 @@
 
 ## Citation
 
+Source:
+[`inst/CITATION`](https://github.com/sebastian-lortz/sspLNIRT/blob/main/inst/CITATION)
+
 Lortz S (2026). *sspLNIRT: Sample Size Planning for Item Calibration
 using the Joint Hierarchical Model*. R package version 0.0.0.9000,
 <https://github.com/sebastian-lortz/sspLNIRT>.
