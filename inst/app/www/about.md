@@ -1,6 +1,8 @@
 About the Project
 ================
 
+<br>
+
 ### Resources
 
 For detailed documentation, vignettes, and source code, visit the

@@ -1,6 +1,6 @@
-#' Plot the precision of item parameters
+#' Plot the estimation metrics of the item parameters
 #'
-#' The function plots the mean squared error or bias across values of the true parameter. For objects from \code{optim_sample()}, the
+#' The function plots the root mean squared error (RMSE) or bias across values of the true parameter. For objects from \code{optim_sample()}, the
 #' function uses the data at the minimum N, or, if the optimization stopped due to N being outside the specified range, at the respective bound.
 #'
 #' @param object Object. Output from \code{optim_sample()} or \code{comp_rmse()}.

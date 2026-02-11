@@ -1,9 +1,10 @@
+
 ---
 title: "Welcome to the sspLNIRT App"
 output: html_document
 ---
 
-<br><br>
+<br>
 
 ### Sample Size Planning for Item Calibration with the Joint Hierarchical Model
 

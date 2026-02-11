@@ -3,6 +3,7 @@ title: "About the Project"
 output: html_document
 ---
 
+<br>
 
 ### Resources
 

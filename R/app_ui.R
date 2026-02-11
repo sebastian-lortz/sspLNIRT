@@ -14,7 +14,10 @@ app_ui <- function(request) {
 
         bslib::nav_panel(
           title = "Home",
-          includeMarkdown(app_sys("app/www/home.md"))
+          div(
+            style = "margin-top: 20px;",
+            includeMarkdown(app_sys("app/www/home.md"))
+          )
         ),
 
         # precomputed data
@@ -32,7 +35,10 @@ app_ui <- function(request) {
         # about the app
         bslib::nav_panel(
           title = "About",
+          div(
+            style = "margin-top: 20px;",
           includeMarkdown(app_sys("app/www/about.md"))
+          )
         )
       )
     )

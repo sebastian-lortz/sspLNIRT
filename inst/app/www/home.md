@@ -1,7 +1,7 @@
 Welcome to the sspLNIRT App
 ================
 
-<br><br>
+<br>
 
 ### Sample Size Planning for Item Calibration with the Joint Hierarchical Model
 

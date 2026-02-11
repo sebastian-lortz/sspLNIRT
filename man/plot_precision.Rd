@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_plot_precision.R
 \name{plot_precision}
 \alias{plot_precision}
-\title{Plot the precision of item parameters}
+\title{Plot the estimation metrics of the item parameters}
 \usage{
 plot_precision(object, pars, y.val = "rmse", n.bins = 30)
 }
@@ -19,7 +19,7 @@ plot_precision(object, pars, y.val = "rmse", n.bins = 30)
 A ggplot object.
 }
 \description{
-The function plots the mean squared error or bias across values of the true parameter. For objects from \code{optim_sample()}, the
+The function plots the root mean squared error (RMSE) or bias across values of the true parameter. For objects from \code{optim_sample()}, the
 function uses the data at the minimum N, or, if the optimization stopped due to N being outside the specified range, at the respective bound.
 }
 \examples{
