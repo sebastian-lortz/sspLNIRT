@@ -195,20 +195,20 @@ dashed line marks the threshold, the dotted line the extrapolated $N$.
 
 ### Estimation precision
 
-`plot_precision()` shows how RMSE or bias varies across the range of true
+`plot_estimation()` shows how RMSE or bias varies across the range of true
 parameter values. This is useful for identifying regions of the parameter space
 where estimation is more or less precise:
 
 ```{r, fig.width = 7, fig.height = 5}
-plot_precision(res_alpha$object, pars = "item", y.val = "rmse")
+plot_estimation(res_alpha$object, pars = "item", y.val = "rmse")
 ```
 
 ```{r, fig.width = 7, fig.height = 4}
-plot_precision(res_alpha$object, pars = "person", y.val = "rmse")
+plot_estimation(res_alpha$object, pars = "person", y.val = "rmse")
 ```
 
 ```{r, fig.width = 7, fig.height = 5}
-plot_precision(res_alpha$object, pars = "item", y.val = "bias")
+plot_estimation(res_alpha$object, pars = "item", y.val = "bias")
 ```
 
 ### Design configuration

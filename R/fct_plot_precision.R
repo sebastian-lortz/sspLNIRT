@@ -1,4 +1,4 @@
-#' Plot the estimation metrics of the item parameters
+#' Plot the estimation metrics of the parameters
 #'
 #' The function plots the root mean squared error (RMSE) or bias across values of the true parameter. For objects from \code{optim_sample()}, the
 #' function uses the data at the minimum N, or, if the optimization stopped due to N being outside the specified range, at the respective bound.
@@ -12,12 +12,12 @@
 #'
 #' @examples
 #'  \dontrun{
-#'    plot_precision(object = test.optim.sample, pars = "item")
+#'    plot_estimation(object = test.optim.sample, pars = "item")
 #' }
 #'
 #' @export
 #'
-plot_precision <- function(object, pars, y.val = "rmse", n.bins = 30) {
+plot_estimation <- function(object, pars = "item", y.val = "rmse", n.bins = 30) {
 
   # --- input checks ---
   pars  <- match.arg(pars, choices = c("item", "person"))

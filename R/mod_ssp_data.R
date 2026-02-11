@@ -900,7 +900,7 @@ mod_ssp_data_server <- function(id) {
 
       obj <- result$object
 
-      plot_precision(
+      plot_estimation(
         object = obj,
         pars = input$precision_pars,
         y.val = input$precision_yval,

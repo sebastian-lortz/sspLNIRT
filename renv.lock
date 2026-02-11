@@ -4,7 +4,7 @@
     "Repositories": [
       {
         "Name": "CRAN",
-        "URL": "https://cran.rstudio.com"
+        "URL": "https://ftp.belnet.be/mirror/CRAN"
       }
     ]
   },
@@ -4669,8 +4669,9 @@
       "Package": "sspLNIRT",
       "Version": "0.0.0.9000",
       "Source": "GitHub",
-      "Title": "Sample Size Planning for Joint Hierarchical Modelling using LNIRT",
-      "Authors@R": "person(\"Sebastian A. J.\", \"Lortz\", , \"s.a.j.lortz@gmail.com\", role = c(\"aut\", \"cre\"))",
+      "Title": "Sample Size Planning for Item Calibration using the Joint Hierarchical Model",
+      "Data": "2026",
+      "Authors@R": "person(given = \"Sebastian Alexander Jens\", family = \"Lortz\", email = \"s.a.j.lortz@gmail.com\", role = c(\"aut\", \"cre\"))",
       "Description": "Sample size planning tools for the Joint Hierarchical Model  using a 2-PL normal ogive model for response accuracy and a 3-PL  log-normal model for response time, estimated via the LNIRT package.",
       "License": "MIT + file LICENSE",
       "Imports": [
@@ -4706,15 +4707,17 @@
       "Depends": [
         "R (>= 4.1.0)"
       ],
+      "URL": "https://github.com/sebastian-lortz/sspLNIRT, https://sebastian-lortz.github.io/sspLNIRT/",
+      "BugReports": "https://github.com/sebastian-lortz/sspLNIRT/issues",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "sspLNIRT",
       "RemoteUsername": "sebastian-lortz",
       "RemoteRef": "HEAD",
-      "RemoteSha": "6065ea9e26f39a6c169cff4cc1c6a4d437cb6d9e",
+      "RemoteSha": "3f6a32bc35acec19d6d0a590abe830fe45cb64f1",
       "NeedsCompilation": "no",
-      "Author": "Sebastian A. J. Lortz [aut, cre]",
-      "Maintainer": "Sebastian A. J. Lortz <s.a.j.lortz@gmail.com>"
+      "Author": "Sebastian Alexander Jens Lortz [aut, cre]",
+      "Maintainer": "Sebastian Alexander Jens Lortz <s.a.j.lortz@gmail.com>"
     },
     "stringi": {
       "Package": "stringi",

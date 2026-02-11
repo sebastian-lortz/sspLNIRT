@@ -135,8 +135,8 @@ names(diff.items) <- c("alpha", "beta", "phi", "lambda", "sigma2")
 plot(diff.items,
      ylab = "Difference")
 
-plot_precision(exp0)
-plot_precision(exp1)
+plot_estimation(exp0)
+plot_estimation(exp1)
 
 
 # no measurable difference on precision of item parameters
