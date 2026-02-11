@@ -55,7 +55,7 @@ devtools::install_github("sebastian-lortz/sspLNIRT")
 You can launch the ShinyApp locally by running:
 
 ```{r, eval = FALSE}
-discourse::run_app()
+sspLNIRT::run_app()
 ```
 
 ## Citation

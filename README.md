@@ -47,7 +47,7 @@ devtools::install_github("sebastian-lortz/sspLNIRT")
 You can launch the ShinyApp locally by running:
 
 ``` r
-discourse::run_app()
+sspLNIRT::run_app()
 ```
 
 ## Citation
@@ -79,4 +79,4 @@ Conduct.
 
 You are reading the doc about version: 0.0.0.9000
 
-This README has been compiled on 2026-02-10 23:54:17.
+This README has been compiled on 2026-02-11 11:51:43.
