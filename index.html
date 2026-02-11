@@ -50,29 +50,31 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="ssplnirt">sspLNIRT<a class="anchor" aria-label="anchor" href="#ssplnirt"></a>
 </h1></div>
-<!-- badges:start -->
-<p><a href="https://www.tidyverse.org/lifecycle/#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <!-- badges:end --></p>
-<p>I introduce <code>sspLNIRT</code>: Sample-size Planning for Item Calibration with the Joint Hierarchical Model of Response Accuracy and Response Time. The package can be used to estimate minimum sample sizes to each a target item parameter precision under a specified data simulation model.</p>
+<!-- badges: start -->
+
+<p><code>sspLNIRT</code> is a sample size planning tool for item calibration with the Joint Hierarchical Model (JHM) of response accuracy and response time. It estimates the minimum sample size required to achieve a target precision (RMSE) of item parameter estimates under a specified data-generating process.</p>
+<p>The package provides:</p>
+<ul>
+<li>
+<strong>Precomputed results</strong> for various design conditions, accessible instantly via a Shiny app and/or R package.</li>
+<li>
+<strong>Custom Sample Size Estimation</strong> via <code><a href="reference/optim_sample.html">optim_sample()</a></code> for design conditions outside the precomputed data.</li>
+<li>
+<strong>Visualization functions</strong> for inspecting parameter precision or bias, power curves, and implied response time and response accuracy distributions.</li>
+</ul>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>The tool is available as R package and comprehensive ShinyApp.</p>
+<p>The tool is available as an R package and as an interactive Shiny app.</p>
 <div class="section level3">
 <h3 id="web-app">Web App<a class="anchor" aria-label="anchor" href="#web-app"></a>
 </h3>
-<p>You can use the app at <a href="https://sebastian-lortz.shinyapps.io/sspLNIRT/" class="external-link uri">https://sebastian-lortz.shinyapps.io/sspLNIRT/</a>.</p>
-</div>
-<div class="section level3">
-<h3 id="system-requirements">System Requirements<a class="anchor" aria-label="anchor" href="#system-requirements"></a>
-</h3>
-<p>The <code>sspLNIRT</code> package was build under R Version 4.5.2 using Apple clang version 16.0.0 (clang-1600.0.26.6) and GNU Fortran (GCC) 14.2.0. To compile R from source, install the appropriate toolchain<br>
-- macOS: see <a href="https://mac.r-project.org/tools/" class="external-link uri">https://mac.r-project.org/tools/</a><br>
-- windows: see <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link uri">https://cran.r-project.org/bin/windows/Rtools/</a></p>
+<p>Use the app at <a href="https://sebastian-lortz.shinyapps.io/sspLNIRT/" class="external-link">sebastian-lortz.shinyapps.io/sspLNIRT</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
-<p>You can install the latest version of the R package <code>sspLNIRT</code> like so:</p>
+<p>You can install the latest version of the R package from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install devtools if needed</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span><span class="op">}</span></span>
@@ -81,12 +83,28 @@
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"sebastian-lortz/sspLNIRT"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
+<h3 id="system-requirements">System Requirements<a class="anchor" aria-label="anchor" href="#system-requirements"></a>
+</h3>
+<p>The <code>sspLNIRT</code> package was built under R version 4.5.2 using Apple clang version 16.0.0 (clang-1600.0.26.6) and GNU Fortran (GCC) 14.2.0. To compile R packages from source, install the appropriate toolchain:</p>
+<ul>
+<li>macOS: see <a href="https://mac.r-project.org/tools/" class="external-link uri">https://mac.r-project.org/tools/</a>
+</li>
+<li>Windows: see <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link uri">https://cran.r-project.org/bin/windows/Rtools/</a>
+</li>
+</ul>
+</div>
+<div class="section level3">
 <h3 id="run">Run<a class="anchor" aria-label="anchor" href="#run"></a>
 </h3>
-<p>You can launch the ShinyApp locally by running:</p>
+<p>Launch the Shiny app locally with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">sspLNIRT</span><span class="fu">::</span><span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>Vignettes and full function documentation are available at <a href="https://sebastian-lortz.github.io/sspLNIRT/">sebastian-lortz.github.io/sspLNIRT</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
@@ -111,7 +129,7 @@
 <h2 id="about">About<a class="anchor" aria-label="anchor" href="#about"></a>
 </h2>
 <p>You are reading the doc about version: 0.0.0.9000</p>
-<p>This README has been compiled on 2026-02-11 11:51:43.</p>
+<p>This README has been compiled on 2026-02-11 17:06:07.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -151,7 +169,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://www.tidyverse.org/lifecycle/#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

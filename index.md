@@ -1,32 +1,34 @@
 # sspLNIRT
 
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+`sspLNIRT` is a sample size planning tool for item calibration with the
+Joint Hierarchical Model (JHM) of response accuracy and response time.
+It estimates the minimum sample size required to achieve a target
+precision (RMSE) of item parameter estimates under a specified
+data-generating process.
 
-I introduce `sspLNIRT`: Sample-size Planning for Item Calibration with
-the Joint Hierarchical Model of Response Accuracy and Response Time. The
-package can be used to estimate minimum sample sizes to each a target
-item parameter precision under a specified data simulation model.
+The package provides:
+
+- **Precomputed results** for various design conditions, accessible
+  instantly via a Shiny app and/or R package.
+- **Custom Sample Size Estimation** via
+  [`optim_sample()`](https://sebastian-lortz.github.io/sspLNIRT/reference/optim_sample.md)
+  for design conditions outside the precomputed data.
+- **Visualization functions** for inspecting parameter precision or
+  bias, power curves, and implied response time and response accuracy
+  distributions.
 
 ## Usage
 
-The tool is available as R package and comprehensive ShinyApp.
+The tool is available as an R package and as an interactive Shiny app.
 
 ### Web App
 
-You can use the app at <https://sebastian-lortz.shinyapps.io/sspLNIRT/>.
-
-### System Requirements
-
-The `sspLNIRT` package was build under R Version 4.5.2 using Apple clang
-version 16.0.0 (clang-1600.0.26.6) and GNU Fortran (GCC) 14.2.0. To
-compile R from source, install the appropriate toolchain  
-- macOS: see <https://mac.r-project.org/tools/>  
-- windows: see <https://cran.r-project.org/bin/windows/Rtools/>
+Use the app at
+[sebastian-lortz.shinyapps.io/sspLNIRT](https://sebastian-lortz.shinyapps.io/sspLNIRT/).
 
 ### Installation
 
-You can install the latest version of the R package `sspLNIRT` like so:
+You can install the latest version of the R package from GitHub:
 
 ``` r
 # install devtools if needed
@@ -36,13 +38,27 @@ if (!requireNamespace("devtools")) {install.packages("devtools")}
 devtools::install_github("sebastian-lortz/sspLNIRT")
 ```
 
+### System Requirements
+
+The `sspLNIRT` package was built under R version 4.5.2 using Apple clang
+version 16.0.0 (clang-1600.0.26.6) and GNU Fortran (GCC) 14.2.0. To
+compile R packages from source, install the appropriate toolchain:
+
+- macOS: see <https://mac.r-project.org/tools/>
+- Windows: see <https://cran.r-project.org/bin/windows/Rtools/>
+
 ### Run
 
-You can launch the ShinyApp locally by running:
+Launch the Shiny app locally with:
 
 ``` r
 sspLNIRT::run_app()
 ```
+
+## Documentation
+
+Vignettes and full function documentation are available at
+[sebastian-lortz.github.io/sspLNIRT](https://sebastian-lortz.github.io/sspLNIRT/).
 
 ## Citation
 
@@ -73,4 +89,4 @@ Conduct.
 
 You are reading the doc about version: 0.0.0.9000
 
-This README has been compiled on 2026-02-11 11:51:43.
+This README has been compiled on 2026-02-11 17:06:07.
