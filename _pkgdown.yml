@@ -2,3 +2,14 @@ url: https://sebastian-lortz.github.io/sspLNIRT/
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left:
+      - home
+      - reference
+      - articles
+
+articles:
+  - title: "Application in R"
+    contents:
+      - "sspLNIRT"
