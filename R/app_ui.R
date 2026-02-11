@@ -13,10 +13,8 @@ app_ui <- function(request) {
         id = "tab",
 
         bslib::nav_panel(
-          title = "home",
-          # put whatever you want on the home tab
-          h2("Welcome"),
-          p("Use the tabs to navigate.")
+          title = "Home",
+          includeMarkdown(app_sys("app/www/home.md"))
         ),
 
         # precomputed data

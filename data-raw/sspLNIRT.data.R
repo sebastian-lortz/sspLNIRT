@@ -23,47 +23,11 @@ batch.list <- setNames(lapply(files, readRDS), sprintf("batch_%03d", batch_id))
 rows <- lapply(names(batch.list), function(bn) {
   batch <- batch.list[[bn]]
   lapply(seq_along(batch), function(i) {
-    res <- batch[[i]][[1]]
-    cfg <- batch[[i]][[2]]
-
-    # pre bin the err data
-    n.bins = 30
-    item.bin.means <- res$comp.rmse$err.dat$item %>%
-      dplyr::filter(par != "sigma2") %>%
-      group_by(par) %>%
-      mutate(bin = ntile(sim.val, n.bins)) %>%
-      group_by(par, bin) %>%
-      summarise(
-        mean_sim = mean(sim.val, na.rm = TRUE),
-        mean_err = mean(err, na.rm = TRUE),
-        mean_rmse = sqrt(mean(err^2, na.rm = TRUE)),
-        .groups = "drop"
-      )
-    person.bin.means <- res$comp.rmse$err.dat$person %>%
-      group_by(par) %>%
-      mutate(bin = ntile(sim.val, n.bins)) %>%
-      group_by(par, bin) %>%
-      summarise(
-        mean_sim = mean(sim.val, na.rm = TRUE),
-        mean_err = mean(err, na.rm = TRUE),
-        mean_rmse = sqrt(mean(err^2, na.rm = TRUE)),
-        .groups = "drop"
-      )
-
-    # fit power curve
-    if (res$trace$steps > 2) {
-      fit <- lm(log(res$trace$track.res$res.temp) ~ log(res$trace$track.N$N.temp))
-      a <- coef(fit)[1]
-      b <- coef(fit)[2]
-      N.curve <- as.numeric(ceiling(exp((log(cfg$thresh) - a) / b)))
-    } else {
-      N.curve <- NA
-    }
-
-    # replace err.dat with binned version, add N.curve
-    res$comp.rmse$err.dat <- list(item = item.bin.means, person = person.bin.means)
-    res$N.curve <- N.curve
+    res <- batch[[i]]$res
+    cfg <- batch[[i]]$args
     class(cfg) <- "sspLNIRT.design"
+
+    names(res)[1] <- "N.min"
 
     tibble(
       batch   = bn,
@@ -81,4 +45,23 @@ sspLNIRT.data <- do.call(rbind, unlist(rows, recursive = FALSE))
 usethis::use_data(sspLNIRT.data, overwrite = TRUE)
 
 
-sspLNIRT.data[[3]][[1]]
+####### Inspect the data #########
+conv <- sapply(seq_len(972), function(i) {
+  sspLNIRT.data[[3]][[i]]$comp.rmse$conv.rate
+})
+summary(conv)
+hist(conv)
+
+Ns <- t(sapply(seq_len(972), function(i) {
+  if(grepl("thresh", sspLNIRT.data[[3]][[i]]$N.min)) {
+    cbind(NA_real_, NA_real_)
+  } else {
+    cbind(sspLNIRT.data[[3]][[i]]$N.min,
+          sspLNIRT.data[[3]][[i]]$N.curve)
+  }
+}))
+
+dif.n <- Ns[,1] - Ns[,2]
+summary(dif.n)
+plot(dif.n)
+sspLNIRT.data[[3]][[1]]$comp.rmse$conv.rate

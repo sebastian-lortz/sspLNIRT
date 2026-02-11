@@ -44,14 +44,12 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_rmse.R",
-  "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
   "R/fct_person_par.R",
   "R/fct_rhat_LNIRT.R",
   "R/fct_scale_M.R",
-  "R/fct_sim_jhm_data.R",
-  "R/utils_helpers.R"
+  "R/fct_sim_jhm_data.R"
 )
 
 # load to environment

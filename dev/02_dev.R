@@ -67,6 +67,7 @@ usethis::use_github()
 devtools::build_readme()
 # GitHub Actions
 usethis::use_github_action()
+
 # Chose one of the three
 # See https://usethis.r-lib.org/reference/use_github_action.html
 usethis::use_github_action_check_release()
@@ -90,6 +91,10 @@ usethis::use_gitlab_ci()
 rmarkdown::render("/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/about.Rmd",
                   output_format = "github_document",
                   output_file   = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/about.md")
+# render home doc
+rmarkdown::render("/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/home.Rmd",
+                  output_format = "github_document",
+                  output_file   = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/home.md")
 
 # You're now set! ----
 # go to dev/03_deploy.R

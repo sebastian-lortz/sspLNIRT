@@ -41,15 +41,13 @@ if (HPC) {
 # required functions
 fct.names <- list(
   "R/fct_comp_rmse.R",
-  "R/fct_geweke_LNIRT.R",
   "R/fct_item_par.R",
   "R/fct_optim_sample.R",
   "R/fct_person_par.R",
   "R/fct_rhat_LNIRT.R",
   "R/fct_scale_M.R",
-  "R/fct_sim_jhm_data.R",
-  "R/utils_helpers.R"
-)
+  "R/fct_sim_jhm_data.R"
+  )
 
 # load to environment
 invisible (
@@ -134,21 +132,20 @@ ssp.variance4 <- readRDS(paste0(save.dir, "ssp.variance4"))
 ssp.variance5 <- readRDS(paste0(save.dir, "ssp.variance5"))
 
 ## check convergence
-res.names <- c(ssp.variance1, ssp.variance2, ssp.variance3, ssp.variance4
-               #,ssp.variance1
+res.names <- c(ssp.variance1, ssp.variance2, ssp.variance3, ssp.variance4, ssp.variance5
                )
 
 summary(sapply(res.names, FUN = function(x) {
   x$comp.rmse$conv.rate
 }))
 
-# conv rates: > .84
+# conv rates: > .83
 
 
 # get ssp data
 ssp.res <- as.data.frame(
   t(sapply(res.names, FUN = function(x) {
-  as.numeric(c(x$N.min,
+  as.numeric(c(x$N.best,
                x$N.curve,
                x$res.best,
                x$trace$time.taken))

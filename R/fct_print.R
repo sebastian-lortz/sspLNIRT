@@ -18,8 +18,8 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     cat("Sample Size Optimization\n")
     cat("--------------------------------------------------\n")
     cat("  Minimum N: ", x$N.min, "\n")
-    cat("  Power Curve N: ", x$N.curve, "\n")
-    cat("  MSE result: ", x$res.best, "\n")
+    cat("  Power curve N: ", x$N.curve, "\n")
+    cat("  RMSE at minimum N: ", x$res.best, "\n")
     cat("  Steps: ", x$trace$steps, "\n")
     cat("  Time elapsed:", format(x$trace$time.taken), "\n\n")
     # Item parameter MSEs
@@ -48,7 +48,7 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     print(t(person_df), right = TRUE, quote = FALSE)
     # Convergence info
     if (!is.null(x$comp.rmse$conv.rate)) {
-      cat("\nConverged Iterations in final step:", nrow(x$comp.rmse$conv.rate), "\n")
+      cat("\nConverged MC iterations at minimum N:", nrow(x$comp.rmse$conv.rate), "\n")
     }
   } else {
     # comp_mse output

@@ -247,16 +247,21 @@ mod_ssp_data_ui <- function(id) {
           id   = ns("acc_output"),
           open = FALSE,
 
-          # --- Output Panel ---
+          # --- Output Panel (inlined) ---
           bslib::accordion_panel(
             title = "Output",
             icon  = bsicons::bs_icon("terminal"),
 
-            shiny::div(
-              style = "height: 40vh; overflow-y: auto;",
-              shiny::verbatimTextOutput(ns("out_text"))
-            ),
-            # --- Downloads collapsible section ---
+            # --- Top row: key sample size results ---
+            shiny::uiOutput(ns("out_header")),
+
+            # --- Item & Person parameter tables side by side ---
+            shiny::uiOutput(ns("out_param_tables")),
+
+            # --- Convergence info ---
+            shiny::uiOutput(ns("out_convergence")),
+
+            # --- Downloads ---
             shiny::tags$details(
               class = "mt-3",
               shiny::tags$summary(
@@ -282,7 +287,6 @@ mod_ssp_data_ui <- function(id) {
               )
             )
           ),
-
 
           # --- Plots Panel ---
           bslib::accordion_panel(
@@ -417,6 +421,7 @@ mod_ssp_data_ui <- function(id) {
 }
 
 
+
 #' ssp_data Server Functions
 #'
 #' @noRd
@@ -478,18 +483,288 @@ mod_ssp_data_server <- function(id) {
       }
     })
 
-    # Render summary output
-    output$out_text <- shiny::renderPrint({
+    # ════════════════════════════════════════════════
+    # Output panel helpers
+    # ════════════════════════════════════════════════
+
+    # ── Helper: styled metric card ──
+    metric_card <- function(label, value, tooltip = NULL, icon_name = NULL,
+                            accent_class = "text-primary") {
+      label_el <- if (!is.null(tooltip)) {
+        name_with_info(label, tooltip)
+      } else {
+        label
+      }
+
+      shiny::tags$div(
+        class = "p-3 border rounded bg-light text-center",
+        if (!is.null(icon_name)) {
+          shiny::tags$div(
+            class = paste("mb-1", accent_class),
+            bsicons::bs_icon(icon_name, size = "1.2em")
+          )
+        },
+        shiny::tags$div(
+          class = "text-muted",
+          style = "font-size: 0.78em;",
+          label_el
+        ),
+        shiny::tags$div(
+          class = "fw-bold",
+          style = "font-size: 1.35em;",
+          value
+        )
+      )
+    }
+
+    # ── Helper: transposed parameter table ──
+    # Parameters as COLUMNS, metrics (RMSE, MC SD, Bias) as ROWS
+    param_table <- function(rmse_vals, mc_sd_vals, bias_vals = NULL, par_names) {
+
+      # Metric row tooltips
+      metric_tips <- list(
+        RMSE    = "Root Mean Square Error: expected average deviation of estimates from true values.",
+        `MC SD` = "Monte Carlo Standard Deviation: variability of the RMSE across simulation iterations.",
+        Bias    = "Average signed difference between estimated and true parameter values."
+      )
+
+      # Column tooltips for parameter names
+      col_tips <- list(
+        alpha  = "\u03b1: Item discrimination. Higher = item better differentiates ability levels.",
+        beta   = "\u03b2: Item difficulty. Higher = harder item.",
+        phi    = "\u03c6: Time sensitivity. Higher = RT more sensitive to speed differences.",
+        lambda = "\u03bb: Time intensity. Higher = item takes longer on average.",
+        theta  = "\u03b8: Latent ability.",
+        zeta   = "\u03b6: Latent speed."
+      )
+
+      # Unicode display names
+      display_names <- list(
+        alpha = "\u03b1", beta = "\u03b2", phi = "\u03c6", lambda = "\u03bb",
+        theta = "\u03b8", zeta = "\u03b6"
+      )
+
+      has_bias <- !is.null(bias_vals)
+
+      # ── Header row: empty corner cell + one column per parameter ──
+      header_cells <- list(
+        shiny::tags$th(style = "text-align: left; padding: 6px 10px;", "")
+      )
+      for (p in par_names) {
+        display <- display_names[[p]] %||% p
+        tip     <- col_tips[[p]] %||% ""
+        header_cells <- c(header_cells, list(
+          shiny::tags$th(
+            style = "text-align: right; padding: 6px 10px;",
+            name_with_info(display, tip)
+          )
+        ))
+      }
+
+      # ── Helper to build one metric row ──
+      make_row <- function(metric_label, metric_tip, vals) {
+        cells <- list(
+          shiny::tags$td(
+            style = "text-align: left; padding: 6px 10px; font-weight: 600;",
+            name_with_info(metric_label, metric_tip)
+          )
+        )
+        for (p in par_names) {
+          cells <- c(cells, list(
+            shiny::tags$td(
+              style = "text-align: right; padding: 6px 10px; font-family: monospace;",
+              sprintf("%.4f", vals[[p]])
+            )
+          ))
+        }
+        shiny::tags$tr(cells)
+      }
+
+      # ── Build metric rows ──
+      rows <- list(
+        make_row("RMSE",  metric_tips[["RMSE"]],  rmse_vals),
+        make_row("MC SD", metric_tips[["MC SD"]], mc_sd_vals)
+      )
+      if (has_bias) {
+        rows <- c(rows, list(
+          make_row("Bias", metric_tips[["Bias"]], bias_vals)
+        ))
+      }
+
+      # ── Assemble table ──
+      shiny::tags$table(
+        class = "table table-sm table-hover mb-0",
+        style = "font-size: 0.88em;",
+        shiny::tags$thead(
+          shiny::tags$tr(class = "border-bottom", header_cells)
+        ),
+        shiny::tags$tbody(rows)
+      )
+    }
+
+    # ════════════════════════════════════════════════
+    # Render: Header with key metrics
+    # ════════════════════════════════════════════════
+    output$out_header <- shiny::renderUI({
+
       result <- ssp_result()
 
       if (!is.null(result$error)) {
-        cat("Error:\n", result$error)
-      } else if (!is.null(result$object)) {
-        cat("=== sspLNIRT Result ===\n\n")
-        summary(result$object)
-      } else {
-        cat("No matching configuration found.")
+        return(shiny::tags$div(
+          class = "alert alert-warning mt-2",
+          bsicons::bs_icon("exclamation-triangle", class = "me-2"),
+          result$error
+        ))
       }
+
+      obj <- result$object
+      if (is.null(obj) || is.null(obj$N.min)) {
+        return(shiny::tags$div(
+          class = "text-muted text-center py-4",
+          "No matching configuration found."
+        ))
+      }
+
+      # Extract values
+      smry       <- summary(obj)
+      N_min      <- smry$N.min
+      N_curve    <- smry$N.curve
+      rmse_best  <- smry$res.best
+      steps      <- smry$trace$steps
+      time_taken <- format(smry$trace$time.taken)
+
+      shiny::tagList(
+        # Value boxes row
+        bslib::layout_columns(
+          col_widths = c(4, 4, 4),
+          class = "mt-2 mb-3",
+
+          metric_card(
+            label      = "Minimum N",
+            value      = N_min,
+            tooltip    = "The smallest sample size for which the target RMSE threshold was achieved in the bisection search.",
+            icon_name  = "people-fill",
+            accent_class = "text-primary"
+          ),
+
+          metric_card(
+            label      = "Power Curve N",
+            value      = N_curve,
+            tooltip    = "Minimum sample size estimated from a power-law curve fitted to all optimization steps. Pools information across steps to reduce Monte Carlo variability.",
+            icon_name  = "graph-up-arrow",
+            accent_class = "text-success"
+          ),
+
+          metric_card(
+            label      = "RMSE at Min N",
+            value      = sprintf("%.4f", rmse_best),
+            tooltip    = "The estimated RMSE of the target item parameter at the minimum sample size.",
+            icon_name  = "bullseye",
+            accent_class = "text-info"
+          )
+        ),
+
+        # Optimizer info (subtle)
+        shiny::tags$div(
+          class = "text-muted mb-3",
+          style = "font-size: 0.8em;",
+          bsicons::bs_icon("gear", class = "me-1"),
+          paste0("Optimization completed in ", steps, " steps (", time_taken, ")")
+        )
+      )
+    })
+
+    # ════════════════════════════════════════════════
+    # Render: Item & Person parameter tables SIDE BY SIDE
+    # ════════════════════════════════════════════════
+    output$out_param_tables <- shiny::renderUI({
+
+      result <- ssp_result()
+      obj    <- result$object
+      if (is.null(obj) || is.null(obj$N.min)) return(NULL)
+
+      smry <- summary(obj)
+
+      # ── Item parameters ──
+      rmse_items   <- as.list(unlist(smry$comp.rmse$item$rmse))
+      mc_sd_items  <- as.list(unlist(smry$comp.rmse$item$mc.sd.rmse))
+      bias_items   <- if (!is.null(smry$comp.rmse$item$bias)) {
+        as.list(unlist(smry$comp.rmse$item$bias))
+      } else {
+        NULL
+      }
+      item_names <- names(unlist(smry$comp.rmse$item$rmse))
+
+      # ── Person parameters ──
+      rmse_person  <- as.list(unlist(smry$comp.rmse$person$rmse))
+      mc_sd_person <- as.list(unlist(smry$comp.rmse$person$mc.sd.rmse))
+      bias_person  <- if (!is.null(smry$comp.rmse$person$bias)) {
+        as.list(unlist(smry$comp.rmse$person$bias))
+      } else {
+        NULL
+      }
+      person_names <- names(unlist(smry$comp.rmse$person$rmse))
+
+      # ── Side by side layout ──
+      bslib::layout_columns(
+        col_widths = c(7, 5),
+        class = "mb-3",
+
+        # Left: Item parameters (4 columns, wider)
+        shiny::tags$div(
+          shiny::tags$h6(
+            class = "text-muted mb-2",
+            bsicons::bs_icon("list-check", class = "me-1"),
+            name_with_info(
+              "Item Parameters",
+              "Precision metrics for item parameter estimates at the minimum sample size, averaged over items and Monte Carlo iterations."
+            )
+          ),
+          param_table(rmse_items, mc_sd_items, bias_items, item_names)
+        ),
+
+        # Right: Person parameters (2 columns, narrower)
+        shiny::tags$div(
+          shiny::tags$h6(
+            class = "text-muted mb-2",
+            bsicons::bs_icon("people", class = "me-1"),
+            name_with_info(
+              "Person Parameters",
+              "Precision metrics for person parameter estimates at the minimum sample size, averaged over persons and Monte Carlo iterations."
+            )
+          ),
+          param_table(rmse_person, mc_sd_person, bias_person, person_names)
+        )
+      )
+    })
+
+    # ════════════════════════════════════════════════
+    # Render: Convergence info
+    # ════════════════════════════════════════════════
+    output$out_convergence <- shiny::renderUI({
+
+      result <- ssp_result()
+      obj    <- result$object
+      if (is.null(obj) || is.null(obj$N.min)) return(NULL)
+
+      conv_rate <- obj$comp.rmse$conv.rate
+      if (is.null(conv_rate)) return(NULL)
+
+      label_text <- sprintf("%.0f%%", 100 * conv_rate)
+
+      shiny::tags$div(
+        class = "d-flex align-items-center text-muted py-2 border-top",
+        style = "font-size: 0.85em;",
+        bsicons::bs_icon("check-circle-fill", class = "me-2 text-success"),
+        name_with_info(
+          paste0("Convergence rate: ", label_text),
+          paste0(
+            "Proportion of Monte Carlo iterations where all item parameter chains ",
+            "satisfied the R\u0302 convergence criterion. Non-converged iterations ",
+            "are excluded from the RMSE and bias computation."
+          )
+        )
+      )
     })
 
     # ============================================
@@ -525,12 +800,10 @@ mod_ssp_data_server <- function(id) {
     rt_plot_trigger <- shiny::reactiveVal(0)
 
     shiny::observeEvent(input$draw_rt, {
-      # Increment counter to force redraw
       rt_plot_trigger(rt_plot_trigger() + 1)
     })
 
     output$plot1 <- shiny::renderPlot({
-      # Depend on the trigger
       trigger <- rt_plot_trigger()
 
       if (trigger == 0) {
@@ -572,12 +845,10 @@ mod_ssp_data_server <- function(id) {
     ra_plot_trigger <- shiny::reactiveVal(0)
 
     shiny::observeEvent(input$draw_ra, {
-      # Increment counter to force redraw
       ra_plot_trigger(ra_plot_trigger() + 1)
     })
 
     output$plot2 <- shiny::renderPlot({
-      # Depend on the trigger
       trigger <- ra_plot_trigger()
 
       if (trigger == 0) {

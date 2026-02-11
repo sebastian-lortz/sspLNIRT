@@ -8,6 +8,15 @@
 \description{
 Sample size planning tools for the Joint Hierarchical Model using a 2-PL normal ogive model for response accuracy and a 3-PL log-normal model for response time, estimated via the LNIRT package.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/sebastian-lortz/sspLNIRT}
+  \item \url{https://sebastian-lortz.github.io/sspLNIRT/}
+  \item Report bugs at \url{https://github.com/sebastian-lortz/sspLNIRT/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Sebastian Alexander Jens Lortz \email{s.a.j.lortz@gmail.com}
 

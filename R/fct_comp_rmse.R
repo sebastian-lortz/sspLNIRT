@@ -71,7 +71,7 @@ comp_rmse <- function(N,
                      XG = 3000,
                      burnin = 20,
                      seed = NULL,
-                     keep.err.dat = TRUE,
+                     keep.err.dat = FALSE,
                      rhat = 1.05) {
 
   if (is.null(seed)) {

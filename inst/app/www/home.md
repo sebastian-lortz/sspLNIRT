@@ -1,0 +1,46 @@
+sspLNIRT App
+================
+
+### Sample Size Planning for Item Calibration with the Joint Hierarchical Model
+
+`sspLNIRT` estimates the minimum sample size needed to achieve a desired
+precision of item parameter estimates under the Joint Hierarchical Model
+(JHM) of response accuracy and response time.
+
+The JHM combines a 2-parameter normal ogive model for response accuracy
+with a 3-parameter log-normal model for response times, linked through
+higher-level joint distributions (see [van der Linden,
+2007](https://doi.org/10.1007/s11336-006-1478-z); [Klein Entink et al.,
+2009](https://doi.org/10.1007/s11336-008-9075-y)).
+
+### Precomputed Results
+
+The **Precomputed** tab provides instant access to minimum sample sizes
+across **972 design conditions**. Select the input parameters of your
+planned study, e.g., test length, target item parameter, desired RMSE
+threshold, and the app retrieves the corresponding result from a
+precomputed lookup database. No simulations are run.
+
+The output includes:
+
+- **Minimum N** — the smallest sample size achieving the target RMSE,
+  from a bisection search optimizer.
+- **Power Curve N** — a smoothed estimate from a power-law curve fitted
+  across all optimization steps, which reduces Monte Carlo variability.
+- **Precision summary** — RMSE, Monte Carlo SD, and bias for all item
+  and person parameters at the minimum sample size.
+- **Diagnostic plots** — parameter precision and bias across true
+  values, the power curve of optimization steps, and simulated response
+  time and response accuracy distributions.
+
+### Custom Optimization
+
+The **Custom** tab allows running the sample size optimization for
+design conditions not covered by the precomputed grid. Specify custom
+item parameter means, covariance structures, residual variance settings,
+and other model parameters. A R script can be downloaed and run locally.
+The optimization calls `optim_sample()` and runs the full optimization
+procedure, which requires substantial computation time.
+
+More details regarding the `sspLNIRT` application in R can be found in
+this [tutorial](https://sebastian-lortz.github.io/sspLNIRT/articles/).

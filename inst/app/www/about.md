@@ -1,12 +1,17 @@
 About the Project
 ================
 
-I introduce the sspLNIRT app … . It is available as R package and shiny
-app via Github page: <link>
+### Resources
+
+For detailed documentation, vignettes, and source code, visit the
+package website:
+**[sebastian-lortz.github.io/sspLNIRT](https://sebastian-lortz.github.io/sspLNIRT/)**
 
 ### Publications
 
-The method is introduced in the research project titled ‘insert title’.
+The tool is introduced in the research project titled ‘Sample-size
+Planning for Item Calibration with the Joint Hierarchical Model of
+Response Accuracy and Response Time’. You can find the manuscript here:
 
 ### Contributors
 

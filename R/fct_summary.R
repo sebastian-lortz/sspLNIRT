@@ -20,6 +20,7 @@ summary.sspLNIRT.object <- function(object, ...) {
     # optim_sample output
     summary_obj <- list(
       N.min = object$N.min,
+      N.curve = object$N.curve,
       res.best = object$res.best,
       comp.rmse = object$comp.rmse,
       trace = object$trace
