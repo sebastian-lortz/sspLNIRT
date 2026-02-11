@@ -1,7 +1,7 @@
-# Plot the precision of item parameters
+# Plot the estimation metrics of the item parameters
 
-The function plots the mean squared error or bias across values of the
-true parameter. For objects from
+The function plots the root mean squared error (RMSE) or bias across
+values of the true parameter. For objects from
 [`optim_sample()`](https://sebastian-lortz.github.io/sspLNIRT/reference/optim_sample.md),
 the function uses the data at the minimum N, or, if the optimization
 stopped due to N being outside the specified range, at the respective
