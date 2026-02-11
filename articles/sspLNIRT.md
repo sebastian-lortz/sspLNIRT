@@ -150,16 +150,16 @@ to check if your specifications is in the available conditions:
 configs <- available_configs()
 head(configs, 10)
 #>    thresh out.par  K mu.alpha meanlog.sigma2 rho
-#> 1    0.20   alpha 10      0.6      -1.609438 0.2
-#> 2    0.20    beta 10      0.6      -1.609438 0.2
-#> 3    0.20     phi 10      0.6      -1.609438 0.2
-#> 4    0.20  lambda 10      0.6      -1.609438 0.2
-#> 5    0.10   alpha 10      0.6      -1.609438 0.2
-#> 6    0.10    beta 10      0.6      -1.609438 0.2
-#> 7    0.10     phi 10      0.6      -1.609438 0.2
-#> 8    0.10  lambda 10      0.6      -1.609438 0.2
-#> 9    0.05   alpha 10      0.6      -1.609438 0.2
-#> 10   0.05    beta 10      0.6      -1.609438 0.2
+#> 1    0.10     phi 30      1.4     -1.6094379 0.6
+#> 2    0.20     phi 30      0.6      0.0000000 0.2
+#> 3    0.05   alpha 10      1.0     -1.6094379 0.4
+#> 4    0.20    beta 50      1.0     -1.6094379 0.4
+#> 5    0.05   alpha 10      0.6     -0.5108256 0.6
+#> 6    0.10   alpha 50      1.4     -0.5108256 0.6
+#> 7    0.10    beta 30      1.4      0.0000000 0.4
+#> 8    0.20  lambda 10      0.6     -0.5108256 0.4
+#> 9    0.10    beta 10      1.4     -1.6094379 0.2
+#> 10   0.10  lambda 10      0.6      0.0000000 0.6
 ```
 
 The columns correspond to the design factors that were varied: `thresh`
@@ -187,10 +187,10 @@ summary(res_alpha$object)
 #> Sample Size Optimization
 #> --------------------------------------------------
 #>   Minimum N:  639 
-#>   Power Curve N:  
-#>   MSE result:  0.09884139 
+#>   Power curve N:  564 
+#>   RMSE at minimum N:  0.09884139 
 #>   Steps:  13 
-#>   Time elapsed: 1.102363 hours 
+#>   Time elapsed: 1.186907 hours 
 #> 
 #> Item Parameter MSEs:
 #> --------------------------------------------------
@@ -204,7 +204,7 @@ summary(res_alpha$object)
 #> RMSE  0.459026 0.412612
 #> MC SD 0.024429 0.039770
 #> 
-#> Converged Iterations in final step: 92 
+#> Converged MC iterations at minimum N: 
 #> ---
 ```
 
@@ -267,7 +267,7 @@ The full set of generating parameters can be inspected:
 
 ``` r
 str(res_alpha$design)
-#> List of 16
+#> List of 19
 #>  $ thresh        : num 0.1
 #>  $ range         : num [1:2] 50 2000
 #>  $ out.par       : chr "alpha"
@@ -281,9 +281,12 @@ str(res_alpha$design)
 #>  $ sd.item       : num [1:4] 0.2 1 0.2 0.5
 #>  $ cor2cov.item  : logi TRUE
 #>  $ sdlog.sigma2  : num 0
+#>  $ item.pars.m   : NULL
 #>  $ XG            : num 6000
-#>  $ rhat          : num 1.05
+#>  $ burnin        : num 20
 #>  $ seed          : num 311251
+#>  $ rhat          : num 1.05
+#>  $ keep.err.dat  : logi FALSE
 #>  - attr(*, "class")= chr "sspLNIRT.design"
 ```
 
