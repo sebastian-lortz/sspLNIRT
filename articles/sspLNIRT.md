@@ -302,8 +302,10 @@ run_app()
 
 ## References
 
-Fox, J.-P., Klein Entink, R. H., & van der Linden, W. J. (2023). *LNIRT:
-LogNormal Response Time Item Response Theory Models*. R package.
+Fox, J.-P., Klotzke, K., & Simsek, A. S. (2023). R-package LNIRT for
+joint modeling of response accuracy and times. PeerJ Comput Sci, 9,
+e1232. <https://doi.org/10.7717/peerj-cs.1232>
 
 van der Linden, W. J. (2007). A hierarchical framework for modeling
-speed and accuracy on test items. *Psychometrika*, *72*(3), 287–308.
+speed and accuracy on test items. Psychometrika, 72 (3), 287–308.
+<https://doi.org/10.1007/s11336-006-1478-z>
