@@ -235,27 +235,27 @@ extrapolated $N$.
 
 ### Estimation precision
 
-[`plot_precision()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_precision.md)
+[`plot_estimation()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_precision.md)
 shows how RMSE or bias varies across the range of true parameter values.
 This is useful for identifying regions of the parameter space where
 estimation is more or less precise:
 
 ``` r
-plot_precision(res_alpha$object, pars = "item", y.val = "rmse")
+plot_estimation(res_alpha$object, pars = "item", y.val = "rmse")
 #> `geom_smooth()` using formula = 'y ~ x'
 ```
 
 ![](sspLNIRT_files/figure-html/unnamed-chunk-12-1.png)
 
 ``` r
-plot_precision(res_alpha$object, pars = "person", y.val = "rmse")
+plot_estimation(res_alpha$object, pars = "person", y.val = "rmse")
 #> `geom_smooth()` using formula = 'y ~ x'
 ```
 
 ![](sspLNIRT_files/figure-html/unnamed-chunk-13-1.png)
 
 ``` r
-plot_precision(res_alpha$object, pars = "item", y.val = "bias")
+plot_estimation(res_alpha$object, pars = "item", y.val = "bias")
 #> `geom_smooth()` using formula = 'y ~ x'
 ```
 

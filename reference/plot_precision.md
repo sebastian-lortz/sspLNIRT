@@ -10,7 +10,7 @@ bound.
 ## Usage
 
 ``` r
-plot_precision(object, pars, y.val = "rmse", n.bins = 30)
+plot_estimation(object, pars, y.val = "rmse", n.bins = 30)
 ```
 
 ## Arguments
@@ -43,6 +43,6 @@ A ggplot object.
 
 ``` r
  if (FALSE) { # \dontrun{
-   plot_precision(object = test.optim.sample, pars = "item")
+   plot_estimation(object = test.optim.sample, pars = "item")
 } # }
 ```

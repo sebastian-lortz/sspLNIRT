@@ -274,20 +274,20 @@ extrapolated
 <div class="section level3">
 <h3 id="estimation-precision">Estimation precision<a class="anchor" aria-label="anchor" href="#estimation-precision"></a>
 </h3>
-<p><code><a href="../reference/plot_precision.html">plot_precision()</a></code> shows how RMSE or bias varies across
+<p><code><a href="../reference/plot_precision.html">plot_estimation()</a></code> shows how RMSE or bias varies across
 the range of true parameter values. This is useful for identifying
 regions of the parameter space where estimation is more or less
 precise:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_precision</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_precision</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"person"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"person"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_precision</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"bias"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"bias"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672"></p>
 </div>
