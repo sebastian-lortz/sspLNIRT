@@ -3,7 +3,7 @@
 `sspLNIRT` is a sample size planning tool for item calibration with the
 Joint Hierarchical Model (JHM) of response accuracy and response time.
 It estimates the minimum sample size required to achieve a target
-precision (RMSE) of item parameter estimates under a specified
+accuracy (RMSE) of item parameter estimates under a specified
 data-generating process.
 
 The package provides:
@@ -13,8 +13,8 @@ The package provides:
 - **Custom Sample Size Estimation** via
   [`optim_sample()`](https://sebastian-lortz.github.io/sspLNIRT/reference/optim_sample.md)
   for design conditions outside the precomputed data.
-- **Visualization functions** for inspecting parameter precision or
-  bias, power curves, and implied response time and response accuracy
+- **Visualization functions** for inspecting parameter accuracy or bias,
+  power curves, and implied response time and response accuracy
   distributions.
 
 ## Usage

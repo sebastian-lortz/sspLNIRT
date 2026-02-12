@@ -22,8 +22,8 @@ with a log-normal model for response times, estimated via Gibbs sampling
 through the `LNIRT` package (Fox et al., 2023).
 
 The core question is: *What is the minimum sample size to achieve a
-desired precision of item parameter estimates, given the assumed
-data-generating process?* Precision is defined as the root mean squared
+desired accuracy of item parameter estimates, given the assumed
+data-generating process?* accuracy is defined as the root mean squared
 error (RMSE) of a target item parameter (e.g., discrimination $\alpha$)
 falling below a user-specified threshold, averaged across items and
 Monte Carlo iterations.
@@ -208,8 +208,8 @@ summary(res_alpha$object)
 #> ---
 ```
 
-Having established that the target precision for $\alpha$ is reached, I
-can check the other precisions in the output. All other item parameters
+Having established that the target accuracy for $\alpha$ is reached, I
+can check the other accuracys in the output. All other item parameters
 are below my RMSE threshold, thus, I choose the minimum sample size from
 the ouput as my planned sample size.
 
@@ -221,7 +221,7 @@ The power curve shows how RMSE decreases with $N$, fitted as a log-log
 regression through the optimization trace. It can be used to extrapolate
 the required $N$ for the target threshold and thus, has less variane
 than the N.min from the bisection optimization. It can be used to
-further inspect the relation between sample size and precision.
+further inspect the relation between sample size and accuracy.
 
 ``` r
 plot_power_curve(res_alpha$object, thresh = 0.1)
@@ -233,9 +233,9 @@ The left panel shows the log-log fit; the right panel the original
 scale. The dashed line marks the threshold, the dotted line the
 extrapolated $N$.
 
-### Estimation precision
+### Estimation accuracy
 
-[`plot_estimation()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_precision.md)
+[`plot_estimation()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_estimation.md)
 shows how RMSE or bias varies across the range of true parameter values.
 This is useful for identifying regions of the parameter space where
 estimation is more or less precise:

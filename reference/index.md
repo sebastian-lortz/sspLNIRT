@@ -14,10 +14,10 @@
   : Plot the simulated response accuracy data
 - [`plot_RT()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_RT.md)
   : Plot the simulated response time data
+- [`plot_estimation()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_estimation.md)
+  : Plot the estimation metrics of the parameters
 - [`plot_power_curve()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_power_curve.md)
   : Plot the power curve from sample size optimization
-- [`plot_estimation()`](https://sebastian-lortz.github.io/sspLNIRT/reference/plot_precision.md)
-  : Plot the estimation metrics of the item parameters
 - [`print(`*`<summary.sspLNIRT.object>`*`)`](https://sebastian-lortz.github.io/sspLNIRT/reference/print.summary.sspLNIRT.object.md)
   : Print summary for summary.sspLNIRT.object
 - [`rhat_LNIRT()`](https://sebastian-lortz.github.io/sspLNIRT/reference/rhat_LNIRT.md)

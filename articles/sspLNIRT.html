@@ -78,8 +78,8 @@ Linden, 2007), combining a 2-parameter normal ogive model for response
 accuracy with a log-normal model for response times, estimated via Gibbs
 sampling through the <code>LNIRT</code> package (Fox et al., 2023).</p>
 <p>The core question is: <em>What is the minimum sample size to achieve
-a desired precision of item parameter estimates, given the assumed
-data-generating process?</em> Precision is defined as the root mean
+a desired accuracy of item parameter estimates, given the assumed
+data-generating process?</em> accuracy is defined as the root mean
 squared error (RMSE) of a target item parameter (e.g., discrimination
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>)
 falling below a user-specified threshold, averaged across items and
@@ -242,9 +242,9 @@ and <code>rho</code> (ability–speed correlation).</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Converged MC iterations at minimum N: </span></span>
 <span><span class="co">#&gt; ---</span></span></code></pre></div>
-<p>Having established that the target precision for
+<p>Having established that the target accuracy for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>
-is reached, I can check the other precisions in the output. All other
+is reached, I can check the other accuracys in the output. All other
 item parameters are below my RMSE threshold, thus, I choose the minimum
 sample size from the ouput as my planned sample size.</p>
 </div>
@@ -262,7 +262,7 @@ used to extrapolate the required
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
 for the target threshold and thus, has less variane than the N.min from
 the bisection optimization. It can be used to further inspect the
-relation between sample size and precision.</p>
+relation between sample size and accuracy.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_power_curve.html">plot_power_curve</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, thresh <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="672"></p>
@@ -272,22 +272,22 @@ extrapolated
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>.</p>
 </div>
 <div class="section level3">
-<h3 id="estimation-precision">Estimation precision<a class="anchor" aria-label="anchor" href="#estimation-precision"></a>
+<h3 id="estimation-accuracy">Estimation accuracy<a class="anchor" aria-label="anchor" href="#estimation-accuracy"></a>
 </h3>
-<p><code><a href="../reference/plot_precision.html">plot_estimation()</a></code> shows how RMSE or bias varies across
+<p><code><a href="../reference/plot_estimation.html">plot_estimation()</a></code> shows how RMSE or bias varies across
 the range of true parameter values. This is useful for identifying
 regions of the parameter space where estimation is more or less
 precise:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"person"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"person"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_precision.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"bias"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"bias"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672"></p>
 </div>
