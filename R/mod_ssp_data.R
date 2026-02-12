@@ -170,7 +170,7 @@ mod_ssp_data_ui <- function(id) {
             title = "Targets",
             icon  = bsicons::bs_icon("bullseye"),
 
-            shiny::helpText("Define the precision goal for sample size planning."),
+            shiny::helpText("Define the accuracy goal for sample size planning."),
 
             bslib::layout_columns(
               col_widths = c(6, 6),
@@ -189,7 +189,7 @@ mod_ssp_data_ui <- function(id) {
 
               shiny::selectInput(
                 inputId = ns("thresh"),
-                label   = name_with_info("RMSE Threshold", "Target root mean square error. Lower = more precision required = larger N."),
+                label   = name_with_info("RMSE Threshold", "Target root mean square error. Lower = more accuracy required = larger N."),
                 choices  = c(
                   "0.20"   = .2,
                   "0.10"  = .1,
@@ -297,24 +297,24 @@ mod_ssp_data_ui <- function(id) {
               style = "height: 62vh; overflow: auto;",
               bslib::navset_pill(
 
-                # === Precision panel (FIRST) ===
+                # === Estimation panel (FIRST) ===
                 bslib::nav_panel(
-                  title = "Precision",
+                  title = "Estimation",
                   icon  = bsicons::bs_icon("speedometer2"),
 
                   bslib::card(
-                    bslib::card_header("Parameter Precision at the Minimum N", class = "bg-light"),
+                    bslib::card_header("Estimation Metrics at the Minimum N", class = "bg-light"),
                     bslib::card_body(
                       bslib::layout_columns(
                         col_widths = c(6, 6),
                         shiny::selectInput(
-                          inputId = ns("precision_pars"),
-                          label = name_with_info("Parameters", "Show precision for item or person parameters."),
+                          inputId = ns("estimation_pars"),
+                          label = name_with_info("Parameters", "Show Metrics for item or person parameters."),
                           choices = c("Item" = "item", "Person" = "person"),
                           selected = "item"
                         ),
                         shiny::selectInput(
-                          inputId = ns("precision_yval"),
+                          inputId = ns("accuracy_yval"),
                           label = name_with_info("Metric", "RMSE = estimation error; Bias = systematic over/underestimation."),
                           choices = c("RMSE" = "rmse", "Bias" = "bias"),
                           selected = "rmse"
@@ -717,7 +717,7 @@ mod_ssp_data_server <- function(id) {
             bsicons::bs_icon("list-check", class = "me-1"),
             name_with_info(
               "Item Parameters",
-              "Precision metrics for item parameter estimates at the minimum sample size, averaged over items and Monte Carlo iterations."
+              "accuracy metrics for item parameter estimates at the minimum sample size, averaged over items and Monte Carlo iterations."
             )
           ),
           param_table(rmse_items, mc_sd_items, bias_items, item_names)
@@ -730,7 +730,7 @@ mod_ssp_data_server <- function(id) {
             bsicons::bs_icon("people", class = "me-1"),
             name_with_info(
               "Person Parameters",
-              "Precision metrics for person parameter estimates at the minimum sample size, averaged over persons and Monte Carlo iterations."
+              "accuracy metrics for person parameter estimates at the minimum sample size, averaged over persons and Monte Carlo iterations."
             )
           ),
           param_table(rmse_person, mc_sd_person, bias_person, person_names)
@@ -886,7 +886,7 @@ mod_ssp_data_server <- function(id) {
     }, res = 120)
 
     # ============================================
-    # Plot 3: Precision plot (always reactive)
+    # Plot 3: Accuracy plot (always reactive)
     # ============================================
     output$plot3 <- shiny::renderPlot({
       result <- ssp_result()
@@ -902,8 +902,8 @@ mod_ssp_data_server <- function(id) {
 
       plot_estimation(
         object = obj,
-        pars = input$precision_pars,
-        y.val = input$precision_yval,
+        pars = input$estimation_pars,
+        y.val = input$accuracy_yval,
         n.bins = 30
       )
 

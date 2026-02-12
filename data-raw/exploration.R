@@ -139,7 +139,7 @@ plot_estimation(exp0)
 plot_estimation(exp1)
 
 
-# no measurable difference on precision of item parameters
+# no measurable difference on accuracy of item parameters
 
 
 

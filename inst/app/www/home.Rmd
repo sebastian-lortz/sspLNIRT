@@ -8,7 +8,7 @@ output: html_document
 
 ### Sample Size Planning for Item Calibration with the Joint Hierarchical Model
 
-`sspLNIRT` estimates the minimum sample size needed to achieve a desired precision of item parameter estimates under the Joint Hierarchical Model (JHM) of response accuracy and response time.
+`sspLNIRT` estimates the minimum sample size needed to achieve a desired accuracy of item parameter estimates under the Joint Hierarchical Model (JHM) of response accuracy and response time.
 
 The JHM combines a 2-parameter normal ogive model for response accuracy with a 3-parameter log-normal model for response times, linked through higher-level joint distributions (see [van der Linden, 2007](https://doi.org/10.1007/s11336-006-1478-z); [Klein Entink et al., 2009](https://doi.org/10.1007/s11336-008-9075-y)). 
 
@@ -21,7 +21,7 @@ The **Precomputed** tab provides instant access to minimum sample sizes across *
 - **Minimum N** — the smallest sample size achieving the target RMSE, from a bisection search optimizer.
 - **Power Curve N** — a smoothed estimate from a power-law curve fitted across all optimization steps, which reduces Monte Carlo variability.
 - **Estimation at Minimum N** — RMSE, Monte Carlo SD, and bias for all item and person parameters at the minimum sample size.
-- **Diagnostic plots** — parameter precision and bias (at minimum N) across true values, the power curve fitted to the optimization steps, and simulated response time and response accuracy distributions.
+- **Diagnostic plots** — parameter accuracy and bias (at minimum N) across true values, the power curve fitted to the optimization steps, and simulated response time and response accuracy distributions.
 
 <br>
 

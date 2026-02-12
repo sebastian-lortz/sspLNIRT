@@ -151,7 +151,7 @@ mod_ssp_custom_ui <- function(id) {
             title = "Targets",
             icon  = bsicons::bs_icon("bullseye"),
 
-            shiny::helpText("Define the precision goal for sample size planning."),
+            shiny::helpText("Define the accuracy goal for sample size planning."),
 
             bslib::layout_columns(
               col_widths = c(6, 6),
@@ -170,7 +170,7 @@ mod_ssp_custom_ui <- function(id) {
 
               shiny::numericInput(
                 inputId = ns("thresh"),
-                label   = name_with_info("RMSE Threshold", "Target root mean square error. Lower = more precision required = larger N."),
+                label   = name_with_info("RMSE Threshold", "Target root mean square error. Lower = more accuracy required = larger N."),
                 value   = 0.1, min = 0.001, step = 0.01
               )
             )

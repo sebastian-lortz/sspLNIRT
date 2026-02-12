@@ -19,13 +19,13 @@ output: github_document
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
-`sspLNIRT` is a sample size planning tool for item calibration with the Joint Hierarchical Model (JHM) of response accuracy and response time. It estimates the minimum sample size required to achieve a target precision (RMSE) of item parameter estimates under a specified data-generating process.
+`sspLNIRT` is a sample size planning tool for item calibration with the Joint Hierarchical Model (JHM) of response accuracy and response time. It estimates the minimum sample size required to achieve a target accuracy (RMSE) of item parameter estimates under a specified data-generating process.
 
 The package provides:
 
 - **Precomputed results** for various design conditions, accessible instantly via a Shiny app and/or R package.
 - **Custom Sample Size Estimation** via `optim_sample()` for design conditions outside the precomputed data.
-- **Visualization functions** for inspecting parameter precision or bias, power curves, and implied response time and response accuracy distributions.
+- **Visualization functions** for inspecting parameter accuracy or bias, power curves, and implied response time and response accuracy distributions.
 
 ## Usage
 

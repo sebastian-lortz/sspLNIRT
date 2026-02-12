@@ -6,7 +6,7 @@ Welcome to the sspLNIRT App
 ### Sample Size Planning for Item Calibration with the Joint Hierarchical Model
 
 `sspLNIRT` estimates the minimum sample size needed to achieve a desired
-precision of item parameter estimates under the Joint Hierarchical Model
+accuracy of item parameter estimates under the Joint Hierarchical Model
 (JHM) of response accuracy and response time.
 
 The JHM combines a 2-parameter normal ogive model for response accuracy
@@ -31,7 +31,7 @@ precomputed database. **No simulations** are run. The output includes:
   across all optimization steps, which reduces Monte Carlo variability.
 - **Estimation at Minimum N** — RMSE, Monte Carlo SD, and bias for all
   item and person parameters at the minimum sample size.
-- **Diagnostic plots** — parameter precision and bias (at minimum N)
+- **Diagnostic plots** — parameter accuracy and bias (at minimum N)
   across true values, the power curve fitted to the optimization steps,
   and simulated response time and response accuracy distributions.
 
