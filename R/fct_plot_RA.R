@@ -35,16 +35,16 @@
 plot_RA <- function(level,
                     by.theta = FALSE,
                     N = 1e5,
-                    K = 20,
+                    K = 10,
                     mu.person = c(0, 0),
-                    mu.item = c(1, 0, .5, 0),
-                    meanlog.sigma2 = log(.3),
+                    mu.item = c(1, 0, .5, 1),
+                    meanlog.sigma2 = log(.6),
                     cov.m.person = matrix(c(1, .4,
                                             .4, 1), ncol = 2, byrow = TRUE),
                     cov.m.item = matrix(c(1, 0, 0, 0,
-                                          0, 1, 0, 0,
+                                          0, 1, 0, 0.4,
                                           0, 0, 1, 0,
-                                          0, 0, 0, 1), ncol = 4, byrow = TRUE),
+                                          0, 0.4, 0, 1), ncol = 4, byrow = TRUE),
                     sd.item = c(.2, 1, .2, .5),
                     sdlog.sigma2 = 0,
                     item.pars.m = NULL,
@@ -78,29 +78,15 @@ plot_RA <- function(level,
 
       dat <- data.frame(RA = as.integer(rowSums(RA.data)))
 
-      probs    <- c(.01, .1, .5, .9, .99)
-      quant_df <- data.frame(
-        q        = as.numeric(stats::quantile(dat$RA, probs)),
-        quantile = factor(probs)
-      )
-
       p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data[["RA"]])) +
         ggplot2::geom_histogram(
           binwidth = 1, boundary = -0.5, closed = "left",
           fill = "grey75", colour = "grey30", alpha = 0.6
         ) +
-        ggplot2::geom_vline(
-          data     = quant_df,
-          ggplot2::aes(xintercept = q, colour = quantile),
-          linetype = "dashed", linewidth = 0.5
-        ) +
         ggplot2::scale_x_continuous(breaks = 0:K, limits = c(-0.5, K + 0.5)) +
-        ggplot2::scale_colour_viridis_d(option = "D", end = 0.85) +
         ggplot2::labs(
-          x      = "Total correct score",
-          y      = "Count",
-          colour = "Quantile",
-          title  = "Response accuracy of persons over items"
+          x = "Total correct score",
+          y = "Count"
         ) +
         ggplot2::theme_minimal()
 
@@ -113,29 +99,13 @@ plot_RA <- function(level,
         RA    = rowSums(RA.data)
       )
 
-      probs    <- c(.01, .1, .5, .9, .99)
-      quant_df <- data.frame(
-        q        = as.numeric(stats::quantile(dat$theta, probs)),
-        quantile = factor(probs)
-      )
-
       p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data[["theta"]], y = .data[["RA"]])) +
         ggplot2::stat_summary_bin(fun = mean, bins = K,
                                   geom = "col", fill = "grey75",
                                   colour = "grey30", alpha = 0.6) +
-        ggplot2::stat_summary_bin(fun = mean, bins = 60,
-                                  geom = "line", colour = "grey30", alpha = 0.6) +
-        ggplot2::geom_vline(
-          data     = quant_df,
-          ggplot2::aes(xintercept = q, colour = quantile),
-          linetype = "dashed", linewidth = 0.5
-        ) +
-        ggplot2::scale_colour_viridis_d(option = "D", end = 0.85) +
         ggplot2::labs(
-          x      = "Theta",
-          y      = "Total correct score",
-          colour = "Theta quantile",
-          title  = "Response accuracy of persons by theta"
+          x = "Theta",
+          y = "Total correct score"
         ) +
         ggplot2::theme_minimal()
 
@@ -170,21 +140,34 @@ plot_RA <- function(level,
       ggplot2::facet_wrap(~ item, scales = "free_y") +
       ggplot2::labs(
         x     = "Probability of correct response",
-        y     = "Density",
-        title = "Within-item response accuracy distributions"
+        y     = "Density"
       ) +
       ggplot2::theme_minimal()
 
   } else {
 
+    # sort by theta within each item for clean area/line rendering
+    prob_long <- prob_long[order(prob_long$item, prob_long$theta), ]
+
+    # theta at which P(correct) = 0.50: for the 2PNO, this is theta = beta
+    beta_df <- data.frame(
+      item     = factor(seq_len(length(beta))),
+      beta_val = beta
+    )
+
     p <- ggplot2::ggplot(prob_long, ggplot2::aes(x = .data[["theta"]],
                                                  y = .data[["prob"]])) +
-      ggplot2::geom_line(colour = "grey30", alpha = 0.5) +
+      ggplot2::geom_area(fill = "grey75", alpha = 0.5) +
+      ggplot2::geom_line(colour = "grey30", linewidth = 0.4) +
+      ggplot2::geom_vline(
+        data     = beta_df,
+        ggplot2::aes(xintercept = .data[["beta_val"]]),
+        linetype = "dashed", linewidth = 0.4
+      ) +
       ggplot2::facet_wrap(~ item, scales = "fixed") +
       ggplot2::labs(
         x     = "Theta",
-        y     = "Probability of correct response",
-        title = "Item characteristic curves"
+        y     = "Probability of correct response"
       ) +
       ggplot2::theme_minimal()
   }

@@ -35,18 +35,18 @@
 plot_RT <- function(level,
                     logRT = FALSE,
                     N = 1e5,
-                    K = 20,
+                    K = 10,
                     mu.person = c(0, 0),
-                    mu.item = c(1, 0, 1, 0),
-                    meanlog.sigma2 = log(.3),
-                    cov.m.person = matrix(c(1, .5,
-                                            .5, 1), ncol = 2, byrow = TRUE),
+                    mu.item = c(1, 0, .5, 1),
+                    meanlog.sigma2 = log(.6),
+                    cov.m.person = matrix(c(1, .4,
+                                            .4, 1), ncol = 2, byrow = TRUE),
                     cov.m.item = matrix(c(1, 0, 0, 0,
-                                          0, 1, 0, 0,
+                                          0, 1, 0, 0.4,
                                           0, 0, 1, 0,
-                                          0, 0, 0, 1), ncol = 4, byrow = TRUE),
+                                          0, 0.4, 0, 1), ncol = 4, byrow = TRUE),
                     sd.item = c(.2, 1, .2, .5),
-                    sdlog.sigma2 = 0.2,
+                    sdlog.sigma2 = 0,
                     item.pars.m = NULL,
                     cor2cov.item = TRUE) {
 
@@ -101,9 +101,7 @@ plot_RT <- function(level,
       ggplot2::labs(
         x      = x_lab,
         y      = "Density",
-        colour = "Quantile",
-        title  = paste0(if (logRT) "Log r" else "R",
-                        "esponse time of persons over items")
+        colour = "Quantile"
       ) +
       ggplot2::theme_minimal()
 
@@ -139,8 +137,7 @@ plot_RT <- function(level,
     ggplot2::facet_wrap(~ item, scales = axis.scale) +
     ggplot2::labs(
       x     = x_lab,
-      y     = "Density",
-      title = "Within-item response time distributions"
+      y     = "Density"
     ) +
     ggplot2::theme_minimal()
 

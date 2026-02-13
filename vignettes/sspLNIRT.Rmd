@@ -2,7 +2,7 @@
 title: "sspLNIRT"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to sspLNIRT}
+  %\VignetteIndexEntry{sspLNIRT}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,7 +25,7 @@ devtools::install_github("sebastian-lortz/sspLNIRT")
 ```
 
 ```{r setup}
-# load package
+# load sspLNIRT package
 library(sspLNIRT)
 ```
 
@@ -39,19 +39,29 @@ for response times, estimated via Gibbs sampling through the `LNIRT` package
 
 The core question is: *What is the minimum sample size to achieve a desired
 accuracy of item parameter estimates, given the assumed data-generating
-process?* accuracy is defined as the root mean squared error (RMSE) of a
+process?* Accuracy is defined as the root mean squared error (RMSE) of a
 target item parameter (e.g., discrimination $\alpha$) falling below a
 user-specified threshold, averaged across items and Monte Carlo iterations.
 
 For a detailed description of the method, simulation model, and precomputed
-design conditions, see the manuscript.
+design conditions, see the accompanying manuscript.
 
 ## Step 1: Specify the data-generating process
 
 The first step is to specify the assumed data-generating process. This includes
 the item and person parameter distributions that define the simulation model.
-The following example uses a 10-item test with the following simulation model 
-specifications.
+The following example uses a 10-item test ($K = 10$) with the following
+specifications:
+
+- Mean item parameters: $\mu_\alpha = 1$, $\mu_\beta = 0$, $\mu_\phi = 0.5$,
+  $\mu_\lambda = 1$, with standard deviations of $0.2$, $1.0$, $0.2$, and
+  $0.5$, respectively.
+- Item difficulty ($\beta$) and time intensity ($\lambda$) correlate at
+  $r = 0.4$; all other item parameter correlations are zero.
+- Mean residual variance on the log scale: $\mu_{\sigma^2} = \ln(0.6)$, with
+  zero variance across items.
+- Person parameters follow a bivariate standard normal distribution with
+  ability--speed correlation $\rho = 0.4$.
 
 ```{r}
 sim.mod.args <- list(
@@ -75,33 +85,162 @@ sim.mod.args <- list(
 
 Before committing to a design, it is useful to inspect the implied response
 accuracy and response time distributions. This helps evaluate whether the
-assumed data-generating process is plausible for the intended application. I
-set N = 1e4 as an example. One could use the estimated mimum sample size as well
-to inspect these distributions post hoc.
+assumed data-generating process produces plausible score and time distributions
+for the intended application.
+
+At the item level, `plot_RA()` shows the distribution of implied response
+probabilities across items, and `plot_RT()` shows within-item response time
+distributions:
 
 ```{r, fig.width = 7, fig.height = 5}
-do.call(plot_RA, c(list(level = "item", by.theta = TRUE, N = 1e4), sim.mod.args))
+do.call(plot_RA, c(list(level = "item", by.theta = TRUE, N = 1e5), sim.mod.args))
 ```
 
 ```{r, fig.width = 7, fig.height = 5}
-do.call(plot_RT, c(list(level = "item", logRT = FALSE, N = 1e4), sim.mod.args))
+do.call(plot_RT, c(list(level = "item", logRT = FALSE, N = 1e5), sim.mod.args))
 ```
 
-Additional views are available at the person level:
-
-```{r, fig.width = 7, fig.height = 4}
-do.call(plot_RA, c(list(level = "person", by.theta = TRUE, N = 1e4), sim.mod.args))
-```
+Additional views are available at the person level, showing total-correct score
+distributions and person-level (log-)RT distributions:
 
 ```{r, fig.width = 7, fig.height = 4}
-do.call(plot_RT, c(list(level = "person", logRT = TRUE, N = 1e4), sim.mod.args))
+do.call(plot_RA, c(list(level = "person", by.theta = TRUE, N = 1e5), sim.mod.args))
 ```
+
+```{r, fig.width = 7, fig.height = 4}
+do.call(plot_RT, c(list(level = "person", logRT = TRUE, N = 1e5), sim.mod.args))
+```
+
+Both functions allow users to inspect how the simulated RA and RT distributions
+vary as a function of person ability and speed, respectively. This enables
+researchers to interpret the assumed data-generating process more accurately
+and facilitates making appropriate design choices.
 
 ## Step 2: Determine the minimum sample size
 
+### Using precomputed results
+
+The package ships with precomputed minimum sample sizes across a factorial grid
+of design conditions (see the manuscript for details). If the assumed design is
+covered by this grid, results can be retrieved instantly without running any
+simulations. Use `available_configs()` to check whether your specification
+matches an available condition:
+
+```{r}
+configs <- available_configs()
+head(configs, 10)
+```
+
+The columns correspond to the design factors that were varied: `thresh` (RMSE
+threshold), `out.par` (target item parameter), `K` (test length), `mu.alpha`
+(mean item discrimination), `meanlog.sigma2` (log-scale mean of $\sigma^2$),
+and `rho` (ability--speed correlation).
+
+#### Planning for item discrimination ($\alpha$)
+
+Suppose the researcher aims for a target accuracy of $RMSE_\xi^* = 0.1$ for
+all item parameters $\xi \in \{\alpha, \beta, \phi, \lambda\}$, because she is
+interested in an accurate joint calibration of both the RA and the RT model.
+She begins by retrieving the minimum sample size for item discrimination
+($\alpha$):
+
+```{r}
+res_alpha <- get_sspLNIRT(
+  thresh         = 0.1,
+  out.par        = "alpha",
+  K              = 10,
+  mu.alpha       = 1,
+  meanlog.sigma2 = log(0.6),
+  rho            = 0.4
+)
+summary(res_alpha$object)
+```
+
+The output reports the estimated minimum sample size $N_\alpha$ together with
+the estimated RMSE, Monte Carlo standard deviation of the RMSE, and bias for
+all item and person parameters at $N_\alpha$. The researcher checks whether the
+target accuracy is already achieved for all item parameters at this sample size.
+
+#### Continuing with remaining parameters
+
+If the desired accuracy threshold has not been reached for all item parameters
+at $N_\alpha$, the researcher continues the sample size planning for the
+remaining parameters. She retrieves the minimum sample size for item difficulty
+($\beta$):
+
+```{r}
+res_beta <- get_sspLNIRT(
+  thresh         = 0.1,
+  out.par        = "beta",
+  K              = 10,
+  mu.alpha       = 1,
+  meanlog.sigma2 = log(0.6),
+  rho            = 0.4
+)
+summary(res_beta$object)
+```
+
+If needed, she continues with the RT item parameters ($\phi$ and $\lambda$):
+
+```{r}
+res_phi <- get_sspLNIRT(
+  thresh         = 0.1,
+  out.par        = "phi",
+  K              = 10,
+  mu.alpha       = 1,
+  meanlog.sigma2 = log(0.6),
+  rho            = 0.4
+)
+summary(res_phi$object)
+```
+
+```{r}
+res_lambda <- get_sspLNIRT(
+  thresh         = 0.1,
+  out.par        = "lambda",
+  K              = 10,
+  mu.alpha       = 1,
+  meanlog.sigma2 = log(0.6),
+  rho            = 0.4
+)
+summary(res_lambda$object)
+```
+
+#### Selecting the planning sample size
+
+To ensure that the target accuracy is expected to be met for all item
+parameters simultaneously, the researcher conservatively selects the largest
+minimum sample size across all four parameters:
+
+```{r}
+N_all <- c(
+  alpha  = res_alpha$object$N.min,
+  beta   = res_beta$object$N.min,
+  phi    = res_phi$object$N.min,
+  lambda = res_lambda$object$N.min
+)
+N_all
+
+# select the largest
+N_star <- max(N_all)
+N_star
+
+# identify which parameter determined N*
+res_final <- list(
+  alpha  = res_alpha,
+  beta   = res_beta,
+  phi    = res_phi,
+  lambda = res_lambda
+)[[names(which.max(N_all))]]
+```
+
+The researcher selects $N^* =$ `r N_star` as the planning sample size,
+determined by the parameter `r names(which.max(N_all))`.
+
 ### Using `optim_sample()` for custom designs
 
-To run the sample size optimization directly, call `optim_sample()`. This uses
+When the assumed design is not covered by the precomputed grid, the researcher
+can run the sample size optimization directly using `optim_sample()`. This uses
 a bisection algorithm that iteratively evaluates `comp_rmse()` at candidate
 sample sizes until the RMSE of the target parameter crosses the threshold. Each
 step runs a full Monte Carlo simulation study with `iter` replications.
@@ -123,71 +262,43 @@ optim.args <- list(
   seed         = 1234
 )
 
-res_alpha <- do.call(optim_sample, c(sim.mod.args, optim.args))
-summary(res_alpha)
+res_custom <- do.call(optim_sample, c(sim.mod.args, optim.args))
+summary(res_custom)
 ```
 
 For a single evaluation at a fixed $N$ (without optimization), use
 `comp_rmse()`:
 
 ```{r, eval = FALSE}
-# default optimizer settings
-opt.args <- list(N = 200, iter = 100, XG = 6000, burnin = 20,
-       rhat = 1.05, keep.err.dat = TRUE, seed = 1234)
-
 # Not run — computationally intensive
-rmse_result <- do.call(comp_rmse, c(opt.args,sim.mod.args))
+rmse.args <- list(
+  N            = 200,
+  iter         = 100,
+  XG           = 6000,
+  burnin       = 20,
+  rhat         = 1.05,
+  keep.err.dat = TRUE,
+  seed         = 1234
+)
+
+rmse_result <- do.call(comp_rmse, c(rmse.args, sim.mod.args))
 summary(rmse_result)
 ```
-
-### Using precomputed results
-
-The package ships with precomputed minimum sample sizes across a factorial grid
-of design conditions. If the assumed design is covered by this grid, results can be retrieved instantly without
-running any simulations. You can use `available_configs()` to check if your specifications is in the available
-conditions:
-
-```{r}
-configs <- available_configs()
-head(configs, 10)
-```
-
-The columns correspond to the design factors that were varied: `thresh` (RMSE
-threshold), `out.par` (target item parameter), `K` (test length), `mu.alpha`
-(mean item discrimination), `meanlog.sigma2` (log-scale mean of $\sigma^2$),
-and `rho` (ability--speed correlation).
-
-To retrieve a matching result, use `get_sspLNIRT()`:
-
-```{r}
-res_alpha <- get_sspLNIRT(
-  thresh         = 0.1,
-  out.par        = "alpha",
-  K              = 10,
-  mu.alpha       = 1,
-  meanlog.sigma2 = log(0.6),
-  rho            = 0.4
-)
-summary(res_alpha$object)
-```
-
-Having established that the target accuracy for $\alpha$ is reached, I can check
-the other accuracys in the output. All other item parameters are below my RMSE 
-threshold, thus, I choose the minimum sample size from the ouput as my planned 
-sample size.
 
 ## Step 3: Inspect and visualize
 
 ### Power curve
 
-The power curve shows how RMSE decreases with $N$, fitted as a log-log
+The power curve shows how RMSE decreases with sample size, fitted as a log-log
 regression through the optimization trace. It can be used to extrapolate the
-required $N$ for the target threshold and thus, has less variane than the N.min
-from the bisection optimization. It can be used to further inspect the relation 
-between sample size and accuracy.
+required $N$ for the target threshold. Because the power-law curve pools
+information from all bisection steps, $N^*_{\text{curve}}$ tends to have less
+variance than $N^*$ from the bisection optimizer, but may have more bias. The
+plot can be used to further inspect the relation between sample size and
+accuracy.
 
 ```{r, fig.width = 7, fig.height = 4}
-plot_power_curve(res_alpha$object, thresh = 0.1)
+plot_power_curve(res_final$object, thresh = 0.1)
 ```
 
 The left panel shows the log-log fit; the right panel the original scale. The
@@ -196,27 +307,30 @@ dashed line marks the threshold, the dotted line the extrapolated $N$.
 ### Estimation accuracy
 
 `plot_estimation()` shows how RMSE or bias varies across the range of true
-parameter values. This is useful for identifying regions of the parameter space
-where estimation is more or less precise:
+parameter values at the selected sample size $N^*$. This is useful for
+identifying regions of the parameter space where estimation is more or less
+precise — for instance, whether items with extreme difficulty values are
+estimated less accurately.
 
 ```{r, fig.width = 7, fig.height = 5}
-plot_estimation(res_alpha$object, pars = "item", y.val = "rmse")
+plot_estimation(res_final$object, pars = "item", y.val = "rmse")
 ```
 
 ```{r, fig.width = 7, fig.height = 4}
-plot_estimation(res_alpha$object, pars = "person", y.val = "rmse")
+plot_estimation(res_final$object, pars = "person", y.val = "rmse")
 ```
 
 ```{r, fig.width = 7, fig.height = 5}
-plot_estimation(res_alpha$object, pars = "item", y.val = "bias")
+plot_estimation(res_final$object, pars = "item", y.val = "bias")
 ```
 
 ### Design configuration
 
-The full set of generating parameters can be inspected:
+The full set of generating parameters can be inspected via the `design`
+element of the output:
 
 ```{r}
-str(res_alpha$design)
+str(res_final$design)
 ```
 
 ## Interactive Shiny application
@@ -224,8 +338,9 @@ str(res_alpha$design)
 The package includes a Shiny app for interactive exploration of precomputed
 results. Users specify design conditions via the interface, and the app
 retrieves the corresponding minimum sample size with summary statistics and
-visualizations. Alternatively, users can specify their own design condition, 
-inspect the distribution visualizations, and download the function call for R.
+visualizations. Alternatively, users can specify their own design condition,
+inspect the distribution visualizations, and download the function call for use
+in R.
 
 ```{r, eval = FALSE}
 run_app()
@@ -233,6 +348,10 @@ run_app()
 
 ## References
 
-Fox, J.-P., Klotzke, K., & Simsek, A. S. (2023). R-package LNIRT for joint modeling of response accuracy and times. PeerJ Comput Sci, 9, e1232. https://doi.org/10.7717/peerj-cs.1232
+Fox, J.-P., Klotzke, K., & Simsek, A. S. (2023). R-package LNIRT for joint
+modeling of response accuracy and times. *PeerJ Computer Science*, *9*, e1232.
+https://doi.org/10.7717/peerj-cs.1232
 
-van der Linden, W. J. (2007). A hierarchical framework for modeling speed and accuracy on test items. Psychometrika, 72 (3), 287–308. https://doi.org/10.1007/s11336-006-1478-z
+van der Linden, W. J. (2007). A hierarchical framework for modeling speed and
+accuracy on test items. *Psychometrika*, *72*(3), 287–308.
+https://doi.org/10.1007/s11336-006-1478-z

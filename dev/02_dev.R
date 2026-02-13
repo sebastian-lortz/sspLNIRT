@@ -96,6 +96,7 @@ rmarkdown::render("/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app
                   output_format = "github_document",
                   output_file   = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/inst/app/www/home.md")
 
+
 # You're now set! ----
 # go to dev/03_deploy.R
 rstudioapi::navigateToFile("dev/03_deploy.R")

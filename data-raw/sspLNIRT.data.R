@@ -64,4 +64,4 @@ Ns <- t(sapply(seq_len(972), function(i) {
 dif.n <- Ns[,1] - Ns[,2]
 summary(dif.n)
 plot(dif.n)
-sspLNIRT.data[[3]][[1]]$comp.rmse$conv.rate
+sspLNIRT.data[[3]][[1]]

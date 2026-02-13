@@ -25,30 +25,34 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     # Item parameter MSEs
     cat("Item Parameter MSEs:\n")
     cat("--------------------------------------------------\n")
-    rmse_items <- unlist(x$comp.rmse$item$rmse)
+    rmse_item <- unlist(x$comp.rmse$item$rmse)
     mc_sd_item <- unlist(x$comp.rmse$item$mc.sd.rmse)
+    bias_item <- unlist(x$comp.rmse$item$bias)
     item_df <- data.frame(
-      RMSE = sprintf("%.6f", rmse_items),
+      RMSE = sprintf("%.6f", rmse_item),
       `MC SD` = sprintf("%.6f", mc_sd_item),
+      Bias = sprintf("%.6f", bias_item),
       check.names = FALSE
     )
-    rownames(item_df) <- names(rmse_items)
+    rownames(item_df) <- names(rmse_item)
     print(t(item_df), right = TRUE, quote = FALSE)
     # Person parameter MSEs
     cat("\nPerson Parameter MSEs:\n")
     cat("--------------------------------------------------\n")
     rmse_person <- unlist(x$comp.rmse$person$rmse)
     mc_sd_person <- unlist(x$comp.rmse$person$mc.sd.rmse)
+    bias_person <- unlist(x$comp.rmse$person$bias)
     person_df <- data.frame(
       RMSE = sprintf("%.6f", rmse_person),
       `MC SD` = sprintf("%.6f", mc_sd_person),
+      Bias = sprintf("%.6f", bias_person),
       check.names = FALSE
     )
     rownames(person_df) <- names(rmse_person)
     print(t(person_df), right = TRUE, quote = FALSE)
     # Convergence info
     if (!is.null(x$comp.rmse$conv.rate)) {
-      cat("\nConverged MC iterations at minimum N:", nrow(x$comp.rmse$conv.rate), "\n")
+      cat("\nConverged MC iterations at minimum N:",x$comp.rmse$conv.rate*100, "%\n")
     }
   } else {
     # comp_mse output
@@ -56,14 +60,14 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     # Item parameters
     cat("Item Parameter MSEs:\n")
     cat("--------------------------------------------------\n")
-    rmse_items <- unlist(x$item$rmse)
+    rmse_item <- unlist(x$item$rmse)
     mc_sd_item <- unlist(x$item$mc.sd.rmse)
     item_df <- data.frame(
-      RMSE = sprintf("%.6f", rmse_items),
+      RMSE = sprintf("%.6f", rmse_item),
       `MC SD` = sprintf("%.6f", mc_sd_item),
       check.names = FALSE
     )
-    rownames(item_df) <- names(rmse_items)
+    rownames(item_df) <- names(rmse_item)
     print(t(item_df), right = TRUE, quote = FALSE)
     # Person parameters
     cat("\nPerson Parameter MSEs:\n")
@@ -79,7 +83,7 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     print(t(person_df), right = TRUE, quote = FALSE)
     # Convergence
     if (!is.null(x$conv.rate)) {
-      cat("\nConverged Iterations:", nrow(x$conv.rate), "\n")
+      cat("\nConverged MC iterations at minimum N: ",x$conv.rate*100, "%\n")
     }
   }
   cat("---\n")
