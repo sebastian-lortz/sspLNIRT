@@ -39,7 +39,7 @@ ggsave(
 
 ## RT plot
 set.seed(456)
-RT.plot <- do.call(plot_RT, c(list(level = "person", logRT = FALSE, N = 1e5), sim.mod.args))
+RT.plot <- do.call(plot_RT, c(list(level = "item", logRT = FALSE, N = 1e5), sim.mod.args))
 ggsave(
   filename = "data-raw/plots/RT.design.plot.pdf",
   plot     = RT.plot,
