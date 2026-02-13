@@ -3,7 +3,7 @@
 # devtools::install_github("sebastian-lortz/sspLNIRT")
 
 # install from GitHub
-devtools::install_github("sebastian-lortz/sspLNIRT")
+devtools::install_github("sebastian-lortz/sspLNIRT", force = TRUE)
 library(sspLNIRT)
 library(ggplot2)
 
@@ -109,21 +109,31 @@ gg.conv = data.frame(
 )
 
 quant_df <- data.frame(
-  q = quantile(conv, c(.3, .5, .7)),
-  quantile = c("30%", "50%", "70%")  # add a column for colour/facet mapping
+  q = quantile(conv, 0.5),
+  quantile = "Median"  # label for legend
 )
 
-ggplot2::ggplot(gg.conv, ggplot2::aes(x = conv)) +
-  ggplot2::geom_density(fill = "grey80", colour = "grey30", alpha = 0.6) +
-  ggplot2::geom_vline(
-    data    = quant_df,
-    ggplot2::aes(xintercept = q, colour = quantile),
-    linetype = "dashed", linewidth = 0.5
+conv.plot <- ggplot(gg.conv, aes(x = conv)) +
+  geom_density(fill = "grey80", colour = "grey30", alpha = 0.6) +
+  geom_vline(
+    data = quant_df,
+    aes(xintercept = q),  # map to legend
+    linetype = "dashed",
+    linewidth = 0.5
   ) +
-  ggplot2::scale_colour_viridis_d(option = "D", end = 0.85) +
-  ggplot2::labs(
-    x      = "Convergence ratio of MC iterations at the minimum N",
-    y      = "Density",
-    colour = "Quantile"
+  scale_colour_manual(values = "grey30") +   # single grey for median line
+  labs(
+    x = "Convergence ratio of MC iterations at the minimum N",
+    y = "Density"
   ) +
-  ggplot2::theme_minimal()
+  theme_minimal()
+
+ggsave(
+  filename = "data-raw/plots/conv.plot2.pdf",
+  plot     = conv.plot,
+  width    = 180,
+  height   = 100,
+  units    = "mm",
+  bg       = "white",
+  dpi = 300
+)

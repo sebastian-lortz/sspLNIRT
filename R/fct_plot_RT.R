@@ -93,14 +93,16 @@ plot_RT <- function(level,
       ggplot2::geom_density(fill = "grey75", colour = "grey30", alpha = 0.6) +
       ggplot2::geom_vline(
         data    = quant_df,
-        ggplot2::aes(xintercept = q),
+        ggplot2::aes(xintercept = q, colour = quantile),
         linetype = "dashed", linewidth = 0.5
       ) +
+      ggplot2::scale_colour_viridis_d(option = "D", end = 0.85) +
       ggplot2::coord_cartesian(xlim = lims) +
       ggplot2::labs(
         x      = x_lab,
-        y      = "Density"
-        ) +
+        y      = "Density",
+        colour = "Quantile"
+      ) +
       ggplot2::theme_minimal()
 
     return(p)
