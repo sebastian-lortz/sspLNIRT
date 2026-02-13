@@ -2,6 +2,8 @@
 # install from GitHub
 # devtools::install_github("sebastian-lortz/sspLNIRT")
 
+# install from GitHub
+devtools::install_github("sebastian-lortz/sspLNIRT")
 library(sspLNIRT)
 library(ggplot2)
 
@@ -24,7 +26,7 @@ sim.mod.args <- list(
 
 ## RA plot
 set.seed(123)
-RA.plot <- do.call(plot_RA, c(list(level = "item", by.theta = TRUE, N = 1e4), sim.mod.args))
+RA.plot <- do.call(plot_RA, c(list(level = "item", by.theta = TRUE, N = 1e5), sim.mod.args))
 ggsave(
   filename = "data-raw/plots/RA.design.plot.pdf",
   plot     = RA.plot,
@@ -37,7 +39,7 @@ ggsave(
 
 ## RT plot
 set.seed(456)
-RT.plot <- do.call(plot_RT, c(list(level = "item", logRT = FALSE, N = 1e4), sim.mod.args))
+RT.plot <- do.call(plot_RT, c(list(level = "person", logRT = FALSE, N = 1e5), sim.mod.args))
 ggsave(
   filename = "data-raw/plots/RT.design.plot.pdf",
   plot     = RT.plot,
@@ -96,3 +98,32 @@ ggsave(
   bg       = "white",
   dpi = 300
 )
+
+
+## convergence plot across all iterations
+conv <- sapply(seq_len(972), function(i) {
+  sspLNIRT.data[[3]][[i]]$comp.rmse$conv.rate
+})
+gg.conv = data.frame(
+  conv = conv
+)
+
+quant_df <- data.frame(
+  q = quantile(conv, c(.3, .5, .7)),
+  quantile = c("30%", "50%", "70%")  # add a column for colour/facet mapping
+)
+
+ggplot2::ggplot(gg.conv, ggplot2::aes(x = conv)) +
+  ggplot2::geom_density(fill = "grey80", colour = "grey30", alpha = 0.6) +
+  ggplot2::geom_vline(
+    data    = quant_df,
+    ggplot2::aes(xintercept = q, colour = quantile),
+    linetype = "dashed", linewidth = 0.5
+  ) +
+  ggplot2::scale_colour_viridis_d(option = "D", end = 0.85) +
+  ggplot2::labs(
+    x      = "Convergence ratio of MC iterations at the minimum N",
+    y      = "Density",
+    colour = "Quantile"
+  ) +
+  ggplot2::theme_minimal()
