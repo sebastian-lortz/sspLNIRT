@@ -67,7 +67,7 @@
 <span><span class="co"># install from GitHub</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"sebastian-lortz/sspLNIRT"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># load package</span></span>
+<code class="sourceCode R"><span><span class="co"># load sspLNIRT package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebastian-lortz/sspLNIRT" class="external-link">sspLNIRT</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
@@ -79,21 +79,49 @@ accuracy with a log-normal model for response times, estimated via Gibbs
 sampling through the <code>LNIRT</code> package (Fox et al., 2023).</p>
 <p>The core question is: <em>What is the minimum sample size to achieve
 a desired accuracy of item parameter estimates, given the assumed
-data-generating process?</em> accuracy is defined as the root mean
+data-generating process?</em> Accuracy is defined as the root mean
 squared error (RMSE) of a target item parameter (e.g., discrimination
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>)
 falling below a user-specified threshold, averaged across items and
 Monte Carlo iterations.</p>
 <p>For a detailed description of the method, simulation model, and
-precomputed design conditions, see the manuscript.</p>
+precomputed design conditions, see the accompanying manuscript.</p>
 </div>
 <div class="section level2">
 <h2 id="step-1-specify-the-data-generating-process">Step 1: Specify the data-generating process<a class="anchor" aria-label="anchor" href="#step-1-specify-the-data-generating-process"></a>
 </h2>
 <p>The first step is to specify the assumed data-generating process.
 This includes the item and person parameter distributions that define
-the simulation model. The following example uses a 10-item test with the
-following simulation model specifications.</p>
+the simulation model. The following example uses a 10-item test
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">K = 10</annotation></semantics></math>)
+with the following specifications:</p>
+<ul>
+<li>Mean item parameters:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>α</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mu_\alpha = 1</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>β</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\mu_\beta = 0</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>ϕ</mi></msub><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\mu_\phi = 0.5</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>λ</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mu_\lambda = 1</annotation></semantics></math>,
+with standard deviations of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.2</mn><annotation encoding="application/x-tex">0.2</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.0</mn><annotation encoding="application/x-tex">1.0</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.2</mn><annotation encoding="application/x-tex">0.2</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>,
+respectively.</li>
+<li>Item difficulty
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>)
+and time intensity
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>)
+correlate at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0.4</mn></mrow><annotation encoding="application/x-tex">r = 0.4</annotation></semantics></math>;
+all other item parameter correlations are zero.</li>
+<li>Mean residual variance on the log scale:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><msup><mi>σ</mi><mn>2</mn></msup></msub><mo>=</mo><mo>ln</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.6</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu_{\sigma^2} = \ln(0.6)</annotation></semantics></math>,
+with zero variance across items.</li>
+<li>Person parameters follow a bivariate standard normal distribution
+with ability–speed correlation
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.4</mn></mrow><annotation encoding="application/x-tex">\rho = 0.4</annotation></semantics></math>.</li>
+</ul>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim.mod.args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  K              <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -115,77 +143,46 @@ following simulation model specifications.</p>
 </h3>
 <p>Before committing to a design, it is useful to inspect the implied
 response accuracy and response time distributions. This helps evaluate
-whether the assumed data-generating process is plausible for the
-intended application. I set N = 1e4 as an example. One could use the
-estimated mimum sample size as well to inspect these distributions post
-hoc.</p>
+whether the assumed data-generating process produces plausible score and
+time distributions for the intended application.</p>
+<p>At the item level, <code><a href="../reference/plot_RA.html">plot_RA()</a></code> shows the distribution of
+implied response probabilities across items, and <code><a href="../reference/plot_RT.html">plot_RT()</a></code>
+shows within-item response time distributions:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RA</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"item"</span>, by.theta <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RA</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"item"</span>, by.theta <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RT</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"item"</span>, logRT <span class="op">=</span> <span class="cn">FALSE</span>, N <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RT</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"item"</span>, logRT <span class="op">=</span> <span class="cn">FALSE</span>, N <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="672"></p>
-<p>Additional views are available at the person level:</p>
+<p>Additional views are available at the person level, showing
+total-correct score distributions and person-level (log-)RT
+distributions:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RA</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"person"</span>, by.theta <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RA</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"person"</span>, by.theta <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RT</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"person"</span>, logRT <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">plot_RT</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">"person"</span>, logRT <span class="op">=</span> <span class="cn">TRUE</span>, N <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sspLNIRT_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="672"></p>
+<p>Both functions allow users to inspect how the simulated RA and RT
+distributions vary as a function of person ability and speed,
+respectively. This enables researchers to interpret the assumed
+data-generating process more accurately and facilitates making
+appropriate design choices.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="step-2-determine-the-minimum-sample-size">Step 2: Determine the minimum sample size<a class="anchor" aria-label="anchor" href="#step-2-determine-the-minimum-sample-size"></a>
 </h2>
 <div class="section level3">
-<h3 id="using-optim_sample-for-custom-designs">Using <code>optim_sample()</code> for custom designs<a class="anchor" aria-label="anchor" href="#using-optim_sample-for-custom-designs"></a>
-</h3>
-<p>To run the sample size optimization directly, call
-<code><a href="../reference/optim_sample.html">optim_sample()</a></code>. This uses a bisection algorithm that
-iteratively evaluates <code><a href="../reference/comp_rmse.html">comp_rmse()</a></code> at candidate sample sizes
-until the RMSE of the target parameter crosses the threshold. Each step
-runs a full Monte Carlo simulation study with <code>iter</code>
-replications.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Not run — computationally intensive (several hours)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">optim.args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  thresh       <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  range        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">2000</span><span class="op">)</span>,</span>
-<span>  out.par      <span class="op">=</span> <span class="st">"alpha"</span>,</span>
-<span>  iter         <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  XG           <span class="op">=</span> <span class="fl">6000</span>,</span>
-<span>  burnin       <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>  rhat         <span class="op">=</span> <span class="fl">1.05</span>,</span>
-<span>  keep.err.dat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  seed         <span class="op">=</span> <span class="fl">1234</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">res_alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">optim_sample</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sim.mod.args</span>, <span class="va">optim.args</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">)</span></span></code></pre></div>
-<p>For a single evaluation at a fixed
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-(without optimization), use <code><a href="../reference/comp_rmse.html">comp_rmse()</a></code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># default optimizer settings</span></span>
-<span><span class="va">opt.args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">200</span>, iter <span class="op">=</span> <span class="fl">100</span>, XG <span class="op">=</span> <span class="fl">6000</span>, burnin <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>       rhat <span class="op">=</span> <span class="fl">1.05</span>, keep.err.dat <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Not run — computationally intensive</span></span>
-<span><span class="va">rmse_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">comp_rmse</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">opt.args</span>,<span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">rmse_result</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
 <h3 id="using-precomputed-results">Using precomputed results<a class="anchor" aria-label="anchor" href="#using-precomputed-results"></a>
 </h3>
 <p>The package ships with precomputed minimum sample sizes across a
-factorial grid of design conditions. If the assumed design is covered by
-this grid, results can be retrieved instantly without running any
-simulations. You can use <code><a href="../reference/available_configs.html">available_configs()</a></code> to check if
-your specifications is in the available conditions:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+factorial grid of design conditions (see the manuscript for details). If
+the assumed design is covered by this grid, results can be retrieved
+instantly without running any simulations. Use
+<code><a href="../reference/available_configs.html">available_configs()</a></code> to check whether your specification
+matches an available condition:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">configs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/available_configs.html">available_configs</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">configs</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    thresh out.par  K mu.alpha meanlog.sigma2 rho</span></span>
@@ -205,8 +202,19 @@ parameter), <code>K</code> (test length), <code>mu.alpha</code> (mean
 item discrimination), <code>meanlog.sigma2</code> (log-scale mean of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>σ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math>),
 and <code>rho</code> (ability–speed correlation).</p>
-<p>To retrieve a matching result, use <code><a href="../reference/get_sspLNIRT.html">get_sspLNIRT()</a></code>:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="section level4">
+<h4 id="planning-for-item-discrimination-alpha">Planning for item discrimination
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>)<a class="anchor" aria-label="anchor" href="#planning-for-item-discrimination-alpha"></a>
+</h4>
+<p>Suppose the researcher aims for a target accuracy of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi>M</mi><mi>S</mi><msubsup><mi>E</mi><mi>ξ</mi><mo>*</mo></msubsup><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">RMSE_\xi^* = 0.1</annotation></semantics></math>
+for all item parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ξ</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>ϕ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\xi \in \{\alpha, \beta, \phi, \lambda\}</annotation></semantics></math>,
+because she is interested in an accurate joint calibration of both the
+RA and the RT model. She begins by retrieving the minimum sample size
+for item discrimination
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>):</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_sspLNIRT.html">get_sspLNIRT</a></span><span class="op">(</span></span>
 <span>  thresh         <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  out.par        <span class="op">=</span> <span class="st">"alpha"</span>,</span>
@@ -230,23 +238,236 @@ and <code>rho</code> (ability–speed correlation).</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Item Parameter MSEs:</span></span>
 <span><span class="co">#&gt; --------------------------------------------------</span></span>
-<span><span class="co">#&gt;          alpha     beta      phi   lambda   sigma2</span></span>
-<span><span class="co">#&gt; RMSE  0.098841 0.092362 0.035406 0.033659 0.043612</span></span>
-<span><span class="co">#&gt; MC SD 0.031066 0.027087 0.008124 0.008721 0.008937</span></span>
+<span><span class="co">#&gt;          alpha     beta       phi    lambda   sigma2</span></span>
+<span><span class="co">#&gt; RMSE  0.098841 0.092362  0.035406  0.033659 0.043612</span></span>
+<span><span class="co">#&gt; MC SD 0.031066 0.027087  0.008124  0.008721 0.008937</span></span>
+<span><span class="co">#&gt; Bias  0.002482 0.005544 -0.001633 -0.001883 0.020752</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Person Parameter MSEs:</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;          theta      zeta</span></span>
+<span><span class="co">#&gt; RMSE  0.459026  0.412612</span></span>
+<span><span class="co">#&gt; MC SD 0.024429  0.039770</span></span>
+<span><span class="co">#&gt; Bias  0.005937 -0.003958</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Converged MC iterations at minimum N: 92 %</span></span>
+<span><span class="co">#&gt; ---</span></span></code></pre></div>
+<p>The output reports the estimated minimum sample size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mi>α</mi></msub><annotation encoding="application/x-tex">N_\alpha</annotation></semantics></math>
+together with the estimated RMSE, Monte Carlo standard deviation of the
+RMSE, and bias for all item and person parameters at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mi>α</mi></msub><annotation encoding="application/x-tex">N_\alpha</annotation></semantics></math>.
+The researcher checks whether the target accuracy is already achieved
+for all item parameters at this sample size.</p>
+</div>
+<div class="section level4">
+<h4 id="continuing-with-remaining-parameters">Continuing with remaining parameters<a class="anchor" aria-label="anchor" href="#continuing-with-remaining-parameters"></a>
+</h4>
+<p>If the desired accuracy threshold has not been reached for all item
+parameters at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mi>α</mi></msub><annotation encoding="application/x-tex">N_\alpha</annotation></semantics></math>,
+the researcher continues the sample size planning for the remaining
+parameters. She retrieves the minimum sample size for item difficulty
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>):</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_sspLNIRT.html">get_sspLNIRT</a></span><span class="op">(</span></span>
+<span>  thresh         <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  out.par        <span class="op">=</span> <span class="st">"beta"</span>,</span>
+<span>  K              <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  mu.alpha       <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  meanlog.sigma2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.6</span><span class="op">)</span>,</span>
+<span>  rho            <span class="op">=</span> <span class="fl">0.4</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_beta</span><span class="op">$</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ==================================================</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call: optim_sample()</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sample Size Optimization</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;   Minimum N:  569 </span></span>
+<span><span class="co">#&gt;   Power curve N:  600 </span></span>
+<span><span class="co">#&gt;   RMSE at minimum N:  0.09919063 </span></span>
+<span><span class="co">#&gt;   Steps:  12 </span></span>
+<span><span class="co">#&gt;   Time elapsed: 1.512638 hours </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Item Parameter MSEs:</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;          alpha      beta      phi    lambda   sigma2</span></span>
+<span><span class="co">#&gt; RMSE  0.101245  0.099191 0.034784  0.037650 0.045637</span></span>
+<span><span class="co">#&gt; MC SD 0.026370  0.035566 0.009574  0.010899 0.009412</span></span>
+<span><span class="co">#&gt; Bias  0.002800 -0.000782 0.000935 -0.002178 0.021952</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Person Parameter MSEs:</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;           theta      zeta</span></span>
+<span><span class="co">#&gt; RMSE   0.462287  0.423354</span></span>
+<span><span class="co">#&gt; MC SD  0.025813  0.040762</span></span>
+<span><span class="co">#&gt; Bias  -0.002605 -0.007314</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Converged MC iterations at minimum N: 89 %</span></span>
+<span><span class="co">#&gt; ---</span></span></code></pre></div>
+<p>If needed, she continues with the RT item parameters
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ϕ</mi><annotation encoding="application/x-tex">\phi</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>):</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_phi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_sspLNIRT.html">get_sspLNIRT</a></span><span class="op">(</span></span>
+<span>  thresh         <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  out.par        <span class="op">=</span> <span class="st">"phi"</span>,</span>
+<span>  K              <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  mu.alpha       <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  meanlog.sigma2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.6</span><span class="op">)</span>,</span>
+<span>  rho            <span class="op">=</span> <span class="fl">0.4</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_phi</span><span class="op">$</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ==================================================</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call: optim_sample()</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sample Size Optimization</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;   Minimum N:  89 </span></span>
+<span><span class="co">#&gt;   Power curve N:  90 </span></span>
+<span><span class="co">#&gt;   RMSE at minimum N:  0.09781307 </span></span>
+<span><span class="co">#&gt;   Steps:  13 </span></span>
+<span><span class="co">#&gt;   Time elapsed: 36.17354 mins </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Item Parameter MSEs:</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;          alpha      beta       phi    lambda   sigma2</span></span>
+<span><span class="co">#&gt; RMSE  0.183284  0.238207  0.097813  0.104905 0.184661</span></span>
+<span><span class="co">#&gt; MC SD 0.048650  0.086618  0.031401  0.032902 0.032502</span></span>
+<span><span class="co">#&gt; Bias  0.015704 -0.005407 -0.013453 -0.012235 0.154623</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Person Parameter MSEs:</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;           theta      zeta</span></span>
+<span><span class="co">#&gt; RMSE   0.467960  0.443592</span></span>
+<span><span class="co">#&gt; MC SD  0.045935  0.053863</span></span>
+<span><span class="co">#&gt; Bias  -0.013585 -0.011045</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Converged MC iterations at minimum N: 98 %</span></span>
+<span><span class="co">#&gt; ---</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_lambda</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_sspLNIRT.html">get_sspLNIRT</a></span><span class="op">(</span></span>
+<span>  thresh         <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  out.par        <span class="op">=</span> <span class="st">"lambda"</span>,</span>
+<span>  K              <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  mu.alpha       <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  meanlog.sigma2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.6</span><span class="op">)</span>,</span>
+<span>  rho            <span class="op">=</span> <span class="fl">0.4</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_lambda</span><span class="op">$</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ==================================================</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call: optim_sample()</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sample Size Optimization</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;   Minimum N:  85 </span></span>
+<span><span class="co">#&gt;   Power curve N:  87 </span></span>
+<span><span class="co">#&gt;   RMSE at minimum N:  0.09669668 </span></span>
+<span><span class="co">#&gt;   Steps:  13 </span></span>
+<span><span class="co">#&gt;   Time elapsed: 52.92605 mins </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Item Parameter MSEs:</span></span>
+<span><span class="co">#&gt; --------------------------------------------------</span></span>
+<span><span class="co">#&gt;          alpha     beta       phi    lambda   sigma2</span></span>
+<span><span class="co">#&gt; RMSE  0.171088 0.233903  0.100500  0.096697 0.189290</span></span>
+<span><span class="co">#&gt; MC SD 0.045971 0.069932  0.026824  0.027443 0.034849</span></span>
+<span><span class="co">#&gt; Bias  0.020595 0.025492 -0.010594 -0.002319 0.158314</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Person Parameter MSEs:</span></span>
 <span><span class="co">#&gt; --------------------------------------------------</span></span>
 <span><span class="co">#&gt;          theta     zeta</span></span>
-<span><span class="co">#&gt; RMSE  0.459026 0.412612</span></span>
-<span><span class="co">#&gt; MC SD 0.024429 0.039770</span></span>
+<span><span class="co">#&gt; RMSE  0.465766 0.443007</span></span>
+<span><span class="co">#&gt; MC SD 0.045665 0.065834</span></span>
+<span><span class="co">#&gt; Bias  0.018121 0.001673</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Converged MC iterations at minimum N: </span></span>
+<span><span class="co">#&gt; Converged MC iterations at minimum N: 98 %</span></span>
 <span><span class="co">#&gt; ---</span></span></code></pre></div>
-<p>Having established that the target accuracy for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>
-is reached, I can check the other accuracys in the output. All other
-item parameters are below my RMSE threshold, thus, I choose the minimum
-sample size from the ouput as my planned sample size.</p>
+</div>
+<div class="section level4">
+<h4 id="selecting-the-planning-sample-size">Selecting the planning sample size<a class="anchor" aria-label="anchor" href="#selecting-the-planning-sample-size"></a>
+</h4>
+<p>To ensure that the target accuracy is expected to be met for all item
+parameters simultaneously, the researcher conservatively selects the
+largest minimum sample size across all four parameters:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">N_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  alpha  <span class="op">=</span> <span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span><span class="op">$</span><span class="va">N.min</span>,</span>
+<span>  beta   <span class="op">=</span> <span class="va">res_beta</span><span class="op">$</span><span class="va">object</span><span class="op">$</span><span class="va">N.min</span>,</span>
+<span>  phi    <span class="op">=</span> <span class="va">res_phi</span><span class="op">$</span><span class="va">object</span><span class="op">$</span><span class="va">N.min</span>,</span>
+<span>  lambda <span class="op">=</span> <span class="va">res_lambda</span><span class="op">$</span><span class="va">object</span><span class="op">$</span><span class="va">N.min</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">N_all</span></span>
+<span><span class="co">#&gt;  alpha   beta    phi lambda </span></span>
+<span><span class="co">#&gt;    639    569     89     85</span></span>
+<span></span>
+<span><span class="co"># select the largest</span></span>
+<span><span class="va">N_star</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">N_all</span><span class="op">)</span></span>
+<span><span class="va">N_star</span></span>
+<span><span class="co">#&gt; [1] 639</span></span>
+<span></span>
+<span><span class="co"># identify which parameter determined N*</span></span>
+<span><span class="va">res_final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  alpha  <span class="op">=</span> <span class="va">res_alpha</span>,</span>
+<span>  beta   <span class="op">=</span> <span class="va">res_beta</span>,</span>
+<span>  phi    <span class="op">=</span> <span class="va">res_phi</span>,</span>
+<span>  lambda <span class="op">=</span> <span class="va">res_lambda</span></span>
+<span><span class="op">)</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">N_all</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<p>The researcher selects
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>N</mi><mo>*</mo></msup><mo>=</mo></mrow><annotation encoding="application/x-tex">N^* =</annotation></semantics></math>
+639 as the planning sample size, determined by the parameter alpha.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="using-optim_sample-for-custom-designs">Using <code>optim_sample()</code> for custom designs<a class="anchor" aria-label="anchor" href="#using-optim_sample-for-custom-designs"></a>
+</h3>
+<p>When the assumed design is not covered by the precomputed grid, the
+researcher can run the sample size optimization directly using
+<code><a href="../reference/optim_sample.html">optim_sample()</a></code>. This uses a bisection algorithm that
+iteratively evaluates <code><a href="../reference/comp_rmse.html">comp_rmse()</a></code> at candidate sample sizes
+until the RMSE of the target parameter crosses the threshold. Each step
+runs a full Monte Carlo simulation study with <code>iter</code>
+replications.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Not run — computationally intensive (several hours)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">optim.args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  thresh       <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  range        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">2000</span><span class="op">)</span>,</span>
+<span>  out.par      <span class="op">=</span> <span class="st">"alpha"</span>,</span>
+<span>  iter         <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  XG           <span class="op">=</span> <span class="fl">6000</span>,</span>
+<span>  burnin       <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  rhat         <span class="op">=</span> <span class="fl">1.05</span>,</span>
+<span>  keep.err.dat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  seed         <span class="op">=</span> <span class="fl">1234</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">optim_sample</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sim.mod.args</span>, <span class="va">optim.args</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_custom</span><span class="op">)</span></span></code></pre></div>
+<p>For a single evaluation at a fixed
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+(without optimization), use <code><a href="../reference/comp_rmse.html">comp_rmse()</a></code>:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Not run — computationally intensive</span></span>
+<span><span class="va">rmse.args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  N            <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>  iter         <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  XG           <span class="op">=</span> <span class="fl">6000</span>,</span>
+<span>  burnin       <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  rhat         <span class="op">=</span> <span class="fl">1.05</span>,</span>
+<span>  keep.err.dat <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  seed         <span class="op">=</span> <span class="fl">1234</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rmse_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">comp_rmse</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rmse.args</span>, <span class="va">sim.mod.args</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">rmse_result</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -255,17 +476,21 @@ sample size from the ouput as my planned sample size.</p>
 <div class="section level3">
 <h3 id="power-curve">Power curve<a class="anchor" aria-label="anchor" href="#power-curve"></a>
 </h3>
-<p>The power curve shows how RMSE decreases with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>,
-fitted as a log-log regression through the optimization trace. It can be
-used to extrapolate the required
+<p>The power curve shows how RMSE decreases with sample size, fitted as
+a log-log regression through the optimization trace. It can be used to
+extrapolate the required
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-for the target threshold and thus, has less variane than the N.min from
-the bisection optimization. It can be used to further inspect the
-relation between sample size and accuracy.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_power_curve.html">plot_power_curve</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, thresh <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="672"></p>
+for the target threshold. Because the power-law curve pools information
+from all bisection steps,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>N</mi><mtext mathvariant="normal">curve</mtext><mo>*</mo></msubsup><annotation encoding="application/x-tex">N^*_{\text{curve}}</annotation></semantics></math>
+tends to have less variance than
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>N</mi><mo>*</mo></msup><annotation encoding="application/x-tex">N^*</annotation></semantics></math>
+from the bisection optimizer, but may have more bias. The plot can be
+used to further inspect the relation between sample size and
+accuracy.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_power_curve.html">plot_power_curve</a></span><span class="op">(</span><span class="va">res_final</span><span class="op">$</span><span class="va">object</span>, thresh <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="672"></p>
 <p>The left panel shows the log-log fit; the right panel the original
 scale. The dashed line marks the threshold, the dotted line the
 extrapolated
@@ -275,28 +500,31 @@ extrapolated
 <h3 id="estimation-accuracy">Estimation accuracy<a class="anchor" aria-label="anchor" href="#estimation-accuracy"></a>
 </h3>
 <p><code><a href="../reference/plot_estimation.html">plot_estimation()</a></code> shows how RMSE or bias varies across
-the range of true parameter values. This is useful for identifying
-regions of the parameter space where estimation is more or less
-precise:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+the range of true parameter values at the selected sample size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>N</mi><mo>*</mo></msup><annotation encoding="application/x-tex">N^*</annotation></semantics></math>.
+This is useful for identifying regions of the parameter space where
+estimation is more or less precise — for instance, whether items with
+extreme difficulty values are estimated less accurately.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_final</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
-<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"person"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_final</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"person"</span>, y.val <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
-<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"bias"</span><span class="op">)</span></span>
+<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_estimation.html">plot_estimation</a></span><span class="op">(</span><span class="va">res_final</span><span class="op">$</span><span class="va">object</span>, pars <span class="op">=</span> <span class="st">"item"</span>, y.val <span class="op">=</span> <span class="st">"bias"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
-<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="sspLNIRT_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="design-configuration">Design configuration<a class="anchor" aria-label="anchor" href="#design-configuration"></a>
 </h3>
-<p>The full set of generating parameters can be inspected:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">res_alpha</span><span class="op">$</span><span class="va">design</span><span class="op">)</span></span>
+<p>The full set of generating parameters can be inspected via the
+<code>design</code> element of the output:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">res_final</span><span class="op">$</span><span class="va">design</span><span class="op">)</span></span>
 <span><span class="co">#&gt; List of 19</span></span>
 <span><span class="co">#&gt;  $ thresh        : num 0.1</span></span>
 <span><span class="co">#&gt;  $ range         : num [1:2] 50 2000</span></span>
@@ -328,18 +556,19 @@ precomputed results. Users specify design conditions via the interface,
 and the app retrieves the corresponding minimum sample size with summary
 statistics and visualizations. Alternatively, users can specify their
 own design condition, inspect the distribution visualizations, and
-download the function call for R.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+download the function call for use in R.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Fox, J.-P., Klotzke, K., &amp; Simsek, A. S. (2023). R-package LNIRT
-for joint modeling of response accuracy and times. PeerJ Comput Sci, 9,
-e1232. <a href="https://doi.org/10.7717/peerj-cs.1232" class="external-link uri">https://doi.org/10.7717/peerj-cs.1232</a></p>
+for joint modeling of response accuracy and times. <em>PeerJ Computer
+Science</em>, <em>9</em>, e1232. <a href="https://doi.org/10.7717/peerj-cs.1232" class="external-link uri">https://doi.org/10.7717/peerj-cs.1232</a></p>
 <p>van der Linden, W. J. (2007). A hierarchical framework for modeling
-speed and accuracy on test items. Psychometrika, 72 (3), 287–308. <a href="https://doi.org/10.1007/s11336-006-1478-z" class="external-link uri">https://doi.org/10.1007/s11336-006-1478-z</a></p>
+speed and accuracy on test items. <em>Psychometrika</em>,
+<em>72</em>(3), 287–308. <a href="https://doi.org/10.1007/s11336-006-1478-z" class="external-link uri">https://doi.org/10.1007/s11336-006-1478-z</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
