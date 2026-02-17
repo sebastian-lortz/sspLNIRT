@@ -144,7 +144,7 @@ res.names <- list(
 # check convergence
 conv.data = as.data.frame(sapply(res.names, FUN = function(x) {
   sapply(x, FUN = function(y) {
-    nrow(y$conv.rate)
+    y$conv.rate
   })
 }))
 
@@ -197,7 +197,6 @@ ggplot(rmse.data , aes(x = rmse, fill = condition)) +
     ~ parameter,
     scales = "free",
     ncol = 1  )
-design
 
 # violin plot
 ggplot(data  = rmse.data, mapping = aes(x = condition, y = rmse, fill = condition)) +

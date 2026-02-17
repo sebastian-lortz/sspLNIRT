@@ -6,6 +6,7 @@
 devtools::install_github("sebastian-lortz/sspLNIRT", force = TRUE)
 library(sspLNIRT)
 library(ggplot2)
+library(patchwork)
 
 # input paramters
 sim.mod.args <- list(
@@ -137,4 +138,67 @@ ggsave(
   bg       = "white",
   dpi = 300
 )
+
+# Plot Monte Carlo Variability of RMSE from the small simulation study in /data-raw/mse.variance.R
+
+sum.stats <- readRDS("data-raw/results/rmse.variance.sum.stats")
+sum.stats %>%
+  select(sd, rel.sd) %>%
+  round(., 5) %>%
+  mutate()
+
+gg.stats <- sum.stats %>%
+  mutate(condition = dplyr::recode(condition, `1` = 1000, `2` = 3000, `3` = 6000)) %>%
+  mutate(across(c(sd, rel.sd), ~round(.x, 5)))
+
+abs.sd.rmse.plot <- ggplot(
+  data = gg.stats,
+  aes(x = condition, y = sd, linetype = parameter, shape = parameter, group = parameter)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_x_continuous(breaks = c(1000, 3000, 6000)) +
+  coord_cartesian(ylim = c(0, NA)) +
+  labs(
+    y = "Absolute SD of Estimated RMSE",
+    x = "Posterior Samples (XG)",
+    colour = "Parameter",
+    linetype = "Parameter",
+    shape = "Parameter"
+  )
+
+rel.sd.rmse.plot <- ggplot(
+  data = gg.stats,
+  aes(x = condition, y = rel.sd, linetype = parameter, shape = parameter, group = parameter)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_x_continuous(breaks = c(1000, 3000, 6000)) +
+  coord_cartesian(ylim = c(0, NA)) +
+  labs(
+    y = "Relative SD of Estimated RMSE",
+    x = "Posterior Samples (XG)",
+    colour = "Parameter",
+    linetype = "Parameter",
+    shape = "Parameter"
+  )
+
+sd.rmse.plot <- (abs.sd.rmse.plot + rel.sd.rmse.plot) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    theme = theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  ) &
+  theme(legend.position = "right")
+
+
+ggsave(
+  filename = "/Users/lortz/Desktop/PhD/Research/Chapter 1/sspLNIRT/data-raw/plots/sd.rmse.plot.pdf",
+  plot     = sd.rmse.plot,
+  width    = 180,
+  height   = 100,
+  units    = "mm",
+  bg       = "white",
+  dpi = 300
+)
+
 
