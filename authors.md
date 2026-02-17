@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Sebastian Alexander Jens Lortz**. Author, maintainer.
+- **Sebastian A. J. Lortz**. Author, maintainer.
 
 ## Citation
 
