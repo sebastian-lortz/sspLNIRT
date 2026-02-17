@@ -9,7 +9,7 @@ Authors@R:
            role = c("aut", "cre"))
 Description: Sample size planning tools for the Joint Hierarchical Model 
     using a 2-PL normal ogive model for response accuracy and a 3-PL 
-    log-normal model for response time, estimated via the LNIRT package.
+    log-normal model for response time.
 License: MIT + file LICENSE
 Imports: 
     bsicons,
