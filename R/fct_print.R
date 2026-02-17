@@ -37,7 +37,7 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     rownames(item_df) <- names(rmse_item)
     print(t(item_df), right = TRUE, quote = FALSE)
     # Person parameter MSEs
-    cat("\nPerson Parameter MSEs:\n")
+    cat("\nPerson Parameter RMSEs:\n")
     cat("--------------------------------------------------\n")
     rmse_person <- unlist(x$comp.rmse$person$rmse)
     mc_sd_person <- unlist(x$comp.rmse$person$mc.sd.rmse)
@@ -58,7 +58,7 @@ print.summary.sspLNIRT.object <- function(x, ...) {
     # comp_mse output
     cat("Call: comp_mse()\n\n")
     # Item parameters
-    cat("Item Parameter MSEs:\n")
+    cat("Item Parameter RMSEs:\n")
     cat("--------------------------------------------------\n")
     rmse_item <- unlist(x$item$rmse)
     mc_sd_item <- unlist(x$item$mc.sd.rmse)

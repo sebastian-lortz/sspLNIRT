@@ -123,7 +123,7 @@ plot_RA <- function(level,
 
   prob_long <- data.frame(
     prob  = as.vector(prob_mat),
-    item  = factor(rep(seq_len(length(alpha)), each = length(theta))),
+    item = factor(paste0("Item", rep(seq_len(length(alpha)), each = length(theta)))),
     theta = rep(theta, K)
   )
 
@@ -149,9 +149,9 @@ plot_RA <- function(level,
     # sort by theta within each item for clean area/line rendering
     prob_long <- prob_long[order(prob_long$item, prob_long$theta), ]
 
-    # theta at which P(correct) = 0.50: for the 2PNO, this is theta = beta
+    # theta at which P(correct) = 0.50
     beta_df <- data.frame(
-      item     = factor(seq_len(length(beta))),
+      item     = factor(paste0("Item", seq_len(length(beta)))),
       beta_val = beta
     )
 

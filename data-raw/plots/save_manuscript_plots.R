@@ -26,7 +26,7 @@ sim.mod.args <- list(
 
 ## RA plot
 set.seed(123)
-RA.plot <- do.call(plot_RA, c(list(level = "item", by.theta = TRUE, N = 1e5), sim.mod.args))
+RA.plot <- do.call(plot_RA, c(list(level = "item", by.theta = TRUE, N = 1e4), sim.mod.args))
 ggsave(
   filename = "data-raw/plots/RA.design.plot.pdf",
   plot     = RA.plot,
@@ -39,7 +39,7 @@ ggsave(
 
 ## RT plot
 set.seed(456)
-RT.plot <- do.call(plot_RT, c(list(level = "item", logRT = FALSE, N = 1e5), sim.mod.args))
+RT.plot <- do.call(plot_RT, c(list(level = "item", logRT = FALSE, N = 1e4), sim.mod.args))
 ggsave(
   filename = "data-raw/plots/RT.design.plot.pdf",
   plot     = RT.plot,
@@ -68,7 +68,7 @@ res_final <- res_alpha
 power.plot <- plot_power_curve(res_final$object, thresh = 0.1)
 ggsave(
   filename = "data-raw/plots/power.plot.pdf",
-  plot     = RT.plot,
+  plot     = power.plot,
   width    = 180,
   height   = 100,
   units    = "mm",
@@ -137,3 +137,4 @@ ggsave(
   bg       = "white",
   dpi = 300
 )
+
