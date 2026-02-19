@@ -304,7 +304,7 @@ comp_rmse <- function(N,
 
 # binning error data
   if(!keep.err.dat) {
-    n.bins <- 30
+    n.bins <- K
 
     ntile_base <- function(x, n) {
       floor((rank(x, ties.method = "first") - 1) * n / length(x)) + 1L

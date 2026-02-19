@@ -64,4 +64,6 @@ Ns <- t(sapply(seq_len(972), function(i) {
 dif.n <- Ns[,1] - Ns[,2]
 summary(dif.n)
 plot(dif.n)
-sspLNIRT.data[[3]][[1]]
+
+ Reduce("+", lapply(seq_len(972), \(x)
+grepl("<", sspLNIRT.data[[3]][[x]]$N.min)))
